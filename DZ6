@@ -1,0 +1,27 @@
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        int crystalPrice = 5;
+
+        Console.Write("Введите ваше количество золота: ");
+
+        int gold = Convert.ToInt32(Console.ReadLine());
+
+        Console.Write($"Сколько кристаллов хотите купить? (Цена: {crystalPrice} золота за кристалл) ");
+
+        int crystalsToBuy = Convert.ToInt32(Console.ReadLine());
+
+        int totalCost = crystalsToBuy * crystalPrice;
+        gold -= totalCost;
+        int crystals = crystalsToBuy;
+
+        Console.WriteLine($"\nРезультаты сделки:");
+
+        Console.WriteLine($"Остаток золота: {gold}");
+
+        Console.WriteLine($"Куплено кристаллов: {crystals}");
+    }
+}
