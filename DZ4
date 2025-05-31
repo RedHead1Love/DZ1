@@ -1,0 +1,16 @@
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        int totalPictures = 52;        
+        int picturesPerRow = 3;        
+
+        int fullRows = totalPictures / picturesPerRow;  
+        int remainingPictures = totalPictures % picturesPerRow;  
+
+        Console.WriteLine($"Полных рядов: {fullRows}");
+        Console.WriteLine($"Оставшиеся картинки: {remainingPictures}");
+    }
+}
