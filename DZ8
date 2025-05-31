@@ -1,0 +1,21 @@
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        Console.Write("Введите кол-во пациентов: ");
+        int patientsCount = Convert.ToInt32(Console.ReadLine());
+
+        int minutesOnHours = 60;
+
+        int timePerPatient = 10;
+
+        int totalMinutes = patientsCount * timePerPatient;
+
+        int hours = totalMinutes / minutesOnHours;
+        int minutes = totalMinutes % minutesOnHours;
+
+        Console.WriteLine($"Вы должны отстоять в очереди {hours} часа(ов) и {minutes} минут(ы).");
+    }
+}
