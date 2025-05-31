@@ -5,42 +5,66 @@ class Program
 {
     static void Main()
     {
-        int[] purchases = {
-            150, 
-            230, 
-             99,  
-            540, 
-            320  
-                          };
-
-        Queue<int> purchaseQueue = new Queue<int>(purchases);
-
-        int totalMoney = 0; 
+        var purchaseQueue = InitializePurchaseQueue();
+        int totalMoney = 0;
 
         Console.WriteLine("Начинаем обслуживание клиентов...\n");
+        ProcessCustomers(purchaseQueue, ref totalMoney);
+        DisplayFinalResults(totalMoney);
+    }
 
-        int noPeopleInline = 0;
+    static Queue<int> InitializePurchaseQueue()
+    {
+        int[] purchases = { 150, 230, 99, 540, 320 };
+        return new Queue<int>(purchases);
+    }
 
-        while (purchaseQueue.Count > noPeopleInline)
+    static void ProcessCustomers(Queue<int> queue, ref int totalMoney)
+    {
+        const int NoCustomers = 0;
+
+        while (queue.Count > NoCustomers)
         {
-            int currentPurchase = purchaseQueue.Dequeue();
-            totalMoney += currentPurchase;
+            ServeCustomer(queue, ref totalMoney);
 
-            Console.WriteLine($"Обслужен клиент с покупкой на {currentPurchase} руб.");
-            Console.WriteLine($"Текущий счёт: {totalMoney} руб.");
-            Console.WriteLine($"Осталось клиентов: {purchaseQueue.Count}");
-            Console.WriteLine("\nНажмите любую клавишу для обслуживания следующего клиента...");
-
-            Console.ReadKey();
-
-            Console.Clear();
-
-            if (purchaseQueue.Count > noPeopleInline)
+            if (queue.Count > NoCustomers)
             {
-                Console.WriteLine("Обслуживаем следующего клиента...\n");
+                PromptNextCustomer();
             }
         }
+    }
 
+    static void ServeCustomer(Queue<int> queue, ref int totalMoney)
+    {
+        int purchase = queue.Dequeue();
+        totalMoney += purchase;
+
+        Console.WriteLine($"Обслужен клиент с покупкой на {purchase} руб.");
+        Console.WriteLine($"Текущий счёт: {totalMoney} руб.");
+        Console.WriteLine($"Осталось клиентов: {queue.Count}");
+
+        WaitForNextStep();
+        ClearConsole();
+    }
+
+    static void PromptNextCustomer()
+    {
+        Console.WriteLine("Обслуживаем следующего клиента...\n");
+    }
+
+    static void WaitForNextStep()
+    {
+        Console.WriteLine("\nНажмите любую клавишу для обслуживания следующего клиента...");
+        Console.ReadKey();
+    }
+
+    static void ClearConsole()
+    {
+        Console.Clear();
+    }
+
+    static void DisplayFinalResults(int totalMoney)
+    {
         Console.WriteLine("Все клиенты обслужены!");
         Console.WriteLine($"Итоговый счёт: {totalMoney} руб.");
     }
