@@ -1,0 +1,31 @@
+using System;
+using System.Collections.Generic;
+
+namespace DZ
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            int userAge = 25;
+
+            double averageGrade = 4.75;
+
+            decimal productPrice = 1299.99m;
+
+            bool isSubscribed = true;
+
+            string userName = "Алексей Петров";
+
+            int[] orderIds = { 1001, 1002, 1003, 1004 };
+
+            List<string> allowedRoles = new List<string> { "Admin", "Editor", "User" };
+
+            int userCoins = 4;
+
+            string playerName = Console.ReadLine(); Console.Write("Введите имя игрока: ");
+
+            string street = "Moskovskaya";
+        }
+    }
+}
