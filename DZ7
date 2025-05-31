@@ -1,0 +1,47 @@
+using System;
+using System.Collections.Generic;
+
+class Program
+{
+    static void Main()
+    {
+        int[] purchases = {
+            150, 
+            230, 
+             99,  
+            540, 
+            320  
+                          };
+
+        Queue<int> purchaseQueue = new Queue<int>(purchases);
+
+        int totalMoney = 0; 
+
+        Console.WriteLine("Начинаем обслуживание клиентов...\n");
+
+        int noPeopleInline = 0;
+
+        while (purchaseQueue.Count > noPeopleInline)
+        {
+            int currentPurchase = purchaseQueue.Dequeue();
+            totalMoney += currentPurchase;
+
+            Console.WriteLine($"Обслужен клиент с покупкой на {currentPurchase} руб.");
+            Console.WriteLine($"Текущий счёт: {totalMoney} руб.");
+            Console.WriteLine($"Осталось клиентов: {purchaseQueue.Count}");
+            Console.WriteLine("\nНажмите любую клавишу для обслуживания следующего клиента...");
+
+            Console.ReadKey();
+
+            Console.Clear();
+
+            if (purchaseQueue.Count > noPeopleInline)
+            {
+                Console.WriteLine("Обслуживаем следующего клиента...\n");
+            }
+        }
+
+        Console.WriteLine("Все клиенты обслужены!");
+        Console.WriteLine($"Итоговый счёт: {totalMoney} руб.");
+    }
+}
