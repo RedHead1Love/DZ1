@@ -1,0 +1,29 @@
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        Console.WriteLine("Давайте познакомимся!");
+
+        string GetAnswer(string question)
+        {
+            Console.Write(question);
+
+            string answer = Console.ReadLine();
+
+            return string.IsNullOrWhiteSpace(answer) ? "не указано" : answer;
+        }
+
+        string name = GetAnswer("Как вас зовут? ");
+        string age = GetAnswer("Сколько вам лет? ");
+        string zodiac = GetAnswer("Какой ваш знак зодиака? ");
+        string work = GetAnswer("Где вы работаете/учитесь? ");
+        string hobby = GetAnswer("Какое ваше хобби? ");
+
+        string infomationAboutUser = $"\nВас зовут {name}, вам {age} лет, вы {zodiac}. " +
+                         $"Вы {work} и увлекаетесь {hobby}.";
+
+        Console.WriteLine(infomationAboutUser);
+    }
+}
