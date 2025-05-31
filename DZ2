@@ -1,0 +1,33 @@
+using System;
+using System.Collections.Generic;
+
+class Program
+{
+    static void Main()
+    {
+        Dictionary<string, string> dictionary = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "Яблоко", "Фрукт, который растет на деревьях, обычно красного или зеленого цвета." },
+            { "Книга", "Письменное или печатное произведение, состоящее из скрепленных страниц." },
+            { "Компьютер", "Электронное устройство для хранения и обработки данных." },
+            { "олнце", "Звезда, вокруг которой вращается Земля, дающая свет и тепло." },
+            { "Вода", "Прозрачная жидкость без запаха и вкуса, необходимая для жизни." }
+        };
+
+        Console.Write("Введите слово для поиска: ");
+        string word = Console.ReadLine()?.Trim();
+
+        if (string.IsNullOrEmpty(word))
+        {
+            Console.WriteLine("Вы не ввели слово.");
+        }
+        else if (dictionary.TryGetValue(word, out string meaning))
+        {
+            Console.WriteLine($"Значение слова \"{word}\": {meaning}");
+        }
+        else
+        {
+            Console.WriteLine($"Слово \"{word}\" не найдено в словаре.");
+        }
+    }
+}
