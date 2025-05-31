@@ -1,0 +1,27 @@
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        string firstName = "Иванов";  
+        string lastName = "Петр";     
+
+        Console.WriteLine($"До перестановки: Имя = {firstName}, Фамилия = {lastName}");
+
+        string temp = firstName;
+        firstName = lastName;
+        lastName = temp;
+
+        Console.WriteLine($"После перестановки: Имя = {firstName}, Фамилия = {lastName}\n");
+
+        string firstCup = "кофе";
+        string secondCup = "чай";
+
+        Console.WriteLine($"До перестановки: в первой чашке — {firstCup}, во второй — {secondCup}");
+
+        (firstCup, secondCup) = (secondCup, firstCup);  
+
+        Console.WriteLine($"После перестановки: в первой = {firstCup}, во второй = {secondCup}");
+    }
+}
