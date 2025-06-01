@@ -1,0 +1,29 @@
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        Console.WriteLine("Программа запущена. Введите 'exit' для выхода.");
+
+        string userInput;
+        bool shouldContinue = true;
+
+        while (shouldContinue)
+        {
+            Console.Write(">>>>>> ");
+            userInput = Console.ReadLine()?.Trim().ToLower(); 
+
+            if (userInput == "exit")
+            {
+                shouldContinue = false; 
+            }
+            else
+            {
+                Console.WriteLine($"Вы ввели: {userInput}");
+            }
+        }
+
+        Console.WriteLine("Программа завершена.");
+    }
+}
