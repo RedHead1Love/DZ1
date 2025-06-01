@@ -2,41 +2,27 @@ using System;
 
 class Program
 {
+    static void Main()
+    {
         const string CommandShowText = "1";
         const string CommandGoodbye = "2";
         const string CommandShowRandomNumber = "3";
-        const string CommandlearConsole = "4";
+        const string CommandClearConsole = "4";
         const string CommandExit = "5";
 
-    static void ShowRandomNumber()
-    {
-        Random random = new Random();
-
-        int minimumRandomNumber = 1;
-        int maximumRandomNumber = 101;
-
-        Console.WriteLine($"Случайное число: {random.Next(minimumRandomNumber, maximumRandomNumber)}");
-    }
-
-    static void ShowMenu()
-    {
-        Console.WriteLine("=== МЕНЮ КОМАНД ===");
-        Console.WriteLine($"{CommandShowText} - Приветствие");
-        Console.WriteLine($"{CommandGoodbye} - Прощание");
-        Console.WriteLine($"{CommandShowRandomNumber} - Случайное число");
-        Console.WriteLine($"{CommandlearConsole} - Очистить консоль");
-        Console.WriteLine($"{CommandExit} - Выход из программы");
-        Console.Write("Введите команду: ");
-    }
-
-    static void Main()
-    {
-
         bool isRunning = true;
+        Random random = new Random();
 
         while (isRunning)
         {
-            ShowMenu();
+            Console.WriteLine("=== МЕНЮ КОМАНД ===");
+            Console.WriteLine($"{CommandShowText} - Приветствие");
+            Console.WriteLine($"{CommandGoodbye} - Прощание");
+            Console.WriteLine($"{CommandShowRandomNumber} - Случайное число");
+            Console.WriteLine($"{CommandClearConsole} - Очистить консоль");
+            Console.WriteLine($"{CommandExit} - Выход из программы");
+            Console.Write("Введите команду: ");
+
             string command = Console.ReadLine()?.ToLower().Trim();
 
             switch (command)
@@ -50,21 +36,23 @@ class Program
                     break;
 
                 case CommandShowRandomNumber:
-                    ShowRandomNumber();
+                    int minimumRandomNumber = 1;
+                    int maximumRandomNumber = 101;
+                    Console.WriteLine($"Случайное число: {random.Next(minimumRandomNumber, maximumRandomNumber)}");
                     break;
 
-                case CommandlearConsole:
+                case CommandClearConsole:
                     Console.Clear();
                     Console.WriteLine("Консоль очищена!");
                     break;
 
                 case CommandExit:
                     isRunning = false;
-                    Console.WriteLine("Завершение работы программы...");
+                    Console.WriteLine("Завершение работы программы");
                     break;
 
                 default:
-                    Console.WriteLine("Неизвестная команда. Попробуйте снова.");
+                    Console.WriteLine("Неизвестная команда. Попробуйте снова");
                     break;
             }
 
