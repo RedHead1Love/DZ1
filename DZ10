@@ -7,16 +7,17 @@ class Program
         Console.WriteLine("Программа запущена. Введите 'exit' для выхода.");
 
         string userInput;
-        bool shouldContinue = true;
+        bool isRunning = true;
+        string exitCommand = "exit";
 
-        while (shouldContinue)
+        while (isRunning)
         {
             Console.Write(">>>>>> ");
-            userInput = Console.ReadLine()?.Trim().ToLower(); 
+            userInput = Console.ReadLine()?.Trim().ToLower();
 
-            if (userInput == "exit")
+            if (userInput == exitCommand)
             {
-                shouldContinue = false; 
+                isRunning = false;
             }
             else
             {
