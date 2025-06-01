@@ -19,21 +19,21 @@ class Program
             Console.Write(">>>>>> ");
             string input = Console.ReadLine()?.Trim().ToLower();
 
+            double sum = 0;
+
             switch (input)
             {
-                case CommandCalculateSum when numbers.Count == 0:
+                case CommandCalculateSum when numbers.Count == 0: 
                     Console.WriteLine("Список чисел пуст");
                     break;
 
                 case CommandCalculateSum:
-                    double sum = 0;
-                    foreach (var num in numbers) sum += num;
-                    Console.WriteLine($"Сумма всех чисел: {sum}");
+
+                    foreach (var num in numbers) sum += num; Console.WriteLine($"Сумма всех чисел: {sum}");
                     break;
 
                 case CommandExit:
-                    isRunning = false;
-                    Console.WriteLine("Завершение работы программы...");
+                    isRunning = false; Console.WriteLine("Завершение работы программы...");
                     break;
 
                 default:
