@@ -9,7 +9,6 @@ class Program
         const string CommandCalculateSum = "sum";
         const string CommandExit = "exit";
 
-
         List<double> numbers = new List<double>();
         bool isRunning = true;
 
@@ -22,17 +21,14 @@ class Program
 
             switch (input)
             {
+                case CommandCalculateSum when numbers.Count == 0:
+                    Console.WriteLine("Список чисел пуст");
+                    break;
+
                 case CommandCalculateSum:
-                    if (numbers.Count == 0)
-                    {
-                        Console.WriteLine("Список чисел пуст");
-                    }
-                    else
-                    {
-                        double sum = 0;
-                        foreach (var num in numbers) sum += num;
-                        Console.WriteLine($"Сумма всех чисел: {sum}");
-                    }
+                    double sum = 0;
+                    foreach (var num in numbers) sum += num;
+                    Console.WriteLine($"Сумма всех чисел: {sum}");
                     break;
 
                 case CommandExit:
@@ -41,19 +37,14 @@ class Program
                     break;
 
                 default:
-                    try
+                    if (double.TryParse(input, NumberStyles.Any, CultureInfo.CurrentCulture, out double number))
                     {
-                        double number = Convert.ToDouble(input, CultureInfo.CurrentCulture);
                         numbers.Add(number);
                         Console.WriteLine($"Добавлено число: {number}");
                     }
-                    catch (FormatException)
+                    else
                     {
-                        Console.WriteLine("Ошибка: введите число или команду (sum/exit)");
-                    }
-                    catch (OverflowException)
-                    {
-                        Console.WriteLine("Ошибка: число слишком большое или маленькое");
+                        Console.WriteLine($"Ошибка: введите число или команду ({CommandCalculateSum}/{CommandExit})");
                     }
                     break;
             }
