@@ -1,0 +1,74 @@
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        bool isRunning = true;
+
+        const string CommandShowText = "1";
+        const string CommandGoodbye = "2";
+        const string CommandShowRandomNumber = "3";
+        const string CommandlearConsole = "4";
+        const string CommandExit = "5";
+
+
+        while (isRunning)
+        {
+            ShowMenu();
+            string command = Console.ReadLine()?.ToLower().Trim();
+
+            switch (command)
+            {
+                case CommandShowText:
+                    Console.WriteLine("Здравствуйте");
+                    break;
+
+                case CommandGoodbye:
+                    Console.WriteLine("До свидания");
+                    break;
+
+                case CommandShowRandomNumber:
+                    ShowRandomNumber();
+                    break;
+
+                case CommandlearConsole:
+                    Console.Clear();
+                    Console.WriteLine("Консоль очищена!");
+                    break;
+
+                case CommandExit:
+                    isRunning = false;
+                    Console.WriteLine("Завершение работы программы...");
+                    break;
+
+                default:
+                    Console.WriteLine("Неизвестная команда. Попробуйте снова.");
+                    break;
+            }
+
+            Console.WriteLine(); 
+        }
+    }
+
+    static void ShowMenu()
+    {
+        Console.WriteLine("=== МЕНЮ КОМАНД ===");
+        Console.WriteLine("1 - Приветствие");
+        Console.WriteLine("2 - Прощание");
+        Console.WriteLine("3 - Случайное число");
+        Console.WriteLine("4 - Очистить консоль");
+        Console.WriteLine("5 - Выход из программы");
+        Console.Write("Введите команду: ");
+    }
+
+    static void ShowRandomNumber()
+    {
+        Random rnd = new Random();
+
+        int minimumRandomNumber = 1;
+        int maximumRandomNumber = 101;
+
+        Console.WriteLine($"Случайное число: {rnd.Next(minimumRandomNumber, maximumRandomNumber)}");
+    }
+}
