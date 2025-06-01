@@ -2,16 +2,37 @@ using System;
 
 class Program
 {
-    static void Main()
-    {
-        bool isRunning = true;
-
         const string CommandShowText = "1";
         const string CommandGoodbye = "2";
         const string CommandShowRandomNumber = "3";
         const string CommandlearConsole = "4";
         const string CommandExit = "5";
 
+    static void ShowRandomNumber()
+    {
+        Random random = new Random();
+
+        int minimumRandomNumber = 1;
+        int maximumRandomNumber = 101;
+
+        Console.WriteLine($"Случайное число: {random.Next(minimumRandomNumber, maximumRandomNumber)}");
+    }
+
+    static void ShowMenu()
+    {
+        Console.WriteLine("=== МЕНЮ КОМАНД ===");
+        Console.WriteLine($"{CommandShowText} - Приветствие");
+        Console.WriteLine($"{CommandGoodbye} - Прощание");
+        Console.WriteLine($"{CommandShowRandomNumber} - Случайное число");
+        Console.WriteLine($"{CommandlearConsole} - Очистить консоль");
+        Console.WriteLine($"{CommandExit} - Выход из программы");
+        Console.Write("Введите команду: ");
+    }
+
+    static void Main()
+    {
+
+        bool isRunning = true;
 
         while (isRunning)
         {
@@ -47,28 +68,7 @@ class Program
                     break;
             }
 
-            Console.WriteLine(); 
+            Console.WriteLine();
         }
-    }
-
-    static void ShowMenu()
-    {
-        Console.WriteLine("=== МЕНЮ КОМАНД ===");
-        Console.WriteLine("1 - Приветствие");
-        Console.WriteLine("2 - Прощание");
-        Console.WriteLine("3 - Случайное число");
-        Console.WriteLine("4 - Очистить консоль");
-        Console.WriteLine("5 - Выход из программы");
-        Console.Write("Введите команду: ");
-    }
-
-    static void ShowRandomNumber()
-    {
-        Random rnd = new Random();
-
-        int minimumRandomNumber = 1;
-        int maximumRandomNumber = 101;
-
-        Console.WriteLine($"Случайное число: {rnd.Next(minimumRandomNumber, maximumRandomNumber)}");
     }
 }
