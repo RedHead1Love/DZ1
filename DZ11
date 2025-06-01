@@ -6,11 +6,11 @@ class Program
     {
         int startingNumber = 5;
         int step = 7;
-        int maxNumber = 103;
+        int maximumNumber = 103;
 
-        for (int currentNumber = startingNumber; currentNumber <= maxNumber; currentNumber += step)
+        for (int i = startingNumber; i <= maximumNumber; i += step)
         {
-            Console.Write(currentNumber + " ");
+            Console.Write(i + " ");
         }
     }
 }
