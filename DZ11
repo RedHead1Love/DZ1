@@ -4,17 +4,13 @@ class Program
 {
     static void Main()
     {
-        int currentNumber = 5;
-
+        int startingNumber = 5;
         int step = 7;
-
         int maxNumber = 103;
 
-        while (currentNumber <= maxNumber)
+        for (int currentNumber = startingNumber; currentNumber <= maxNumber; currentNumber += step)
         {
             Console.Write(currentNumber + " ");
-
-            currentNumber += step;
         }
     }
 }
