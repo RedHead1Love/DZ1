@@ -4,14 +4,14 @@ using System.Globalization;
 
 class Program
 {
+    const string CommandCalculateSum = "sum";
+    const string CommandExit = "exit";
+
+    static List<double> numbers = new List<double>();
+    static bool isRunning = true;
+
     static void Main()
     {
-        const string CommandCalculateSum = "sum";
-        const string CommandExit = "exit";
-
-        List<double> numbers = new List<double>();
-        bool isRunning = true;
-
         Console.WriteLine($"Введите числа (по одному). Команды: {CommandCalculateSum} - сумма, {CommandExit} - выход");
 
         while (isRunning)
@@ -19,35 +19,53 @@ class Program
             Console.Write(">>>>>> ");
             string input = Console.ReadLine()?.Trim().ToLower();
 
-            double sum = 0;
-
             switch (input)
             {
-                case CommandCalculateSum when numbers.Count == 0: 
-                    Console.WriteLine("Список чисел пуст");
-                    break;
-
                 case CommandCalculateSum:
-
-                    foreach (var num in numbers) sum += num; Console.WriteLine($"Сумма всех чисел: {sum}");
+                    HandleSumCommand();
                     break;
 
                 case CommandExit:
-                    isRunning = false; Console.WriteLine("Завершение работы программы...");
+                    HandleExitCommand();
                     break;
 
                 default:
-                    if (double.TryParse(input, NumberStyles.Any, CultureInfo.CurrentCulture, out double number))
-                    {
-                        numbers.Add(number);
-                        Console.WriteLine($"Добавлено число: {number}");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Ошибка: введите число или команду ({CommandCalculateSum}/{CommandExit})");
-                    }
+                    HandleNumberInput(input);
                     break;
             }
+        }
+    }
+
+    static void HandleSumCommand()
+    {
+        if (numbers.Count == 0)
+        {
+            Console.WriteLine("Список чисел пуст");
+            return;
+        }
+
+        double sum = 0;
+
+        foreach (var num in numbers) sum += num;
+        Console.WriteLine($"Сумма всех чисел: {sum}");
+    }
+
+    static void HandleExitCommand()
+    {
+        isRunning = false;
+        Console.WriteLine("Завершение работы программы...");
+    }
+
+    static void HandleNumberInput(string input)
+    {
+        if (double.TryParse(input, NumberStyles.Any, CultureInfo.CurrentCulture, out double number))
+        {
+            numbers.Add(number);
+            Console.WriteLine($"Добавлено число: {number}");
+        }
+        else
+        {
+            Console.WriteLine($"Ошибка: введите число или команду ({CommandCalculateSum}/{CommandExit})");
         }
     }
 }
