@@ -1,126 +1,118 @@
 using System;
+using System.Collections.Generic;
 
 class CurrencyConverter
 {
-    const string CommandConvertRubToUsd = "1";
-    const string CommandConvertRubToEur = "2";
-    const string CommandConvertUsdToRub = "3";
-    const string CommandConvertUsdToEur = "4";
-    const string CommandConvertEurToRub = "5";
-    const string CommandConvertEurToUsd = "6";
-    const string CommandExit = "7";
-
-    static decimal rubBalance = 1000m;
-    static decimal usdBalance = 50m;
-    static decimal eurBalance = 30m;
-
-    static decimal rubToUsdRate = 0.011m;
-    static decimal rubToEurRate = 0.010m;
-    static decimal usdToRubRate = 90.0m;
-    static decimal usdToEurRate = 0.91m;
-    static decimal eurToRubRate = 100.0m;
-    static decimal eurToUsdRate = 1.10m;
-
     static void Main()
     {
+        decimal rubBalance = 1000m;
+        decimal usdBalance = 50m;
+        decimal eurBalance = 30m;
+
+        var exchangeRates = new Dictionary<string, decimal>
+        {
+            ["RUB>USD"] = 0.011m,
+            ["RUB>EUR"] = 0.010m,
+            ["USD>RUB"] = 90.0m,
+            ["USD>EUR"] = 0.91m,
+            ["EUR>RUB"] = 100.0m,
+            ["EUR>USD"] = 1.10m
+        };
+
         Console.WriteLine("Добро пожаловать в конвертер валют");
 
-        while (true)
+        bool shouldContinue = true;
+        while (shouldContinue)
         {
-            ShowBalances();
+            ShowBalances(rubBalance, usdBalance, eurBalance);
             ShowMenu();
 
             string choice = Console.ReadLine();
-            if (ProcessChoice(choice)) 
-                break;
+            shouldContinue = ProcessChoice(choice, ref rubBalance, ref usdBalance, ref eurBalance, exchangeRates);
         }
-    }
 
-    static void ShowBalances()
+        ExitProgram();
+    }
+    static void ShowBalances(decimal rub, decimal usd, decimal eur)
     {
         Console.WriteLine("\nТекущий баланс:");
-        Console.WriteLine($"RUB: {rubBalance}");
-        Console.WriteLine($"USD: {usdBalance}");
-        Console.WriteLine($"EUR: {eurBalance}");
+        Console.WriteLine($"RUB: {rub}");
+        Console.WriteLine($"USD: {usd}");
+        Console.WriteLine($"EUR: {eur}");
     }
-
     static void ShowMenu()
     {
         Console.WriteLine("\nВыберите операцию:");
-        Console.WriteLine($"{CommandConvertRubToUsd}. RUB → USD");
-        Console.WriteLine($"{CommandConvertRubToEur}. RUB → EUR");
-        Console.WriteLine($"{CommandConvertUsdToRub}. USD → RUB");
-        Console.WriteLine($"{CommandConvertUsdToEur}. USD → EUR");
-        Console.WriteLine($"{CommandConvertEurToRub}. EUR → RUB");
-        Console.WriteLine($"{CommandConvertEurToUsd}. EUR → USD");
-        Console.WriteLine($"{CommandExit}. Выйти");
+        Console.WriteLine("1. RUB → USD");
+        Console.WriteLine("2. RUB → EUR");
+        Console.WriteLine("3. USD → RUB");
+        Console.WriteLine("4. USD → EUR");
+        Console.WriteLine("5. EUR → RUB");
+        Console.WriteLine("6. EUR → USD");
+        Console.WriteLine("7. Выйти");
         Console.Write("Ваш выбор: ");
     }
-
-    static bool ProcessChoice(string choice)
+    static bool ProcessChoice(string choice, ref decimal rubBalance, ref decimal usdBalance, ref decimal eurBalance,
+                            Dictionary<string, decimal> rates)
     {
         switch (choice)
         {
-            case CommandConvertRubToUsd: 
-                return ConvertCurrency("RUB", "USD", rubToUsdRate, ref rubBalance, ref usdBalance);
-
-            case CommandConvertRubToEur: 
-                return ConvertCurrency("RUB", "EUR", rubToEurRate, ref rubBalance, ref eurBalance);
-
-            case CommandConvertUsdToRub: 
-                return ConvertCurrency("USD", "RUB", usdToRubRate, ref usdBalance, ref rubBalance);
-
-            case CommandConvertUsdToEur: 
-                return ConvertCurrency("USD", "EUR", usdToEurRate, ref usdBalance, ref eurBalance);
-
-            case CommandConvertEurToRub: 
-                return ConvertCurrency("EUR", "RUB", eurToRubRate, ref eurBalance, ref rubBalance);
-
-            case CommandConvertEurToUsd: 
-                return ConvertCurrency("EUR", "USD", eurToUsdRate, ref eurBalance, ref usdBalance);
-
-            case CommandExit: 
-                ExitProgram(); 
+            case "1":
+                ConvertCurrency("RUB", "USD", rates["RUB>USD"], ref rubBalance, ref usdBalance);
                 return true;
-
-            default: ShowError(); return false;
+            case "2":
+                ConvertCurrency("RUB", "EUR", rates["RUB>EUR"], ref rubBalance, ref eurBalance);
+                return true;
+            case "3":
+                ConvertCurrency("USD", "RUB", rates["USD>RUB"], ref usdBalance, ref rubBalance);
+                return true;
+            case "4":
+                ConvertCurrency("USD", "EUR", rates["USD>EUR"], ref usdBalance, ref eurBalance);
+                return true;
+            case "5":
+                ConvertCurrency("EUR", "RUB", rates["EUR>RUB"], ref eurBalance, ref rubBalance);
+                return true;
+            case "6":
+                ConvertCurrency("EUR", "USD", rates["EUR>USD"], ref eurBalance, ref usdBalance);
+                return true;
+            case "7":
+                return false;
+            default:
+                ShowError();
+                return true;
         }
     }
-
-    static bool ConvertCurrency(string fromCurrency, string toCurrency, decimal rate,
+    static void ConvertCurrency(string fromCurrency, string toCurrency, decimal rate,
                               ref decimal fromBalance, ref decimal toBalance)
     {
         Console.Write($"Введите сумму в {fromCurrency} для конвертации: ");
         if (!decimal.TryParse(Console.ReadLine(), out decimal amount))
         {
             Console.WriteLine("Ошибка ввода. Пожалуйста, введите корректное число.");
-            return false;
+            return;
         }
 
         if (amount <= 0)
         {
             Console.WriteLine("Сумма должна быть положительной!");
-            return false;
+            return;
         }
 
         if (fromBalance < amount)
         {
             Console.WriteLine($"Недостаточно средств на балансе {fromCurrency}!");
-            return false;
+            return;
         }
 
         decimal convertedAmount = amount * rate;
         fromBalance -= amount;
         toBalance += convertedAmount;
         Console.WriteLine($"Конвертировано {amount} {fromCurrency} в {convertedAmount} {toCurrency}");
-        return false;
     }
-
     static void ExitProgram()
     {
         Console.WriteLine("До свидания!");
     }
-
     static void ShowError()
     {
         Console.WriteLine("Неверный выбор. Попробуйте снова.");
