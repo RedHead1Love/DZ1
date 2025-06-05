@@ -4,11 +4,11 @@ using System.Globalization;
 
 class Program
 {
-    const string CommandCalculateSum = "sum";
-    const string CommandExit = "exit";
-
     static void Main()
     {
+        const string CommandCalculateSum = "sum";
+        const string CommandExit = "exit";
+
         List<double> numbers = new List<double>();
         bool isRunning = true;
 
@@ -22,20 +22,22 @@ class Program
             switch (input)
             {
                 case CommandCalculateSum:
-                    SumCommand(numbers);
+                    ShowSum(numbers);
                     break;
 
                 case CommandExit:
-                    ExitCommand(ref isRunning);
+                    isRunning = false;
+                    Console.WriteLine("Завершение работы программы...");
                     break;
 
                 default:
-                    CheckNumberInput(input, numbers);
+                    VerifyNumberInput(input, numbers);
                     break;
             }
         }
     }
-    static void SumCommand(List<double> numbers)
+
+    static void ShowSum(List<double> numbers)
     {
         if (numbers.Count == 0)
         {
@@ -45,16 +47,13 @@ class Program
 
         double sum = 0;
 
-        foreach (var coin in numbers) 
+        foreach (var coin in numbers)
             sum += coin;
+
         Console.WriteLine($"Сумма всех чисел: {sum}");
     }
-    static void ExitCommand(ref bool isRunning)
-    {
-        isRunning = false;
-        Console.WriteLine("Завершение работы программы...");
-    }
-    static void CheckNumberInput(string input, List<double> numbers)
+
+    static void VerifyNumberInput(string input, List<double> numbers)
     {
         if (double.TryParse(input, NumberStyles.Any, CultureInfo.CurrentCulture, out double number))
         {
@@ -63,7 +62,7 @@ class Program
         }
         else
         {
-            Console.WriteLine($"Ошибка: введите число или команду ({CommandCalculateSum}/{CommandExit})");
+            Console.WriteLine($"Ошибка: введите число или команду (sum/exit)");
         }
     }
 }
