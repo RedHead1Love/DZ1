@@ -7,12 +7,12 @@ class Program
     const string CommandCalculateSum = "sum";
     const string CommandExit = "exit";
 
-    static List<double> numbers = new List<double>();
-    static bool isRunning = true;
-
     static void Main()
     {
-        Console.WriteLine($"Введите числа (по одному). Команды: {CommandCalculateSum} - сумма, {CommandExit} - выход");
+        List<double> numbers = new List<double>();
+        bool isRunning = true;
+
+        Console.WriteLine($"Введите числа. Команды: {CommandCalculateSum} - сумма, {CommandExit} - выход");
 
         while (isRunning)
         {
@@ -22,21 +22,20 @@ class Program
             switch (input)
             {
                 case CommandCalculateSum:
-                    HandleSumCommand();
+                    SumCommand(numbers);
                     break;
 
                 case CommandExit:
-                    HandleExitCommand();
+                    ExitCommand(ref isRunning);
                     break;
 
                 default:
-                    HandleNumberInput(input);
+                    CheckNumberInput(input, numbers);
                     break;
             }
         }
     }
-
-    static void HandleSumCommand()
+    static void SumCommand(List<double> numbers)
     {
         if (numbers.Count == 0)
         {
@@ -46,17 +45,16 @@ class Program
 
         double sum = 0;
 
-        foreach (var num in numbers) sum += num;
+        foreach (var coin in numbers) 
+            sum += coin;
         Console.WriteLine($"Сумма всех чисел: {sum}");
     }
-
-    static void HandleExitCommand()
+    static void ExitCommand(ref bool isRunning)
     {
         isRunning = false;
         Console.WriteLine("Завершение работы программы...");
     }
-
-    static void HandleNumberInput(string input)
+    static void CheckNumberInput(string input, List<double> numbers)
     {
         if (double.TryParse(input, NumberStyles.Any, CultureInfo.CurrentCulture, out double number))
         {
