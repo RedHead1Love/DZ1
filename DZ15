@@ -22,6 +22,7 @@ class CurrencyConverter
         Console.WriteLine("Добро пожаловать в конвертер валют");
 
         bool shouldContinue = true;
+
         while (shouldContinue)
         {
             ShowBalances(rubBalance, usdBalance, eurBalance);
@@ -33,6 +34,7 @@ class CurrencyConverter
 
         ExitProgram();
     }
+
     static void ShowBalances(decimal rub, decimal usd, decimal eur)
     {
         Console.WriteLine("\nТекущий баланс:");
@@ -40,6 +42,7 @@ class CurrencyConverter
         Console.WriteLine($"USD: {usd}");
         Console.WriteLine($"EUR: {eur}");
     }
+
     static void ShowMenu()
     {
         Console.WriteLine("\nВыберите операцию:");
@@ -52,6 +55,7 @@ class CurrencyConverter
         Console.WriteLine("7. Выйти");
         Console.Write("Ваш выбор: ");
     }
+
     static bool ProcessChoice(string choice, ref decimal rubBalance, ref decimal usdBalance, ref decimal eurBalance,
                             Dictionary<string, decimal> rates)
     {
@@ -82,6 +86,7 @@ class CurrencyConverter
                 return true;
         }
     }
+
     static void ConvertCurrency(string fromCurrency, string toCurrency, decimal rate,
                               ref decimal fromBalance, ref decimal toBalance)
     {
@@ -109,10 +114,12 @@ class CurrencyConverter
         toBalance += convertedAmount;
         Console.WriteLine($"Конвертировано {amount} {fromCurrency} в {convertedAmount} {toCurrency}");
     }
+
     static void ExitProgram()
     {
         Console.WriteLine("До свидания!");
     }
+
     static void ShowError()
     {
         Console.WriteLine("Неверный выбор. Попробуйте снова.");
