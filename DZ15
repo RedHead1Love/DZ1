@@ -3,8 +3,17 @@ using System.Collections.Generic;
 
 class CurrencyConverter
 {
+        const string CommandConvertRubToUsd = "1";
+        const string CommandConvertRubToEur = "2";
+        const string CommandConvertUsdToRub = "3";
+        const string CommandConvertUsdToEur = "4";
+        const string CommandConvertEurToRub = "5";
+        const string CommandConvertEurToUsd = "6";
+        const string CommandExit = "7";
+
     static void Main()
     {
+
         decimal rubBalance = 1000m;
         decimal usdBalance = 50m;
         decimal eurBalance = 30m;
@@ -46,13 +55,13 @@ class CurrencyConverter
     static void ShowMenu()
     {
         Console.WriteLine("\nВыберите операцию:");
-        Console.WriteLine("1. RUB → USD");
-        Console.WriteLine("2. RUB → EUR");
-        Console.WriteLine("3. USD → RUB");
-        Console.WriteLine("4. USD → EUR");
-        Console.WriteLine("5. EUR → RUB");
-        Console.WriteLine("6. EUR → USD");
-        Console.WriteLine("7. Выйти");
+        Console.WriteLine($"{CommandConvertRubToUsd}. RUB → USD");
+        Console.WriteLine($"{CommandConvertRubToEur}. RUB → EUR");
+        Console.WriteLine($"{CommandConvertUsdToRub}. USD → RUB");
+        Console.WriteLine($"{CommandConvertUsdToEur}. USD → EUR");
+        Console.WriteLine($"{CommandConvertEurToRub}. EUR → RUB");
+        Console.WriteLine($"{CommandConvertEurToUsd}. EUR → USD");
+        Console.WriteLine($"{CommandExit}. Выйти");
         Console.Write("Ваш выбор: ");
     }
 
@@ -61,26 +70,33 @@ class CurrencyConverter
     {
         switch (choice)
         {
-            case "1":
+            case CommandConvertRubToUsd:
                 ConvertCurrency("RUB", "USD", rates["RUB>USD"], ref rubBalance, ref usdBalance);
                 return true;
-            case "2":
+
+            case CommandConvertRubToEur:
                 ConvertCurrency("RUB", "EUR", rates["RUB>EUR"], ref rubBalance, ref eurBalance);
                 return true;
-            case "3":
+
+            case CommandConvertUsdToRub:
                 ConvertCurrency("USD", "RUB", rates["USD>RUB"], ref usdBalance, ref rubBalance);
                 return true;
-            case "4":
+
+            case CommandConvertUsdToEur:
                 ConvertCurrency("USD", "EUR", rates["USD>EUR"], ref usdBalance, ref eurBalance);
                 return true;
-            case "5":
+
+            case CommandConvertEurToRub:
                 ConvertCurrency("EUR", "RUB", rates["EUR>RUB"], ref eurBalance, ref rubBalance);
                 return true;
-            case "6":
+
+            case CommandConvertEurToUsd:
                 ConvertCurrency("EUR", "USD", rates["EUR>USD"], ref eurBalance, ref usdBalance);
                 return true;
-            case "7":
+
+            case CommandExit:
                 return false;
+
             default:
                 ShowError();
                 return true;
