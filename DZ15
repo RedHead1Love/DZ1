@@ -23,9 +23,9 @@ class Program
         double eurBalance = 100.0;
         double rubBalance = 10000.0;
 
-        bool isRunning = true;
+        bool isRun = true;
 
-        while (isRunning)
+        while (isRun)
         {
             Console.WriteLine($"Ваш баланс: USD: {usdBalance:F2}, EUR: {eurBalance:F2}, RUB: {rubBalance:F2}");
             Console.WriteLine("Выберите операцию:");
@@ -39,49 +39,61 @@ class Program
 
             string input = Console.ReadLine();
 
-            double amount = 0;
-
-            bool validInput = false;
-
-            if (input == ConvertUsdToEur || input == ConvertUsdToRub || input == ConvertEurToUsd ||
-                input == ConvertEurToRub || input == ConvertRubToUsd || input == ConvertRubToEur)
-            {
-                Console.Write("Введите сумму: ");
-                validInput = double.TryParse(Console.ReadLine(), out amount) && amount > 0;
-            }
-
             switch (input)
             {
-                case ConvertUsdToEur when validInput && amount <= usdBalance:
-                    usdBalance -= amount; eurBalance += amount * usdToEurRate; 
+                case ConvertUsdToEur:
+                    ProcessConversion(ref usdBalance, ref eurBalance, usdToEurRate);
                     break;
 
-                case ConvertUsdToRub when validInput && amount <= usdBalance:
-                    usdBalance -= amount; rubBalance += amount * usdToRubRate;
+                case ConvertUsdToRub:
+                    ProcessConversion(ref usdBalance, ref rubBalance, usdToRubRate);
                     break;
 
-                case ConvertEurToUsd when validInput && amount <= eurBalance:
-                    eurBalance -= amount; usdBalance += amount * eurToUsdRate; 
+                case ConvertEurToUsd:
+                    ProcessConversion(ref eurBalance, ref usdBalance, eurToUsdRate);
                     break;
 
-                case ConvertEurToRub when validInput && amount <= eurBalance:
-                    eurBalance -= amount; rubBalance += amount * eurToRubRate; 
+                case ConvertEurToRub:
+                    ProcessConversion(ref eurBalance, ref rubBalance, eurToRubRate);
                     break;
 
-                case ConvertRubToUsd when validInput && amount <= rubBalance:
-                    rubBalance -= amount; usdBalance += amount * rubToUsdRate; 
+                case ConvertRubToUsd:
+                    ProcessConversion(ref rubBalance, ref usdBalance, rubToUsdRate);
                     break;
 
-                case ConvertRubToEur when validInput && amount <= rubBalance:
-                    rubBalance -= amount; eurBalance += amount * rubToEurRate; 
+                case ConvertRubToEur:
+                    ProcessConversion(ref rubBalance, ref eurBalance, rubToEurRate);
                     break;
 
                 case ExitProgram:
-                    isRunning = false; 
+                    isRun = false;
                     break;
 
                 default:
-                    Console.WriteLine("Неверный ввод или недостаточно средств"); break;
+                    Console.WriteLine("Неверный ввод");
+                    break;
+            }
+        }
+
+        void ProcessConversion(ref double fromBalance, ref double toBalance, double rate)
+        {
+            Console.Write("Введите сумму: ");
+
+            if (double.TryParse(Console.ReadLine(), out double amount) && amount > 0)
+            {
+                if (amount <= fromBalance)
+                {
+                    fromBalance -= amount;
+                    toBalance += amount * rate;
+                }
+                else
+                {
+                    Console.WriteLine("Недостаточно средств");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Неверная сумма");
             }
         }
     }
