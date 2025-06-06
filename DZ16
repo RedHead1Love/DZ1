@@ -1,0 +1,131 @@
+using System;
+using System.Collections.Generic;
+
+class EmployeeManager
+{
+    private Dictionary<string, List<string>> positions = new Dictionary<string, List<string>>();
+    private HashSet<string> uniquePositions = new HashSet<string>();
+
+    public void AddEmployee(string position, string fullName)
+    {
+        if (!uniquePositions.Contains(position))
+        {
+            positions[position] = new List<string>();
+            uniquePositions.Add(position);
+        }
+        
+        positions[position].Add(fullName);
+
+        Console.WriteLine($"Сотрудник {fullName} добавлен на должность {position}.");
+    }
+
+    public void RemoveEmployee(string position, string fullName)
+    {
+        if (positions.TryGetValue(position, out var employees))
+        {
+            if (employees.Remove(fullName))
+            {
+                Console.WriteLine($"Сотрудник {fullName} удалён с должности {position}.");
+
+                if (employees.Count == 0)
+                {
+                    positions.Remove(position);
+                    uniquePositions.Remove(position);
+                    Console.WriteLine($"Должность {position} удалена, так как в ней не осталось сотрудников.");
+                }
+                return;
+            }
+        }
+
+        Console.WriteLine($"Сотрудник {fullName} не найден на должности {position}.");
+    }
+
+    public void DisplayAll()
+    {
+        if (uniquePositions.Count == 0)
+        {
+            Console.WriteLine("Нет данных о сотрудниках");
+            return;
+        }
+
+        foreach (var position in uniquePositions)
+        {
+            Console.WriteLine($"Должность: {position}");
+            Console.WriteLine("Сотрудники:");
+
+            foreach (var employee in positions[position])
+            {
+                Console.WriteLine($"- {employee}");
+            }
+
+            Console.WriteLine();
+        }
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        const string CommandAddEmployee = "1";
+        const string CommandRemoveEmployee = "2";
+        const string CommandShowAllEmployees = "3";
+        const string CommandExit = "4";
+
+        var manager = new EmployeeManager();
+
+        while (true)
+        {
+            Console.WriteLine("\nМеню:");
+            Console.WriteLine($"{CommandAddEmployee}. Добавить сотрудника");
+            Console.WriteLine($"{CommandRemoveEmployee}. Удалить сотрудника");
+            Console.WriteLine($"{CommandShowAllEmployees}. Показать всех сотрудников");
+            Console.WriteLine($"{CommandExit}. Выйти");
+            Console.Write("Выберите действие: ");
+
+            switch (Console.ReadLine())
+            {
+                case CommandAddEmployee:
+                    AddEmployee(manager);
+                    break;
+
+                case CommandRemoveEmployee:
+                    RemoveEmployee(manager);
+                    break;
+
+                case CommandShowAllEmployees:
+                    manager.DisplayAll();
+                    break;
+
+                case CommandExit:
+                    return;
+
+                default:
+                    Console.WriteLine("Неверный ввод!");
+                    break;
+            }
+        }
+    }
+
+    static void AddEmployee(EmployeeManager manager)
+    {
+        Console.Write("Введите должность: ");
+        string position = Console.ReadLine();
+
+        Console.Write("Введите ФИО сотрудника: ");
+        string name = Console.ReadLine();
+
+        manager.AddEmployee(position, name);
+    }
+
+    static void RemoveEmployee(EmployeeManager manager)
+    {
+        Console.Write("Введите должность: ");
+        string position = Console.ReadLine();
+
+        Console.Write("Введите ФИО сотрудника: ");
+        string name = Console.ReadLine();
+
+        manager.RemoveEmployee(position, name);
+    }
+}
