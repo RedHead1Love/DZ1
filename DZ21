@@ -1,0 +1,56 @@
+using System;
+using System.Collections.Generic;
+
+class Program
+{
+    static void Main()
+    {
+        string[] array1 = { "1", "2", "1" };
+        string[] array2 = { "3", "2" };
+
+        List<string> result = MergeArraysWithoutDuplicates(array1, array2);
+
+        Console.WriteLine("Результат объединения:");
+
+        foreach (string item in result)
+        {
+            Console.Write($"\"{item}\" ");
+        }
+    }
+
+    static List<string> MergeArraysWithoutDuplicates(string[] array1, string[] array2)
+    {
+        List<string> mergedList = new List<string>();
+
+        foreach (string item in array1)
+        {
+            if (Contains(mergedList, item) == false)
+            {
+                mergedList.Add(item);
+            }
+        }
+
+        foreach (string item in array2)
+        {
+            if (Contains(mergedList, item) == false)
+            {
+                mergedList.Add(item);
+            }
+        }
+
+        return mergedList;
+    }
+
+    static bool Contains(List<string> list, string item)
+    {
+        foreach (string element in list)
+        {
+            if (element == item)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
