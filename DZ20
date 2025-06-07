@@ -1,0 +1,28 @@
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        int minimumPossibleRandomNumber = 1;
+        int maximumPossibleRandomNumber = 101;
+
+        Random rnd = new Random();
+        int number = rnd.Next(minimumPossibleRandomNumber, maximumPossibleRandomNumber);
+
+        Console.WriteLine($"Заданное число: {number}");
+
+        int power = 0;
+        int result = 1; 
+
+        while (result <= number)
+        {
+            result *= 2;
+            power++;
+        }
+
+        Console.WriteLine($"Нужно 2 возвести в степень: {power}");
+        Console.WriteLine($"Получаем: 2^{power} = {result}");
+        Console.WriteLine($"Проверка итоговая {number} < {result}");
+    }
+}
