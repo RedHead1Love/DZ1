@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 class Program
 {
-    private static Dictionary<string, List<string>> positions = new Dictionary<string, List<string>>();
-
     static void Main()
     {
         const string CommandAddEmployee = "1";
@@ -12,6 +10,7 @@ class Program
         const string CommandShowAllEmployees = "3";
         const string CommandExit = "4";
 
+        Dictionary<string, List<string>> employeesByPosition = new Dictionary<string, List<string>>();
         bool isRunning = true;
 
         while (isRunning)
@@ -28,15 +27,15 @@ class Program
             switch (input)
             {
                 case CommandAddEmployee:
-                    AddEmployee();
+                    AddEmployee(employeesByPosition);
                     break;
 
                 case CommandRemoveEmployee:
-                    RemoveEmployee();
+                    RemoveEmployee(employeesByPosition);
                     break;
 
                 case CommandShowAllEmployees:
-                    DisplayAllEmployees();
+                    DisplayAllEmployees(employeesByPosition);
                     break;
 
                 case CommandExit:
@@ -50,7 +49,7 @@ class Program
         }
     }
 
-    static void AddEmployee()
+    static void AddEmployee(Dictionary<string, List<string>> employeesByPosition)
     {
         Console.Write("Введите должность: ");
         string position = Console.ReadLine();
@@ -58,18 +57,18 @@ class Program
         Console.Write("Введите ФИО сотрудника: ");
         string name = Console.ReadLine();
 
-        if (positions.ContainsKey(position) == false)
+        if (employeesByPosition.ContainsKey(position) == false)
         {
-            positions[position] = new List<string>();
+            employeesByPosition[position] = new List<string>();
         }
 
-        positions[position].Add(name);
+        employeesByPosition[position].Add(name);
         Console.WriteLine($"Сотрудник {name} добавлен на должность {position}.");
     }
 
-    static void RemoveEmployee()
+    static void RemoveEmployee(Dictionary<string, List<string>> employeesByPosition)
     {
-        if (positions.Count == 0)
+        if (employeesByPosition.Count == 0)
         {
             Console.WriteLine("Нет данных о сотрудниках");
             return;
@@ -77,59 +76,62 @@ class Program
 
         Console.WriteLine("Выберите должность:");
 
-        int i = 1;
-        var positionList = new List<string>(positions.Keys);
+        int positionNumber = 1;
+        var positions = new List<string>(employeesByPosition.Keys);
 
-        foreach (var position in positionList)
+        foreach (var position in positions)
         {
-            Console.WriteLine($"{i}. {position}");
-            i++;
+            Console.WriteLine($"{positionNumber}. {position}");
+            positionNumber++;
         }
 
-        if (int.TryParse(Console.ReadLine(), out int positionIndex) &&
-            positionIndex > 0 && positionIndex <= positionList.Count)
+        if (int.TryParse(Console.ReadLine(), out int selectedPositionNumber) &&
+            selectedPositionNumber > 0 && selectedPositionNumber <= positions.Count)
         {
-            string selectedPosition = positionList[positionIndex - 1];
+            string selectedPosition = positions[selectedPositionNumber - 1];
+            var employeesInPosition = employeesByPosition[selectedPosition];
 
             Console.WriteLine("Выберите сотрудника для удаления:");
-            for (i = 0; i < positions[selectedPosition].Count; i++)
+
+            for (int i = 0; i < employeesInPosition.Count; i++)
             {
-                Console.WriteLine($"{i + 1}. {positions[selectedPosition][i]}");
+                Console.WriteLine($"{i + 1}. {employeesInPosition[i]}");
             }
 
-            if (int.TryParse(Console.ReadLine(), out int employeeIndex) &&
-                employeeIndex > 0 && employeeIndex <= positions[selectedPosition].Count)
+            if (int.TryParse(Console.ReadLine(), out int selectedEmployeeNumber) &&
+                selectedEmployeeNumber > 0 && selectedEmployeeNumber <= employeesInPosition.Count)
             {
-                string removedEmployee = positions[selectedPosition][employeeIndex - 1];
-                positions[selectedPosition].RemoveAt(employeeIndex - 1);
+                int employeeIndex = selectedEmployeeNumber - 1;
+                string removedEmployee = employeesInPosition[employeeIndex];
+                employeesInPosition.RemoveAt(employeeIndex);
                 Console.WriteLine($"Сотрудник {removedEmployee} удалён с должности {selectedPosition}.");
 
-                if (positions[selectedPosition].Count == 0)
+                if (employeesInPosition.Count == 0)
                 {
-                    positions.Remove(selectedPosition);
+                    employeesByPosition.Remove(selectedPosition);
                     Console.WriteLine($"Должность {selectedPosition} удалена, так как в ней не осталось сотрудников.");
                 }
             }
             else
             {
-                Console.WriteLine("Неверный номер сотрудника!");
+                Console.WriteLine("Неверный номер сотрудника");
             }
         }
         else
         {
-            Console.WriteLine("Неверный номер должности!");
+            Console.WriteLine("Неверный номер должности");
         }
     }
 
-    static void DisplayAllEmployees()
+    static void DisplayAllEmployees(Dictionary<string, List<string>> employeesByPosition)
     {
-        if (positions.Count == 0)
+        if (employeesByPosition.Count == 0)
         {
             Console.WriteLine("Нет данных о сотрудниках");
             return;
         }
 
-        foreach (var position in positions)
+        foreach (var position in employeesByPosition)
         {
             Console.WriteLine($"\nДолжность: {position.Key}");
             Console.WriteLine("Сотрудники:");
