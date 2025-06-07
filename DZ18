@@ -1,0 +1,33 @@
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        string secretPassword = "123"; 
+        string secretMessage = "Доступ разрешен"; 
+
+        int maxAttempts = 3; 
+        int attempts = 0; 
+
+        while (attempts < maxAttempts)
+        {
+            Console.Write("Введите пароль");
+
+            string userInput = Console.ReadLine();
+
+            if (userInput == secretPassword)
+            {
+                Console.WriteLine(secretMessage);
+                return; 
+            }
+            else
+            {
+                attempts++;
+                Console.WriteLine($"Неверный пароль, осталось попыток: {maxAttempts - attempts}");
+            }
+        }
+
+        Console.WriteLine("Превышено количество попыток, извините");
+    }
+}
