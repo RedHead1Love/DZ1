@@ -4,13 +4,13 @@ class Program
 {
     static void Main()
     {
-        const string ConvertUsdToEur = "1";
-        const string ConvertUsdToRub = "2";
-        const string ConvertEurToUsd = "3";
-        const string ConvertEurToRub = "4";
-        const string ConvertRubToUsd = "5";
-        const string ConvertRubToEur = "6";
-        const string ExitProgram = "0";
+        const string CommandConvertUsdToEur = "1";
+        const string CommandConvertUsdToRub = "2";
+        const string CommandConvertEurToUsd = "3";
+        const string CommandConvertEurToRub = "4";
+        const string CommandConvertRubToUsd = "5";
+        const string CommandConvertRubToEur = "6";
+        const string CommandExitProgram = "0";
 
         double usdToEurRate = 0.85;
         double usdToRubRate = 75.0;
@@ -29,43 +29,43 @@ class Program
         {
             Console.WriteLine($"Ваш баланс: USD: {usdBalance:F2}, EUR: {eurBalance:F2}, RUB: {rubBalance:F2}");
             Console.WriteLine("Выберите операцию:");
-            Console.WriteLine($"{ConvertUsdToEur} Конвертировать USD в EUR");
-            Console.WriteLine($"{ConvertUsdToRub} Конвертировать USD в RUB");
-            Console.WriteLine($"{ConvertEurToUsd} Конвертировать EUR в USD");
-            Console.WriteLine($"{ConvertEurToRub} Конвертировать EUR в RUB");
-            Console.WriteLine($"{ConvertRubToUsd} Конвертировать RUB в USD");
-            Console.WriteLine($"{ConvertRubToEur} Конвертировать RUB в EUR");
-            Console.WriteLine($"{ExitProgram} Выход");
+            Console.WriteLine($"{CommandConvertUsdToEur} Конвертировать USD в EUR");
+            Console.WriteLine($"{CommandConvertUsdToRub} Конвертировать USD в RUB");
+            Console.WriteLine($"{CommandConvertEurToUsd} Конвертировать EUR в USD");
+            Console.WriteLine($"{CommandConvertEurToRub} Конвертировать EUR в RUB");
+            Console.WriteLine($"{CommandConvertRubToUsd} Конвертировать RUB в USD");
+            Console.WriteLine($"{CommandConvertRubToEur} Конвертировать RUB в EUR");
+            Console.WriteLine($"{CommandExitProgram} Выход");
 
             string input = Console.ReadLine();
 
             switch (input)
             {
-                case ConvertUsdToEur:
+                case CommandConvertUsdToEur:
                     ProcessConversion(ref usdBalance, ref eurBalance, usdToEurRate);
                     break;
 
-                case ConvertUsdToRub:
+                case CommandConvertUsdToRub:
                     ProcessConversion(ref usdBalance, ref rubBalance, usdToRubRate);
                     break;
 
-                case ConvertEurToUsd:
+                case CommandConvertEurToUsd:
                     ProcessConversion(ref eurBalance, ref usdBalance, eurToUsdRate);
                     break;
 
-                case ConvertEurToRub:
+                case CommandConvertEurToRub:
                     ProcessConversion(ref eurBalance, ref rubBalance, eurToRubRate);
                     break;
 
-                case ConvertRubToUsd:
+                case CommandConvertRubToUsd:
                     ProcessConversion(ref rubBalance, ref usdBalance, rubToUsdRate);
                     break;
 
-                case ConvertRubToEur:
+                case CommandConvertRubToEur:
                     ProcessConversion(ref rubBalance, ref eurBalance, rubToEurRate);
                     break;
 
-                case ExitProgram:
+                case CommandExitProgram:
                     isRun = false;
                     break;
 
