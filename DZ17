@@ -1,0 +1,23 @@
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        char borderChar = Console.ReadKey().KeyChar;
+
+        Console.WriteLine(); 
+        Console.Write("Введите символ для рамки: ");
+
+        Console.Write("Введите имя: ");
+
+        string name = Console.ReadLine();
+
+        string borderedName = borderChar + name + borderChar;
+        string borderLine = new string(borderChar, borderedName.Length);
+
+        Console.WriteLine(borderLine);
+        Console.WriteLine(borderedName);
+        Console.WriteLine(borderLine);
+    }
+}
