@@ -4,27 +4,24 @@ class Program
 {
     static void Main()
     {
-        string secretPassword = "123"; 
-        string secretMessage = "Доступ разрешен"; 
+        string secretPassword = "123";
+        string secretMessage = "Доступ разрешен";
 
-        int maxAttempts = 3; 
-        int attempts = 0; 
+        int maxAttempts = 3;
 
-        while (attempts < maxAttempts)
+        for (int attempts = 0; attempts < maxAttempts; attempts++)
         {
-            Console.Write("Введите пароль");
-
+            Console.Write("Введите пароль: ");
             string userInput = Console.ReadLine();
 
             if (userInput == secretPassword)
             {
                 Console.WriteLine(secretMessage);
-                return; 
+                return;
             }
             else
             {
-                attempts++;
-                Console.WriteLine($"Неверный пароль, осталось попыток: {maxAttempts - attempts}");
+                Console.WriteLine($"Неверный пароль, осталось попыток: {maxAttempts - attempts - 1}");
             }
         }
 
