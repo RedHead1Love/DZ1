@@ -16,15 +16,16 @@ class Program
 
         int count = 0;
 
-        for (int number = minimumPossibleNumber; number <= maximumPossibleNumber; number++)
+        int firstMultiple = minimumPossibleNumber;
+
+        if (firstMultiple % N != 0)
         {
-            int temp = number;
+            firstMultiple += N - (firstMultiple % N);
+        }
 
-            while (temp >= N)
-                temp -= N;
-
-            if (temp == 0)
-                count++;
+        for (int number = firstMultiple; number <= maximumPossibleNumber; number += N)
+        {
+            count++;
         }
 
         Console.WriteLine($"Количество чисел от {minimumPossibleNumber} до {maximumPossibleNumber}, кратных {N}: {count}");
