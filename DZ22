@@ -2,23 +2,23 @@ using System;
 
 public class Player
 {
-    public string Name { get; }
-    public int Level { get; }
-    public string CharacterClass { get; }
+    private string _name;
+    private int _level;
+    private string _characterClass;
 
     public Player(string name, int level, string characterClass)
     {
-        Name = name;
-        Level = level;
-        CharacterClass = characterClass;
+        _name = name;
+        _level = level;
+        _characterClass = characterClass;
     }
 
     public void PrintInfo()
     {
         Console.WriteLine("=== Информация об игроке ===");
-        Console.WriteLine($"Имя: {Name}");
-        Console.WriteLine($"Уровень: {Level}");
-        Console.WriteLine($"Класс: {CharacterClass}");
+        Console.WriteLine($"Имя: {_name}");
+        Console.WriteLine($"Уровень: {_level}");
+        Console.WriteLine($"Класс: {_characterClass}");
     }
 }
 
@@ -29,15 +29,30 @@ public class Program
         Console.WriteLine("Создание персонажа:");
 
         Console.Write("Введите имя: ");
+
         string name = Console.ReadLine();
 
-        Console.Write("Введите уровень: ");
-        int level = int.Parse(Console.ReadLine());
+        int level = 0;
+        bool isValidInput = false;
+
+        while (isValidInput == false)
+        {
+            Console.Write("Введите уровень: ");
+
+            isValidInput = int.TryParse(Console.ReadLine(), out level);
+
+            if (isValidInput == false)
+            {
+                Console.WriteLine("Ошибка, введите целое число для уровня.");
+            }
+        }
 
         Console.Write("Введите класс: ");
+
         string characterClass = Console.ReadLine();
 
         Player player = new Player(name, level, characterClass);
+
         player.PrintInfo();
     }
 }
