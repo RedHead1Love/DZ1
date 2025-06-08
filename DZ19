@@ -4,31 +4,27 @@ class Program
 {
     static void Main()
     {
-        const int minDivisor = 10;
-        const int maxDivisor = 26;
-        const int minRange = 50;
-        const int maxRange = 150;
+        int minimumRandomNumber = 10;
+        int maximumRandomNumber = 26;
+
+        int minimumMultipleRandom = 50;
+        int maximumMultipleRandom = 150;
 
         Random random = new Random();
 
-        int divisor = random.Next(minDivisor, maxDivisor);
+        int randomNumber = random.Next(minimumRandomNumber, maximumRandomNumber); 
 
-        Console.WriteLine($"Делитель: {divisor}");
+        int i = 0;
 
-        int count = 0;
-        int stepsToNextMultiple = 0; 
-
-        for (int i = minRange; i <= maxRange; i++)
+        for (int multiple = randomNumber; multiple <= maximumMultipleRandom; multiple += randomNumber)
         {
-            stepsToNextMultiple++;
-
-            if (stepsToNextMultiple == divisor)
+            if (multiple >= minimumMultipleRandom)
             {
-                count++;
-                stepsToNextMultiple = 0;
+                i++;
             }
         }
 
-        Console.WriteLine($"Количество кратных чисел: {count}");
+        Console.WriteLine($"Рандомное число = {randomNumber}");
+        Console.WriteLine($"Количество кратных чисел от {minimumMultipleRandom} до {maximumMultipleRandom}: {i}");
     }
 }
