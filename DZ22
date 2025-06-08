@@ -1,0 +1,43 @@
+using System;
+
+public class Player
+{
+    public string Name { get; }
+    public int Level { get; }
+    public string CharacterClass { get; }
+
+    public Player(string name, int level, string characterClass)
+    {
+        Name = name;
+        Level = level;
+        CharacterClass = characterClass;
+    }
+
+    public void PrintInfo()
+    {
+        Console.WriteLine("=== Информация об игроке ===");
+        Console.WriteLine($"Имя: {Name}");
+        Console.WriteLine($"Уровень: {Level}");
+        Console.WriteLine($"Класс: {CharacterClass}");
+    }
+}
+
+public class Program
+{
+    public static void Main()
+    {
+        Console.WriteLine("Создание персонажа:");
+
+        Console.Write("Введите имя: ");
+        string name = Console.ReadLine();
+
+        Console.Write("Введите уровень: ");
+        int level = int.Parse(Console.ReadLine());
+
+        Console.Write("Введите класс: ");
+        string characterClass = Console.ReadLine();
+
+        Player player = new Player(name, level, characterClass);
+        player.PrintInfo();
+    }
+}
