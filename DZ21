@@ -20,37 +20,9 @@ class Program
 
     static List<string> MergeArraysWithoutDuplicates(string[] array1, string[] array2)
     {
-        List<string> mergedList = new List<string>();
+        HashSet<string> uniqueItems = new HashSet<string>(array1);
 
-        foreach (string item in array1)
-        {
-            if (Contains(mergedList, item) == false)
-            {
-                mergedList.Add(item);
-            }
-        }
-
-        foreach (string item in array2)
-        {
-            if (Contains(mergedList, item) == false)
-            {
-                mergedList.Add(item);
-            }
-        }
-
-        return mergedList;
-    }
-
-    static bool Contains(List<string> list, string item)
-    {
-        foreach (string element in list)
-        {
-            if (element == item)
-            {
-                return true;
-            }
-        }
-
-        return false;
+        uniqueItems.UnionWith(array2);
+        return new List<string>(uniqueItems);
     }
 }
