@@ -1,16 +1,71 @@
 using System;
 
+public class Program
+{
+    public static void Main()
+    {
+        Console.WriteLine("Введите координаты игрока (X и Y):");
+
+        Console.Write("X: ");
+        int finallyPositionx = GetValidInput();
+
+        Console.Write("Y: ");
+        int finallyPositionY = GetValidInput();
+
+        Player player = new Player(finallyPositionx, finallyPositionY, '@');
+        Renderer renderer = new Renderer();
+
+        Console.Clear();
+        renderer.DrawPlayer(player);
+
+        Console.WriteLine("\nИгрок отрисован. Нажмите любую клавишу для выхода");
+        Console.ReadKey();
+    }
+
+    private static int GetValidInput()
+    {
+        while (true)
+        {
+            string input = Console.ReadLine();
+
+            if (int.TryParse(input, out int result))
+            {
+                return result;
+            }
+            Console.Write("Ошибка ввода. Введите целое число: ");
+        }
+    }
+}
+
 public class Player
 {
-    public int PositionX { get; set; }
-    public int PositionY { get; set; }
-    public char Symbol { get; set; }
+    private int _positionX;
+    private int _positionY;
+    private char _symbol;
 
     public Player(int xPosition, int yPosition, char symbol)
     {
-        PositionX = xPosition;
-        PositionY = yPosition;
-        Symbol = symbol;
+        _positionX = xPosition;
+        _positionY = yPosition;
+        _symbol = symbol;
+    }
+
+    public int PositionX
+    {
+        get { return _positionX; }
+        set { _positionX = value; }
+    }
+
+    public int PositionY
+    {
+        get { return _positionY; }
+        set { _positionY = value; }
+    }
+
+    public char Symbol
+    {
+        get { return _symbol; }
+        set { _symbol = value; }
     }
 }
 
@@ -23,29 +78,5 @@ public class Renderer
             Console.SetCursorPosition(player.PositionX, player.PositionY);
             Console.Write(player.Symbol);
         }
-    }
-}
-
-public class Program
-{
-    public static void Main()
-    {
-        Console.WriteLine("Введите координаты игрока (X и Y):");
-
-        Console.Write("X: ");
-        int x = int.Parse(Console.ReadLine());
-
-        Console.Write("Y: ");
-        int y = int.Parse(Console.ReadLine());
-
-        Player player = new Player(x, y, '@');
-        Renderer renderer = new Renderer();
-
-        Console.Clear();
-
-        renderer.DrawPlayer(player);
-
-        Console.WriteLine("\nИгрок отрисован. Нажмите любую клавишу для выхода");
-        Console.ReadKey();
     }
 }
