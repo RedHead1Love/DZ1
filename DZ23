@@ -1,0 +1,51 @@
+using System;
+
+public class Player
+{
+    public int PositionX { get; set; }
+    public int PositionY { get; set; }
+    public char Symbol { get; set; }
+
+    public Player(int xPosition, int yPosition, char symbol)
+    {
+        PositionX = xPosition;
+        PositionY = yPosition;
+        Symbol = symbol;
+    }
+}
+
+public class Renderer
+{
+    public void DrawPlayer(Player player)
+    {
+        if (player.PositionX >= 0 && player.PositionY >= 0)
+        {
+            Console.SetCursorPosition(player.PositionX, player.PositionY);
+            Console.Write(player.Symbol);
+        }
+    }
+}
+
+public class Program
+{
+    public static void Main()
+    {
+        Console.WriteLine("Введите координаты игрока (X и Y):");
+
+        Console.Write("X: ");
+        int x = int.Parse(Console.ReadLine());
+
+        Console.Write("Y: ");
+        int y = int.Parse(Console.ReadLine());
+
+        Player player = new Player(x, y, '@');
+        Renderer renderer = new Renderer();
+
+        Console.Clear();
+
+        renderer.DrawPlayer(player);
+
+        Console.WriteLine("\nИгрок отрисован. Нажмите любую клавишу для выхода");
+        Console.ReadKey();
+    }
+}
