@@ -5,32 +5,34 @@ class Program
 {
     static void Main(string[] args)
     {
-        var database = new PlayerDatabase();
+        var database = new Database();
         database.Run();
     }
 }
 
-public class PlayerDatabase
+public class Database
 {
-    private List<Player> players = new List<Player>();
-    private int nextId = 1;
+    private List<Player> _players = new List<Player>();
+    private int _nextId = 1;
 
     public void Run()
     {
         const string CommandAddPlayer = "1";
-        const string CommandBunnedPlayer = "2";
-        const string CommandUnbunnedPlayer = "3";
+        const string CommandBanPlayer = "2";
+        const string CommandUnbanPlayer = "3";
         const string CommandDeletePlayer = "4";
         const string CommandShowAllPlayers = "5";
         const string CommandExit = "6";
 
-        while (true)
+        bool isRunning = true;
+
+        while (isRunning)
         {
             Console.Clear();
             Console.WriteLine("=== ИГРОВАЯ БАЗА ДАННЫХ ===");
             Console.WriteLine($"{CommandAddPlayer}. Добавить игрока");
-            Console.WriteLine($"{CommandBunnedPlayer}. Забанить игрока");
-            Console.WriteLine($"{CommandUnbunnedPlayer}. Разбанить игрока");
+            Console.WriteLine($"{CommandBanPlayer}. Забанить игрока");
+            Console.WriteLine($"{CommandUnbanPlayer}. Разбанить игрока");
             Console.WriteLine($"{CommandDeletePlayer}. Удалить игрока");
             Console.WriteLine($"{CommandShowAllPlayers}. Показать всех игроков");
             Console.WriteLine($"{CommandExit}. Выход");
@@ -44,12 +46,12 @@ public class PlayerDatabase
                     AddPlayer();
                     break;
 
-                case CommandBunnedPlayer:
-                    ChangeBanStatus(true);
+                case CommandBanPlayer:
+                    BanPlayer();
                     break;
 
-                case CommandUnbunnedPlayer:
-                    ChangeBanStatus(false);
+                case CommandUnbanPlayer:
+                    UnbanPlayer();
                     break;
 
                 case CommandDeletePlayer:
@@ -61,10 +63,10 @@ public class PlayerDatabase
                     break;
 
                 case CommandExit:
-                    return;
+                    isRunning = false;
+                    break;
 
                 default:
-
                     Console.WriteLine("Неверный ввод");
                     Console.ReadKey();
                     break;
@@ -78,55 +80,55 @@ public class PlayerDatabase
         Console.WriteLine("=== ДОБАВЛЕНИЕ ИГРОКА ===");
 
         Console.Write("Введите никнейм: ");
-
         var nickname = Console.ReadLine();
 
-        int level;
+        int level = GetValidLevelInput();
 
-        while (true)
-        {
-            Console.Write("Введите уровень: ");
-
-            if (int.TryParse(Console.ReadLine(), out level) && level >= 0)
-                break;
-            Console.WriteLine("Некорректный уровень! Должно быть целое число >= 0");
-        }
-
-        var player = new Player
-        {
-            Id = nextId++,
-            Nickname = nickname,
-            Level = level,
-            IsBanned = false
-        };
-
-        players.Add(player);
+        var player = new Player(_nextId++, nickname, level);
+        _players.Add(player);
 
         Console.WriteLine($"\nИгрок {nickname} успешно добавлен с ID {player.Id}!");
         Console.ReadKey();
     }
 
-    private void ChangeBanStatus(bool ban)
+    private int GetValidLevelInput()
+    {
+        int level;
+
+        while (true)
+        {
+            Console.Write("Введите уровень: ");
+            if (int.TryParse(Console.ReadLine(), out level) && level >= 0)
+                return level;
+
+            Console.WriteLine("Некорректный уровень! Должно быть целое число >= 0");
+        }
+    }
+
+    private void BanPlayer()
     {
         Console.Clear();
-        Console.WriteLine($"=== {(ban ? "БАН" : "РАЗБАН")} ИГРОКА ===");
+        Console.WriteLine("=== БАН ИГРОКА ===");
 
-        var id = GetPlayerIdFromInput();
-
-        if (id == -1) return;
-
-        var player = players.Find(p => p.Id == id);
-
-        if (player == null)
+        if (TryGetPlayer(out Player player))
         {
-            Console.WriteLine("Игрок с таким ID не найден");
+            player.Ban();
+            Console.WriteLine($"Игрок {player.Nickname} успешно забанен");
             Console.ReadKey();
-            return;
         }
+    }
 
-        player.IsBanned = ban;
-        Console.WriteLine($"Игрок {player.Nickname} успешно {(ban ? "забанен" : "разбанен")}");
-        Console.ReadKey();
+    private void UnbanPlayer()
+    {
+        Console.Clear();
+        Console.WriteLine("=== РАЗБАН ИГРОКА ===");
+
+        if (TryGetPlayer(out Player player))
+        {
+            player.Unban();
+            Console.WriteLine($"Игрок {player.Nickname} успешно разбанен");
+            Console.ReadKey();
+        }
     }
 
     private void DeletePlayer()
@@ -134,82 +136,105 @@ public class PlayerDatabase
         Console.Clear();
         Console.WriteLine("=== УДАЛЕНИЕ ИГРОКА ===");
 
-        var id = GetPlayerIdFromInput();
-        if (id == -1) return;
+        if (TryGetPlayer(out Player player))
+        {
+            _players.Remove(player);
+            Console.WriteLine($"Игрок {player.Nickname} успешно удален");
+            Console.ReadKey();
+        }
+    }
 
-        var player = players.Find(p => p.Id == id);
+    private bool TryGetPlayer(out Player player)
+    {
+        player = null;
+        int id = GetPlayerIdFromInput();
+
+        if (id == -1)
+            return false;
+
+        player = _players.Find(gamer => gamer.Id == id);
 
         if (player == null)
         {
             Console.WriteLine("Игрок с таким ID не найден");
             Console.ReadKey();
-            return;
+            return false;
         }
 
-        players.Remove(player);
-
-        Console.WriteLine($"Игрок {player.Nickname} успешно удален");
-        Console.ReadKey();
-    }
-
-    private void ShowAllPlayers()
-    {
-        int idColumnWidth = 5;
-        int nicknameColumnWidth = 20;
-        int levelColumnWidth = 10;
-        int statusColumnWidth = 10;
-
-        string idHeader = "ID";
-        string nicknameHeader = "Никнейм";
-        string levelHeader = "Уровень";
-        string statusHeader = "Статус";
-
-        Console.Clear();
-        Console.WriteLine("=== СПИСОК ВСЕХ ИГРОКОВ ===");
-
-        if (players.Count == 0)
-        {
-            Console.WriteLine("Нет зарегистрированных игроков.");
-        }
-        else
-        {
-            string headerFormat = $"{{0,-{idColumnWidth}}} {{1,-{nicknameColumnWidth}}} {{2,-{levelColumnWidth}}} {{3,-{statusColumnWidth}}}";
-            Console.WriteLine(headerFormat, idHeader, nicknameHeader, levelHeader, statusHeader);
-            Console.WriteLine(new string('-', idColumnWidth + nicknameColumnWidth + levelColumnWidth + statusColumnWidth + 3));
-
-            string rowFormat = $"{{0,-{idColumnWidth}}} {{1,-{nicknameColumnWidth}}} {{2,-{levelColumnWidth}}} {{3,-{statusColumnWidth}}}";
-
-            foreach (var player in players)
-            {
-                var status = player.IsBanned ? "Забанен" : "Активен";
-                Console.WriteLine(rowFormat, player.Id, player.Nickname, player.Level, status);
-            }
-        }
-
-        Console.WriteLine("\nНажмите любую клавишу для продолжения");
-        Console.ReadKey();
+        return true;
     }
 
     private int GetPlayerIdFromInput()
     {
         while (true)
         {
-            Console.Write("Введите ID игрока (или 0 для отмены): ");
+            Console.Write("Введите ID игрока: ");
 
             if (int.TryParse(Console.ReadLine(), out var id))
             {
                 if (id == 0) return -1;
                 if (id > 0) return id;
             }
-            Console.WriteLine("Некорректный ID, Должно быть положительное число.");
+            Console.WriteLine("Некорректный ID, должно быть положительное число.");
         }
+    }
+
+    private void ShowAllPlayers()
+    {
+        const int idColumnWidth = 5;
+        const int nicknameColumnWidth = 20;
+        const int levelColumnWidth = 10;
+        const int statusColumnWidth = 10;
+
+        Console.Clear();
+        Console.WriteLine("=== СПИСОК ВСЕХ ИГРОКОВ ===");
+
+        if (_players.Count == 0)
+        {
+            Console.WriteLine("Нет зарегистрированных игроков.");
+        }
+        else
+        {
+            string headerFormat = $"{"ID",-idColumnWidth} {"Никнейм",-nicknameColumnWidth} {"Уровень",-levelColumnWidth} {"Статус",-statusColumnWidth}";
+            Console.WriteLine(headerFormat);
+            Console.WriteLine(new string('-', idColumnWidth + nicknameColumnWidth + levelColumnWidth + statusColumnWidth + 3));
+
+            string rowFormat = $"{{0,-{idColumnWidth}}} {{1,-{nicknameColumnWidth}}} {{2,-{levelColumnWidth}}} {{3,-{statusColumnWidth}}}";
+
+            foreach (var player in _players)
+            {
+                Console.WriteLine(rowFormat, player.Id, player.Nickname, player.Level, player.Status);
+            }
+        }
+
+        Console.WriteLine("\nНажмите любую клавишу для продолжения");
+        Console.ReadKey();
     }
 }
 
 public class Player
 {
-    public int Id { get; set; }
-    public string Nickname { get; set; }
-    public int Level { get; set; }
-    public bool IsBanned { get; set; }
+    public int Id { get; }
+    public string Nickname { get; }
+    public int Level { get; }
+    public bool IsBanned { get; private set; }
+    public string Status => IsBanned ? "Забанен" : "Активен";
+
+    public Player(int id, string nickname, int level)
+    {
+        Id = id;
+        Nickname = nickname;
+        Level = level;
+        IsBanned = false;
+    }
+
+    public void Ban()
+    {
+        IsBanned = true;
+    }
+
+    public void Unban()
+    {
+        IsBanned = false;
+    }
 }
