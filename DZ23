@@ -7,12 +7,12 @@ public class Program
         Console.WriteLine("Введите координаты игрока (X и Y):");
 
         Console.Write("X: ");
-        int finallyPositionx = GetValidInput();
+        int playerPositionX = GetValidInput();
 
         Console.Write("Y: ");
-        int finallyPositionY = GetValidInput();
+        int playerPositionY = GetValidInput();
 
-        Player player = new Player(finallyPositionx, finallyPositionY, '@');
+        Player player = new Player(playerPositionX, playerPositionY, '@');
         Renderer renderer = new Renderer();
 
         Console.Clear();
@@ -24,24 +24,29 @@ public class Program
 
     private static int GetValidInput()
     {
-        while (true)
+        bool isValidInput = false;
+        int result = 0;
+
+        while (!isValidInput)
         {
             string input = Console.ReadLine();
+            isValidInput = int.TryParse(input, out result);
 
-            if (int.TryParse(input, out int result))
+            if (!isValidInput)
             {
-                return result;
+                Console.Write("Ошибка ввода. Введите целое число: ");
             }
-            Console.Write("Ошибка ввода. Введите целое число: ");
         }
+
+        return result;
     }
 }
 
 public class Player
 {
-    private int _positionX;
-    private int _positionY;
-    private char _symbol;
+    private readonly int _positionX;
+    private readonly int _positionY;
+    private readonly char _symbol;
 
     public Player(int xPosition, int yPosition, char symbol)
     {
@@ -50,23 +55,9 @@ public class Player
         _symbol = symbol;
     }
 
-    public int PositionX
-    {
-        get { return _positionX; }
-        set { _positionX = value; }
-    }
-
-    public int PositionY
-    {
-        get { return _positionY; }
-        set { _positionY = value; }
-    }
-
-    public char Symbol
-    {
-        get { return _symbol; }
-        set { _symbol = value; }
-    }
+    public int PositionX => _positionX;
+    public int PositionY => _positionY;
+    public char Symbol => _symbol;
 }
 
 public class Renderer
