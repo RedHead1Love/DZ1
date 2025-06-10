@@ -33,7 +33,7 @@ namespace BossFight
 
             Random random = new Random();
             int bossAttack = random.Next(bossMinDamage, bossMaxDamage + 1);
-            bool fireballUsed = false;
+            bool isFireballUsed = false;
 
             Console.WriteLine("Битва с боссом началась");
 
@@ -64,7 +64,7 @@ namespace BossFight
                             int fireDamage = random.Next(fireballMinDamage, fireballMaxDamage + 1);
                             bossHealth -= fireDamage;
                             heroMana -= fireballCost;
-                            fireballUsed = true;
+                            isFireballUsed = true;
 
                             Console.WriteLine($"Герой использует огненный шар и наносит {fireDamage} урона");
                         }
@@ -75,11 +75,11 @@ namespace BossFight
                         break;
 
                     case CommandUseExplosion:
-                        if (fireballUsed)
+                        if (isFireballUsed)
                         {
                             int explosionDamage = random.Next(explosionMinDamage, explosionMaxDamage + 1);
                             bossHealth -= explosionDamage;
-                            fireballUsed = false;
+                            isFireballUsed = false;
 
                             Console.WriteLine($"Герой использует взрыв и наносит {explosionDamage} урона");
                         }
