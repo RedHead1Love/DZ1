@@ -6,10 +6,10 @@ namespace BossFight
     {
         static void Main(string[] args)
         {
-            const int CommandThrowsNormalPunch = 1;
-            const int CommandUseFireball = 2;
-            const int CommandUseExplosion = 3;
-            const int CommandUsePotion = 4;
+            const string CommandThrowsNormalPunch = "1";
+            const string CommandUseFireball = "2";
+            const string CommandUseExplosion = "3";
+            const string CommandUsePotion = "4";
 
             int heroHealth = 100;
             int heroMaxHealth = 100;
@@ -17,22 +17,19 @@ namespace BossFight
             int heroMaxMana = 50;
             int heroHealsLeft = 3;
 
-            int NormalAttackMinDamage = 5;
-            int NormalAttackMaxDamage = 15;
-            int FireballCost = 15;
-            int FireballMinDamage = 20;
-            int FireballMaxDamage = 30;
-            int ExplosionMinDamage = 30;
-            int ExplosionMaxDamage = 50;
-            int HealHpAmount = 30;
-            int HealMpAmount = 20;
+            int normalAttackMinDamage = 5;
+            int normalAttackMaxDamage = 15;
+            int fireballCost = 15;
+            int fireballMinDamage = 20;
+            int fireballMaxDamage = 30;
+            int explosionMinDamage = 30;
+            int explosionMaxDamage = 50;
+            int healHpAmount = 30;
+            int healMpAmount = 20;
 
             int bossHealth = 150;
             int bossMinDamage = 10;
             int bossMaxDamage = 20;
-
-            int minimumCommandNumber = 1;
-            int maximumCommandNumber = 4;
 
             Random random = new Random();
             int bossAttack = random.Next(bossMinDamage, bossMaxDamage + 1);
@@ -40,108 +37,98 @@ namespace BossFight
 
             Console.WriteLine("Битва с боссом началась");
 
-            while (true)
+            while (heroHealth > 0 && bossHealth > 0)
             {
                 Console.WriteLine("\nВыберите действие:");
                 Console.WriteLine($"{CommandThrowsNormalPunch} - Обычная атака");
-                Console.WriteLine($"{CommandUseFireball} - Огненный шар ({FireballCost} мана)");
+                Console.WriteLine($"{CommandUseFireball} - Огненный шар ({fireballCost} мана)");
                 Console.WriteLine($"{CommandUseExplosion} - Взрыв (только после огненного шара)");
-                Console.WriteLine($"{CommandUsePotion} - Зелье (восстанавливает {HealHpAmount} здоровья и {HealMpAmount} маны)");
+                Console.WriteLine($"{CommandUsePotion} - Зелье (восстанавливает {healHpAmount} здоровья и {healMpAmount} маны)");
                 Console.WriteLine($"\nГерой: здоровье {heroHealth}/{heroMaxHealth}, мана {heroMana}/{heroMaxMana}, зелья {heroHealsLeft}");
                 Console.WriteLine($"Босс: здоровье {bossHealth}");
 
-                string input = Console.ReadLine();
-                bool validInput = int.TryParse(input, out int choice) && choice >= minimumCommandNumber && choice <= maximumCommandNumber;
+                string choice = Console.ReadLine();
 
-                if (validInput == false)
+                switch (choice)
                 {
-                    Console.WriteLine("Неверный ввод, герой пропускает ход.");
-                }
-                else
-                {
-                    switch (choice)
-                    {
-                        case CommandThrowsNormalPunch: 
-                            int normalDamage = random.Next(NormalAttackMinDamage, NormalAttackMaxDamage + 1);
-                            bossHealth -= normalDamage;
+                    case CommandThrowsNormalPunch:
+                        int normalDamage = random.Next(normalAttackMinDamage, normalAttackMaxDamage + 1);
+                        bossHealth -= normalDamage;
 
-                            Console.WriteLine($"Герой наносит обычную атаку и наносит {normalDamage} урона");
-                            break;
+                        Console.WriteLine($"Герой наносит обычную атаку и наносит {normalDamage} урона");
+                        break;
 
-                        case CommandUseFireball: 
-                            if (heroMana >= FireballCost)
-                            {
-                                int fireDamage = random.Next(FireballMinDamage, FireballMaxDamage + 1);
-                                bossHealth -= fireDamage;
-                                heroMana -= FireballCost;
-                                fireballUsed = true;
+                    case CommandUseFireball:
+                        if (heroMana >= fireballCost)
+                        {
+                            int fireDamage = random.Next(fireballMinDamage, fireballMaxDamage + 1);
+                            bossHealth -= fireDamage;
+                            heroMana -= fireballCost;
+                            fireballUsed = true;
 
-                                Console.WriteLine($"Герой использует огненный шар и наносит {fireDamage} урона");
-                            }
-                            else
-                            {
-                                Console.WriteLine("Недостаточно маны, герой пропускает ход");
-                            }
-                            break;
+                            Console.WriteLine($"Герой использует огненный шар и наносит {fireDamage} урона");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Недостаточно маны, герой пропускает ход");
+                        }
+                        break;
 
-                        case CommandUseExplosion:
-                            if (fireballUsed)
-                            {
-                                int explosionDamage = random.Next(ExplosionMinDamage, ExplosionMaxDamage + 1);
-                                bossHealth -= explosionDamage;
-                                fireballUsed = false;
+                    case CommandUseExplosion:
+                        if (fireballUsed)
+                        {
+                            int explosionDamage = random.Next(explosionMinDamage, explosionMaxDamage + 1);
+                            bossHealth -= explosionDamage;
+                            fireballUsed = false;
 
-                                Console.WriteLine($"Герой использует взрыв и наносит {explosionDamage} урона");
-                            }
-                            else
-                            {
-                                Console.WriteLine("Сначала нужно использовать огненный шар, герой пропускает ход");
-                            }
-                            break;
+                            Console.WriteLine($"Герой использует взрыв и наносит {explosionDamage} урона");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Сначала нужно использовать огненный шар, герой пропускает ход");
+                        }
+                        break;
 
-                        case CommandUsePotion: 
-                            if (heroHealsLeft > 0)
-                            {
-                                heroHealth = Math.Min(heroHealth + HealHpAmount, heroMaxHealth);
-                                heroMana = Math.Min(heroMana + HealMpAmount, heroMaxMana);
-                                heroHealsLeft--;
+                    case CommandUsePotion:
+                        if (heroHealsLeft > 0)
+                        {
+                            heroHealth = Math.Min(heroHealth + healHpAmount, heroMaxHealth);
+                            heroMana = Math.Min(heroMana + healMpAmount, heroMaxMana);
+                            heroHealsLeft--;
 
-                                Console.WriteLine($"Герой использует зелье и восстанавливает {HealHpAmount} здоровья и {HealMpAmount} маны");
-                            }
-                            else
-                            {
-                                Console.WriteLine("Закончились зелья, герой пропускает ход.");
-                            }
-                            break;
-                    }
+                            Console.WriteLine($"Герой использует зелье и восстанавливает {healHpAmount} здоровья и {healMpAmount} маны");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Закончились зелья, герой пропускает ход.");
+                        }
+                        break;
+
+                    default:
+                        Console.WriteLine("Неверный ввод, герой пропускает ход.");
+                        break;
                 }
 
-                if (bossHealth <= 0)
+                if (bossHealth > 0)
                 {
-                    bossHealth = 0;
+                    int bossDamage = random.Next(bossMinDamage, bossMaxDamage + 1);
+                    heroHealth -= bossDamage;
 
-                    if (heroHealth <= 0)
-                    {
-                        Console.WriteLine("\nНичья, оба погибли");
-                    }
-                    else
-                    {
-                        Console.WriteLine("\nПобеда");
-                    }
-                    break;
+                    Console.WriteLine($"Босс атакует и наносит {bossDamage} урона");
                 }
+            }
 
-                int bossDamage = random.Next(bossMinDamage, bossMaxDamage + 1);
-                heroHealth -= bossDamage;
-
-                Console.WriteLine($"Босс атакует и наносит {bossDamage} урона");
-
-                if (heroHealth <= 0)
-                {
-                    heroHealth = 0;
-                    Console.WriteLine("\nПоражение");
-                    break;
-                }
+            if (heroHealth <= 0 && bossHealth <= 0)
+            {
+                Console.WriteLine("\nНичья, оба погибли");
+            }
+            else if (bossHealth <= 0)
+            {
+                Console.WriteLine("\nПобеда");
+            }
+            else
+            {
+                Console.WriteLine("\nПоражение");
             }
 
             Console.WriteLine("\nИгра окончена. Нажмите любую клавишу для выхода");
