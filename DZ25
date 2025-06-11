@@ -13,7 +13,9 @@ class Program
 public class Database
 {
     private List<Player> _players = new List<Player>();
-    private int _nextId = 1;
+    private int _nextPlayerId = 1;
+    private const int MinimumLevel = 0;
+    private const int CancelInputId = 0;
 
     public void Run()
     {
@@ -84,7 +86,7 @@ public class Database
 
         int level = GetValidLevelInput();
 
-        var player = new Player(_nextId++, nickname, level);
+        var player = new Player(_nextPlayerId++, nickname, level);
         _players.Add(player);
 
         Console.WriteLine($"\nИгрок {nickname} успешно добавлен с ID {player.Id}!");
@@ -93,17 +95,24 @@ public class Database
 
     private int GetValidLevelInput()
     {
-        int level;
+        int level = 0; 
+        bool isValidInput = false;
 
-        while (true)
+        while (isValidInput == false)
         {
             Console.Write("Введите уровень: ");
 
-            if (int.TryParse(Console.ReadLine(), out level) && level >= 0)
-                return level;
-
-            Console.WriteLine("Некорректный уровень! Должно быть целое число >= 0");
+            if (int.TryParse(Console.ReadLine(), out level) && level >= MinimumLevel)
+            {
+                isValidInput = true;
+            }
+            else
+            {
+                Console.WriteLine($"Некорректный уровень! Должно быть целое число >= {MinimumLevel}");
+            }
         }
+
+        return level;
     }
 
     private void BanPlayer()
@@ -111,12 +120,13 @@ public class Database
         Console.Clear();
         Console.WriteLine("=== БАН ИГРОКА ===");
 
-        if (TryGetPlayer(out Player player))
-        {
-            player.Ban();
-            Console.WriteLine($"Игрок {player.Nickname} успешно забанен");
-            Console.ReadKey();
-        }
+        Player player;
+        if (TryGetPlayer(out player) == false)
+            return;
+
+        player.Ban();
+        Console.WriteLine($"Игрок {player.Nickname} успешно забанен");
+        Console.ReadKey();
     }
 
     private void UnbanPlayer()
@@ -124,12 +134,13 @@ public class Database
         Console.Clear();
         Console.WriteLine("=== РАЗБАН ИГРОКА ===");
 
-        if (TryGetPlayer(out Player player))
-        {
-            player.Unban();
-            Console.WriteLine($"Игрок {player.Nickname} успешно разбанен");
-            Console.ReadKey();
-        }
+        Player player;
+        if (TryGetPlayer(out player) == false)
+            return;
+
+        player.Unban();
+        Console.WriteLine($"Игрок {player.Nickname} успешно разбанен");
+        Console.ReadKey();
     }
 
     private void DeletePlayer()
@@ -137,12 +148,14 @@ public class Database
         Console.Clear();
         Console.WriteLine("=== УДАЛЕНИЕ ИГРОКА ===");
 
-        if (TryGetPlayer(out Player player))
-        {
-            _players.Remove(player);
-            Console.WriteLine($"Игрок {player.Nickname} успешно удален");
-            Console.ReadKey();
-        }
+        Player player;
+
+        if (TryGetPlayer(out player) == false)
+            return;
+
+        _players.Remove(player);
+        Console.WriteLine($"Игрок {player.Nickname} успешно удален");
+        Console.ReadKey();
     }
 
     private bool TryGetPlayer(out Player player)
@@ -150,7 +163,7 @@ public class Database
         player = null;
         int id = GetPlayerIdFromInput();
 
-        if (id == -1)
+        if (id == CancelInputId)
             return false;
 
         player = _players.Find(gamer => gamer.Id == id);
@@ -167,34 +180,40 @@ public class Database
 
     private int GetPlayerIdFromInput()
     {
-        while (true) 
+        bool isValidInput = false;
+        int id = -1;
+
+        while (isValidInput == false)
         {
-            Console.Write("Введите ID игрока (или 0 для отмены): ");
+            Console.Write($"Введите ID игрока (или {CancelInputId} для отмены): ");
             string input = Console.ReadLine();
 
-            if (int.TryParse(input, out int id))
+            if (int.TryParse(input, out id))
             {
-                if (id == 0)
-                    return -1; 
-
-                if (id > 0)
-                    return id; 
-
-                Console.WriteLine("Ошибка: ID должен быть положительным.");
+                if (id >= 0)
+                {
+                    isValidInput = true;
+                }
+                else
+                {
+                    Console.WriteLine("Ошибка: ID должен быть положительным.");
+                }
             }
             else
             {
                 Console.WriteLine("Ошибка: Введите целое число.");
             }
         }
+
+        return id;
     }
 
     private void ShowAllPlayers()
     {
-        const int idColumnWidth = 5;
-        const int nicknameColumnWidth = 20;
-        const int levelColumnWidth = 10;
-        const int statusColumnWidth = 10;
+        const int IdColumnWidth = 5;
+        const int NicknameColumnWidth = 20;
+        const int LevelColumnWidth = 10;
+        const int StatusColumnWidth = 10;
 
         Console.Clear();
         Console.WriteLine("=== СПИСОК ВСЕХ ИГРОКОВ ===");
@@ -205,11 +224,11 @@ public class Database
         }
         else
         {
-            string headerFormat = $"{"ID",-idColumnWidth} {"Никнейм",-nicknameColumnWidth} {"Уровень",-levelColumnWidth} {"Статус",-statusColumnWidth}";
+            string headerFormat = $"{"ID",-IdColumnWidth} {"Никнейм",-NicknameColumnWidth} {"Уровень",-LevelColumnWidth} {"Статус",-StatusColumnWidth}";
             Console.WriteLine(headerFormat);
-            Console.WriteLine(new string('-', idColumnWidth + nicknameColumnWidth + levelColumnWidth + statusColumnWidth + 3));
+            Console.WriteLine(new string('-', IdColumnWidth + NicknameColumnWidth + LevelColumnWidth + StatusColumnWidth + 3));
 
-            string rowFormat = $"{{0,-{idColumnWidth}}} {{1,-{nicknameColumnWidth}}} {{2,-{levelColumnWidth}}} {{3,-{statusColumnWidth}}}";
+            string rowFormat = $"{{0,-{IdColumnWidth}}} {{1,-{NicknameColumnWidth}}} {{2,-{LevelColumnWidth}}} {{3,-{StatusColumnWidth}}}";
 
             foreach (var player in _players)
             {
@@ -245,6 +264,6 @@ public class Player
     public int Id { get; }
     public string Nickname { get; }
     public int Level { get; }
-    public bool IsBanned { get; private set; }
     public string Status => IsBanned ? "Забанен" : "Активен";
+    public bool IsBanned { get; private set; }
 }
