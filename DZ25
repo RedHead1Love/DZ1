@@ -27,9 +27,9 @@ public class Database
         const string CommandShowAllPlayers = "5";
         const string CommandExit = "6";
 
-        bool isRunning = true;
+        bool isRun = true;
 
-        while (isRunning)
+        while (isRun)
         {
             Console.Clear();
             Console.WriteLine("=== ИГРОВАЯ БАЗА ДАННЫХ ===");
@@ -66,7 +66,7 @@ public class Database
                     break;
 
                 case CommandExit:
-                    isRunning = false;
+                    isRun = false;
                     break;
 
                 default:
@@ -248,11 +248,6 @@ public class Database
 
 public class Player
 {
-    public int Id { get; }
-    public string Nickname { get; }
-    public int Level { get; }
-    public string Status => IsBanned ? "Забанен" : "Активен";
-    public bool IsBanned { get; private set; }
 
     public Player(int id, string nickname, int level)
     {
@@ -261,6 +256,12 @@ public class Player
         Level = level;
         IsBanned = false;
     }
+
+    public int Id { get; }
+    public string Nickname { get; }
+    public int Level { get; }
+    public string Status => IsBanned ? "Забанен" : "Активен";
+    public bool IsBanned { get; private set; }
 
     public void Ban()
     {
@@ -271,5 +272,4 @@ public class Player
     {
         IsBanned = false;
     }
-
 }
