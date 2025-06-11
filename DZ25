@@ -98,6 +98,7 @@ public class Database
         while (true)
         {
             Console.Write("Введите уровень: ");
+
             if (int.TryParse(Console.ReadLine(), out level) && level >= 0)
                 return level;
 
@@ -166,16 +167,25 @@ public class Database
 
     private int GetPlayerIdFromInput()
     {
-        while (true)
+        while (true) 
         {
-            Console.Write("Введите ID игрока: ");
+            Console.Write("Введите ID игрока (или 0 для отмены): ");
+            string input = Console.ReadLine();
 
-            if (int.TryParse(Console.ReadLine(), out var id))
+            if (int.TryParse(input, out int id))
             {
-                if (id == 0) return -1;
-                if (id > 0) return id;
+                if (id == 0)
+                    return -1; 
+
+                if (id > 0)
+                    return id; 
+
+                Console.WriteLine("Ошибка: ID должен быть положительным.");
             }
-            Console.WriteLine("Некорректный ID, должно быть положительное число.");
+            else
+            {
+                Console.WriteLine("Ошибка: Введите целое число.");
+            }
         }
     }
 
@@ -214,12 +224,6 @@ public class Database
 
 public class Player
 {
-    public int Id { get; }
-    public string Nickname { get; }
-    public int Level { get; }
-    public bool IsBanned { get; private set; }
-    public string Status => IsBanned ? "Забанен" : "Активен";
-
     public Player(int id, string nickname, int level)
     {
         Id = id;
@@ -237,4 +241,10 @@ public class Player
     {
         IsBanned = false;
     }
+
+    public int Id { get; }
+    public string Nickname { get; }
+    public int Level { get; }
+    public bool IsBanned { get; private set; }
+    public string Status => IsBanned ? "Забанен" : "Активен";
 }
