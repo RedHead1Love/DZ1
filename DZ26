@@ -10,6 +10,9 @@ class Program
             { 7, 8, 9 }
         };
 
+        int SecondRowIndex = 1;
+        int FirstColumnIndex = 0;
+
         Console.WriteLine("Исходная матрица:");
         PrintMatrix(matrix);
 
@@ -18,32 +21,32 @@ class Program
 
         for (int j = 0; j < columns; j++)
         {
-            sumSecondRow += matrix[1, j];
+            sumSecondRow += matrix[SecondRowIndex, j];
         }
 
         int productFirstColumn = 1;
         int rows = matrix.GetLength(0);
         for (int i = 0; i < rows; i++)
         {
-            productFirstColumn *= matrix[i, 0];
+            productFirstColumn *= matrix[i, FirstColumnIndex];
         }
 
-        Console.WriteLine($"\nСумма второй строки: {sumSecondRow}");
-        Console.WriteLine($"Произведение первого столбца: {productFirstColumn}");
+        Console.WriteLine($"\nСумма строки {SecondRowIndex + 1}: {sumSecondRow}");
+        Console.WriteLine($"Произведение столбца {FirstColumnIndex + 1}: {productFirstColumn}");
     }
 
     static void PrintMatrix(int[,] matrix)
     {
         int rows = matrix.GetLength(0);
-        int cols = matrix.GetLength(1);
+        int lines = matrix.GetLength(1);
 
-        int inputFieldWidth = 4;
+        const int InputFieldWidth = 4;
 
         for (int i = 0; i < rows; i++)
         {
-            for (int j = 0; j < cols; j++)
+            for (int j = 0; j < lines; j++)
             {
-                Console.Write(string.Format("{0," + inputFieldWidth + "}", matrix[i, j]));
+                Console.Write(string.Format("{0," + InputFieldWidth + "}", matrix[i, j]));
             }
             Console.WriteLine();
         }
