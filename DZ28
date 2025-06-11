@@ -42,7 +42,7 @@ class Program
 
         Console.WriteLine($"\nНаибольший элемент матрицы: {maximumNumber}");
 
-        Console.WriteLine("\nПолученная матрица (с замененными максимальными элементами):");
+        Console.WriteLine("\nПолученная матрица с замененными максимальными элементами:");
 
         for (int i = 0; i < matrixHeight; i++)
         {
