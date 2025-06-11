@@ -4,51 +4,45 @@ class Program
 {
     static void Main()
     {
+        const int SecondRowIndex = 1;
+        const int FirstColumnIndex = 0;
+        const int InputFieldWidth = 4;
+
         int[,] matrix = {
             { 1, 2, 3 },
             { 4, 5, 6 },
             { 7, 8, 9 }
         };
 
-        int SecondRowIndex = 1;
-        int FirstColumnIndex = 0;
-
         Console.WriteLine("Исходная матрица:");
-        PrintMatrix(matrix);
+
+        int rowCount = matrix.GetLength(0);
+        int columnCount = matrix.GetLength(1);
+
+        for (int row = 0; row < rowCount; row++)
+        {
+            for (int column = 0; column < columnCount; column++)
+            {
+                Console.Write(string.Format("{0," + InputFieldWidth + "}", matrix[row, column]));
+            }
+            Console.WriteLine();
+        }
 
         int sumSecondRow = 0;
-        int columns = matrix.GetLength(1);
 
-        for (int j = 0; j < columns; j++)
+        for (int column = 0; column < columnCount; column++)
         {
-            sumSecondRow += matrix[SecondRowIndex, j];
+            sumSecondRow += matrix[SecondRowIndex, column];
         }
 
         int productFirstColumn = 1;
-        int rows = matrix.GetLength(0);
-        for (int i = 0; i < rows; i++)
+
+        for (int row = 0; row < rowCount; row++)
         {
-            productFirstColumn *= matrix[i, FirstColumnIndex];
+            productFirstColumn *= matrix[row, FirstColumnIndex];
         }
 
         Console.WriteLine($"\nСумма строки {SecondRowIndex + 1}: {sumSecondRow}");
         Console.WriteLine($"Произведение столбца {FirstColumnIndex + 1}: {productFirstColumn}");
-    }
-
-    static void PrintMatrix(int[,] matrix)
-    {
-        int rows = matrix.GetLength(0);
-        int lines = matrix.GetLength(1);
-
-        const int InputFieldWidth = 4;
-
-        for (int i = 0; i < rows; i++)
-        {
-            for (int j = 0; j < lines; j++)
-            {
-                Console.Write(string.Format("{0," + InputFieldWidth + "}", matrix[i, j]));
-            }
-            Console.WriteLine();
-        }
     }
 }
