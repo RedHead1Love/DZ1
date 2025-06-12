@@ -22,16 +22,40 @@ namespace CardGame
 
     public class Deck
     {
-        private List<Card> cards;
+        private List<Card> _cards;
+        private static readonly Random _random = new Random();
 
         public Deck()
         {
-            cards = new List<Card>();
+            _cards = new List<Card>();
             Initialize();
             Shuffle();
         }
 
-        public int RemainingCards => cards.Count;
+        public int RemainingCards => _cards.Count;
+
+        public void Shuffle()
+        {
+            for (int i = _cards.Count - 1; i >= 0; i--)
+            {
+                int randomIndex = _random.Next(_cards.Count);
+                Card temp = _cards[i];
+                _cards[i] = _cards[randomIndex];
+                _cards[randomIndex] = temp;
+            }
+        }
+
+        public Card DrawCard()
+        {
+            if (_cards.Count == 0)
+            {
+                throw new InvalidOperationException("Колода пуста");
+            }
+
+            Card card = _cards[0];
+            _cards.RemoveAt(0);
+            return card;
+        }
 
         private void Initialize()
         {
@@ -42,59 +66,33 @@ namespace CardGame
             {
                 foreach (var rank in ranks)
                 {
-                    cards.Add(new Card(suit, rank));
+                    _cards.Add(new Card(suit, rank));
                 }
             }
         }
-
-        public void Shuffle()
-        {
-            Random random = new Random();
-
-            for (int i = cards.Count - 1; i > 0; i--)
-            {
-                int randomIndex = random.Next(i + 1);
-                Card temp = cards[i];
-                cards[i] = cards[randomIndex];
-                cards[randomIndex] = temp;
-            }
-        }
-
-        public Card Draw()
-        {
-            if (cards.Count == 0)
-            {
-                throw new InvalidOperationException("Колода пуста");
-            }
-
-            Card card = cards[0];
-            cards.RemoveAt(0);
-            return card;
-        }
-
     }
 
     public class Player
     {
-        private List<Card> _hand;
+        private List<Card> _cardsInHand;
 
         public Player()
         {
-            _hand = new List<Card>();
+            _cardsInHand = new List<Card>();
         }
 
-        public int Count => _hand.Count;
+        public int CardsCount => _cardsInHand.Count;
 
-        public void Add(Card card)
+        public void AddCard(Card card)
         {
-            _hand.Add(card);
+            _cardsInHand.Add(card);
         }
 
-        public void Show()
+        public void ShowCards()
         {
             Console.WriteLine("Карты игрока:");
 
-            foreach (var card in _hand)
+            foreach (var card in _cardsInHand)
             {
                 Console.WriteLine(card);
             }
@@ -112,7 +110,7 @@ namespace CardGame
             _player = player;
         }
 
-        public void Deal(int count)
+        public void DealCards(int count)
         {
             if (count <= 0)
             {
@@ -128,7 +126,7 @@ namespace CardGame
 
             for (int i = 0; i < count; i++)
             {
-                _player.Add(_deck.Draw());
+                _player.AddCard(_deck.DrawCard());
             }
         }
     }
@@ -146,15 +144,15 @@ namespace CardGame
 
             if (int.TryParse(Console.ReadLine(), out int count))
             {
-                dealer.Deal(count);
-                player.Show();
+                dealer.DealCards(count);
+                player.ShowCards();
             }
             else
             {
                 Console.WriteLine("Неверный ввод, введите число");
             }
 
-            Console.WriteLine("Нажмите любую кнопку для выхода");
+            Console.WriteLine("Нажмите любую клавишу для выхода");
             Console.ReadKey();
         }
     }
