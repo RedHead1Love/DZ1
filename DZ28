@@ -4,15 +4,15 @@ class Program
 {
     static void Main()
     {
-        const int matrixHeight = 10;
-        const int matrixWidth = 10;
+        int matrixHeight = 10;
+        int matrixWidth = 10;
 
-        const int smallestNumberInMatrix = 1;
-        const int largestNumberInMatrix = 1000;
+        int smallestNumberInMatrix = 1;
+        int largestNumberInMatrix = 1000;
 
         int numberFieldWidth = 4;
 
-        int valueIndexInFormat = 0; 
+        int valueIndexInFormat = 0;
         int replacementValue = 0;
 
         string numberFormat = "{" + valueIndexInFormat + "," + numberFieldWidth + "}";
@@ -26,7 +26,7 @@ class Program
         {
             for (int j = 0; j < matrixWidth; j++)
             {
-                matrix[i, j] = random.Next(smallestNumberInMatrix, largestNumberInMatrix);
+                matrix[i, j] = random.Next(smallestNumberInMatrix, largestNumberInMatrix + 1); 
                 Console.Write(string.Format(numberFormat, matrix[i, j]));
             }
 
@@ -47,6 +47,7 @@ class Program
         Console.WriteLine($"\nНаибольший элемент матрицы: {maximumNumber}");
 
         Console.WriteLine("\nМатрица после замены максимальных элементов:");
+
         for (int i = 0; i < matrixHeight; i++)
         {
             for (int j = 0; j < matrixWidth; j++)
