@@ -6,7 +6,6 @@ class Program
     {
         int arraySize = 30;
         int[] array = new int[arraySize];
-
         Random random = new Random();
 
         int maximumRandomNumber = 100;
@@ -17,22 +16,14 @@ class Program
         }
 
         Console.WriteLine("Исходный массив:");
-        Console.WriteLine(string.Join(", ", array));
-        Console.WriteLine("\nЛокальные максимумы:");
-
-        FindAndPrintLocalMaxima(array);
-    }
-
-    static void FindAndPrintLocalMaxima(int[] array)
-    {
-        if (array == null || array.Length == 0)
+        for (int i = 0; i < array.Length; i++)
         {
-            Console.WriteLine("Массив пуст.");
-            return;
+            if (i > 0) Console.Write(", ");
+            Console.Write(array[i]);
         }
+        Console.WriteLine("\n\nЛокальные максимумы:");
 
         int lastIndex = array.Length - 1;
-        int preLastIndex = array.Length - 2;
 
         if (array.Length == 1 || array[0] > array[1])
         {
@@ -47,7 +38,7 @@ class Program
             }
         }
 
-        if (array.Length > 1 && array[lastIndex] > array[preLastIndex])
+        if (array.Length > 1 && array[lastIndex] > array[lastIndex - 1])
         {
             Console.WriteLine($"Элемент {array.Length}: {array[lastIndex]}");
         }
