@@ -4,26 +4,32 @@ class Program
 {
     static void Main()
     {
-        int matrixHeight = 10;
-        int matrixWidth = 10;
+        const int matrixHeight = 10;
+        const int matrixWidth = 10;
 
-        int smallestNumberInMatrix = 1;
-        int largestNumberInMatrix = 1000;
+        const int smallestNumberInMatrix = 1;
+        const int largestNumberInMatrix = 1000;
 
         int numberFieldWidth = 4;
+
+        int valueIndexInFormat = 0; 
+        int replacementValue = 0;
+
+        string numberFormat = "{" + valueIndexInFormat + "," + numberFieldWidth + "}";
 
         int[,] matrix = new int[matrixHeight, matrixWidth];
         Random random = new Random();
 
-        Console.WriteLine($"Исходная матрица ({matrixHeight},{matrixWidth}):");
+        Console.WriteLine($"Исходная матрица ({matrixHeight}x{matrixWidth}):");
 
         for (int i = 0; i < matrixHeight; i++)
         {
             for (int j = 0; j < matrixWidth; j++)
             {
                 matrix[i, j] = random.Next(smallestNumberInMatrix, largestNumberInMatrix);
-                Console.Write(string.Format("{0," + numberFieldWidth + "}", matrix[i, j]));
+                Console.Write(string.Format(numberFormat, matrix[i, j]));
             }
+
             Console.WriteLine();
         }
 
@@ -34,26 +40,23 @@ class Program
             for (int j = 0; j < matrixWidth; j++)
             {
                 if (matrix[i, j] > maximumNumber)
-                {
                     maximumNumber = matrix[i, j];
-                }
             }
         }
 
         Console.WriteLine($"\nНаибольший элемент матрицы: {maximumNumber}");
 
-        Console.WriteLine("\nПолученная матрица с замененными максимальными элементами:");
-
+        Console.WriteLine("\nМатрица после замены максимальных элементов:");
         for (int i = 0; i < matrixHeight; i++)
         {
             for (int j = 0; j < matrixWidth; j++)
             {
                 if (matrix[i, j] == maximumNumber)
-                {
-                    matrix[i, j] = 0;
-                }
-                Console.Write(string.Format("{0," + numberFieldWidth + "}", matrix[i, j]));
+                    matrix[i, j] = replacementValue;
+
+                Console.Write(string.Format(numberFormat, matrix[i, j]));
             }
+
             Console.WriteLine();
         }
     }
