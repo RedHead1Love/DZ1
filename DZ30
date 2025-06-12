@@ -1,0 +1,55 @@
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        int arraySize = 30;
+        int[] array = new int[arraySize];
+
+        Random random = new Random();
+
+        int maximumRandomNumber = 100;
+
+        for (int i = 0; i < array.Length; i++)
+        {
+            array[i] = random.Next(maximumRandomNumber);
+        }
+
+        Console.WriteLine("Исходный массив:");
+        Console.WriteLine(string.Join(", ", array));
+        Console.WriteLine("\nЛокальные максимумы:");
+
+        FindAndPrintLocalMaxima(array);
+    }
+
+    static void FindAndPrintLocalMaxima(int[] array)
+    {
+        if (array == null || array.Length == 0)
+        {
+            Console.WriteLine("Массив пуст.");
+            return;
+        }
+
+        int lastIndex = array.Length - 1;
+        int preLastIndex = array.Length - 2;
+
+        if (array.Length == 1 || array[0] > array[1])
+        {
+            Console.WriteLine($"Элемент 1: {array[0]}");
+        }
+
+        for (int i = 1; i < lastIndex; i++)
+        {
+            if (array[i] > array[i - 1] && array[i] > array[i + 1])
+            {
+                Console.WriteLine($"Элемент {i + 1}: {array[i]}");
+            }
+        }
+
+        if (array.Length > 1 && array[lastIndex] > array[preLastIndex])
+        {
+            Console.WriteLine($"Элемент {array.Length}: {array[lastIndex]}");
+        }
+    }
+}
