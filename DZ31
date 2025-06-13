@@ -4,16 +4,16 @@ class Program
 {
     static void Main()
     {
-        int[] numbers = new int[0];
-        bool shouldContinue = true;
-
         const string CommandExit = "1";
         const string CommandSum = "2";
+
+        int[] numbers = new int[0];
+        bool shouldContinue = true;
 
         while (shouldContinue)
         {
             Console.WriteLine("Текущие числа: " + string.Join(", ", numbers));
-            Console.Write("Введите число или команду (sum/exit): ");
+            Console.Write($"Введите число или команду ({CommandSum}/{CommandExit}): ");
 
             string input = Console.ReadLine().ToLower();
 
@@ -30,6 +30,7 @@ class Program
                     {
                         sum += num;
                     }
+
                     Console.WriteLine("Сумма введенных чисел: " + sum);
                     break;
 
@@ -37,7 +38,11 @@ class Program
                     if (int.TryParse(input, out int number))
                     {
                         int[] newArray = new int[numbers.Length + 1];
-                        Array.Copy(numbers, newArray, numbers.Length);
+
+                        for (int i = 0; i < numbers.Length; i++)
+                        {
+                            newArray[i] = numbers[i];
+                        }
                         newArray[numbers.Length] = number;
                         numbers = newArray;
                     }
