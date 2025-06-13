@@ -23,10 +23,11 @@ namespace CardGame
     public class Deck
     {
         private List<Card> _cards;
-        private static readonly Random _random = new Random();
+        private readonly Random _random;
 
-        public Deck()
+        public Deck(Random random)
         {
+            _random = random ?? throw new ArgumentNullException(nameof(random));
             _cards = new List<Card>();
             Initialize();
             Shuffle();
@@ -34,7 +35,7 @@ namespace CardGame
 
         public int RemainingCards => _cards.Count;
 
-        public void Shuffle()
+        private void Shuffle()
         {
             for (int i = _cards.Count - 1; i >= 0; i--)
             {
@@ -74,7 +75,7 @@ namespace CardGame
 
     public class Player
     {
-        private List<Card> _cardsInHand;
+        private readonly List<Card> _cardsInHand;
 
         public Player()
         {
@@ -101,12 +102,12 @@ namespace CardGame
 
     public class Dealer
     {
-        private Deck _deck;
-        private Player _player;
+        private readonly Deck _deck;
+        private readonly Player _player;
 
-        public Dealer(Player player)
+        public Dealer(Player player, Random random)
         {
-            _deck = new Deck();
+            _deck = new Deck(random);
             _player = player;
         }
 
@@ -131,26 +132,38 @@ namespace CardGame
         }
     }
 
+    public static class GameUtils
+    {
+        public static int ReadNumberInput(string prompt)
+        {
+            Console.Write(prompt);
+
+            while (true)
+            {
+                if (int.TryParse(Console.ReadLine(), out int result))
+                {
+                    return result;
+                }
+
+                Console.WriteLine("Неверный ввод, введите число");
+            }
+        }
+    }
+
     class Program
     {
         static void Main(string[] args)
         {
             Console.WriteLine("Добро пожаловать в игру");
 
+            var random = new Random();
             Player player = new Player();
-            Dealer dealer = new Dealer(player);
+            Dealer dealer = new Dealer(player, random);
 
-            Console.Write("Введите количество карт для раздачи: ");
+            int count = GameUtils.ReadNumberInput("Введите количество карт для раздачи: ");
 
-            if (int.TryParse(Console.ReadLine(), out int count))
-            {
-                dealer.DealCards(count);
-                player.ShowCards();
-            }
-            else
-            {
-                Console.WriteLine("Неверный ввод, введите число");
-            }
+            dealer.DealCards(count);
+            player.ShowCards();
 
             Console.WriteLine("Нажмите любую клавишу для выхода");
             Console.ReadKey();
