@@ -1,0 +1,256 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+class Book
+{
+    public string Title { get; set; }
+    public string Author { get; set; }
+    public int Year { get; set; }
+    public string Genre { get; set; }
+    public int Pages { get; set; }
+
+    public Book(string title, string author, int year, string genre = "", int pages = 0)
+    {
+        Title = title;
+        Author = author;
+        Year = year;
+        Genre = genre;
+        Pages = pages;
+    }
+
+    public override string ToString()
+    {
+        return $"{Title} — {Author} ({Year}) {(!string.IsNullOrEmpty(Genre) ? $"| Жанр: {Genre}" : "")} {(Pages > 0 ? $"| Страницы: {Pages}" : "")}";
+    }
+}
+
+class BookStorage
+{
+    private List<Book> _books = new List<Book>();
+
+    public void AddBook(Book book)
+    {
+        _books.Add(book);
+        Console.WriteLine($"Книга '{book.Title}' добавлена в хранилище.");
+    }
+
+    public void RemoveBook(string title)
+    {
+        var bookToRemove = _books.FirstOrDefault(b => b.Title.Equals(title, StringComparison.OrdinalIgnoreCase));
+
+        if (bookToRemove != null)
+        {
+            _books.Remove(bookToRemove);
+            Console.WriteLine($"Книга '{title}' удалена из хранилища.");
+        }
+        else
+        {
+            Console.WriteLine($"Книга с названием '{title}' не найдена.");
+        }
+    }
+
+    public void DisplayAllBooks()
+    {
+        if (_books.Count == 0)
+        {
+            Console.WriteLine("В хранилище нет книг.");
+            return;
+        }
+
+        Console.WriteLine("\nВсе книги в хранилище:");
+
+        foreach (var book in _books)
+        {
+            Console.WriteLine(book);
+        }
+    }
+
+    public void SearchBooks(string searchType, string searchValue)
+    {
+        const string CommandSearchByname = "название";
+        const string CommandSearchByAuthor = "автор";
+        const string CommandSearchbyYear = "год";
+        const string CommandSearchByGenre = "жанр";
+
+        List<Book> foundBooks = new List<Book>();
+
+        switch (searchType.ToLower())
+        {
+            case CommandSearchByname:
+                foundBooks = _books.Where(b => b.Title.Equals(searchValue, StringComparison.OrdinalIgnoreCase)).ToList();
+                break;
+
+            case CommandSearchByAuthor:
+                foundBooks = _books.Where(b => b.Author.Equals(searchValue, StringComparison.OrdinalIgnoreCase)).ToList();
+                break;
+
+            case CommandSearchbyYear:
+                if (int.TryParse(searchValue, out int year))
+                {
+                    foundBooks = _books.Where(b => b.Year == year).ToList();
+                }
+                else
+                {
+                    Console.WriteLine("Некорректный формат года.");
+                    return;
+                }
+                break;
+
+            case CommandSearchByGenre:
+                foundBooks = _books.Where(b => b.Genre.Equals(searchValue, StringComparison.OrdinalIgnoreCase)).ToList();
+                break;
+
+            default:
+                Console.WriteLine($"Неизвестный тип поиска. Доступно: {CommandSearchByname}, {CommandSearchByAuthor}, {CommandSearchbyYear}, {CommandSearchByGenre}");
+                return;
+        }
+
+        if (foundBooks.Count == 0)
+        {
+            Console.WriteLine($"Книги по критерию '{searchType}: {searchValue}' не найдены.");
+        }
+        else
+        {
+            Console.WriteLine($"\nНайденные книги ({searchType}: {searchValue}):");
+            foreach (var book in foundBooks)
+            {
+                Console.WriteLine(book);
+            }
+        }
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        const string CommandAddBook = "1";
+        const string CommandRemoveBook = "2";
+        const string CommandShowAllBooks = "3";
+        const string CommandSearchBooks = "4";
+        const string CommandExit = "5";
+
+        BookStorage storage = new BookStorage();
+        bool isRunning = true;
+
+        Console.WriteLine("Добро пожаловать в хранилище книг!");
+
+        while (isRunning)
+        {
+            Console.WriteLine("\nВыберите действие:");
+            Console.WriteLine($"{CommandAddBook} - Добавить книгу");
+            Console.WriteLine($"{CommandRemoveBook} - Удалить книгу");
+            Console.WriteLine($"{CommandShowAllBooks} - Показать все книги");
+            Console.WriteLine($"{CommandSearchBooks} - Поиск книг");
+            Console.WriteLine($"{CommandExit} - Выход");
+
+            string choice = Console.ReadLine();
+
+            switch (choice)
+            {
+                case CommandAddBook:
+                    AddBookMenu(storage);
+                    break;
+
+                case CommandRemoveBook:
+                    RemoveBookMenu(storage);
+                    break;
+
+                case CommandShowAllBooks:
+                    storage.DisplayAllBooks();
+                    break;
+
+                case CommandSearchBooks:
+                    SearchBooksMenu(storage);
+                    break;
+
+                case CommandExit:
+                    isRunning = false;
+                    break;
+
+                default:
+                    Console.WriteLine("Неверный выбор. Попробуйте снова.");
+                    break;
+            }
+        }
+
+        Console.WriteLine("Работа программы завершена");
+    }
+
+    static void AddBookMenu(BookStorage storage)
+    {
+        Console.Write("Введите название книги: ");
+        string title = Console.ReadLine();
+
+        Console.Write("Введите автора книги: ");
+        string author = Console.ReadLine();
+
+        Console.Write("Введите год выпуска: ");
+        int year = int.Parse(Console.ReadLine());
+
+        Console.Write("Введите жанр (необязательно): ");
+        string genre = Console.ReadLine();
+
+        Console.Write("Введите количество страниц (необязательно, 0 если пропустить): ");
+        int pages = int.Parse(Console.ReadLine());
+
+        Book newBook = new Book(title, author, year, genre, pages);
+        storage.AddBook(newBook);
+    }
+
+    static void RemoveBookMenu(BookStorage storage)
+    {
+        Console.Write("Введите название книги для удаления: ");
+        string title = Console.ReadLine();
+        storage.RemoveBook(title);
+    }
+
+    static void SearchBooksMenu(BookStorage storage)
+    {
+        const string CommandSearchByname = "1";
+        const string CommandSearchByAuthor = "2";
+        const string CommandSearchbyYear = "3";
+        const string CommandSearchByGenre = "4";
+
+        Console.WriteLine("Выберите тип поиска:");
+        Console.WriteLine($"{CommandSearchByname} - По названию");
+        Console.WriteLine($"{CommandSearchByAuthor} - По автору");
+        Console.WriteLine($"{CommandSearchbyYear} - По году выпуска");
+        Console.WriteLine($"{CommandSearchByGenre} - По жанру");
+
+        string searchChoice = Console.ReadLine();
+        string searchType = "";
+        string searchValue = "";
+
+        switch (searchChoice)
+        {
+            case CommandSearchByname:
+                searchType = "название";
+                Console.Write("Введите название для поиска: ");
+                break;
+
+            case CommandSearchByAuthor:
+                searchType = "автор";
+                Console.Write("Введите автора для поиска: ");
+                break;
+
+            case CommandSearchbyYear:
+                searchType = "год";
+                Console.Write("Введите год выпуска для поиска: ");
+                break;
+
+            case CommandSearchByGenre:
+                searchType = "жанр";
+                Console.Write("Введите жанр для поиска: ");
+                break;
+
+            default:
+                Console.WriteLine("Неверный выбор.");
+                return;
+        }
+
+        searchValue = Console.ReadLine();
+        storage.SearchBooks(searchType, searchValue);
+    }
+}
