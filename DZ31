@@ -5,48 +5,47 @@ class Program
     static void Main()
     {
         int[] numbers = new int[0];
-        string input;
+        bool shouldContinue = true;
 
-        while (true)
+        const string CommandExit = "1";
+        const string CommandSum = "2";
+
+        while (shouldContinue)
         {
             Console.WriteLine("Текущие числа: " + string.Join(", ", numbers));
-
             Console.Write("Введите число или команду (sum/exit): ");
 
-            input = Console.ReadLine().ToLower();
+            string input = Console.ReadLine().ToLower();
 
-            if (input == "exit")
+            switch (input)
             {
-                break;
-            }
-            else if (input == "sum")
-            {
-                int sum = 0;
+                case CommandExit:
+                    shouldContinue = false;
+                    break;
 
-                foreach (int num in numbers)
-                {
-                    sum += num;
-                }
+                case CommandSum:
+                    int sum = 0;
 
-                Console.WriteLine("Сумма введенных чисел: " + sum);
-            }
-            else
-            {
-                if (int.TryParse(input, out int number))
-                {
-                    int[] newArray = new int[numbers.Length + 1];
-
-                    for (int i = 0; i < numbers.Length; i++)
+                    foreach (int num in numbers)
                     {
-                        newArray[i] = numbers[i];
+                        sum += num;
                     }
-                    newArray[numbers.Length] = number;
-                    numbers = newArray;
-                }
-                else
-                {
-                    Console.WriteLine("Ошибка: введите число или команду sum/exit");
-                }
+                    Console.WriteLine("Сумма введенных чисел: " + sum);
+                    break;
+
+                default:
+                    if (int.TryParse(input, out int number))
+                    {
+                        int[] newArray = new int[numbers.Length + 1];
+                        Array.Copy(numbers, newArray, numbers.Length);
+                        newArray[numbers.Length] = number;
+                        numbers = newArray;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Ошибка: введите число или команду {CommandSum}/{CommandExit}");
+                    }
+                    break;
             }
         }
     }
