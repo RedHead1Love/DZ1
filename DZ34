@@ -1,0 +1,137 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+
+public class Person
+{
+    public string Name { get; set; }
+    public decimal Money { get; set; }
+    public List<string> Items { get; set; }
+
+    public Person(string name, decimal money)
+    {
+        Name = name;
+        Money = money;
+        Items = new List<string>();
+    }
+
+    public void ShowInfo()
+    {
+        Console.WriteLine($"Имя: {Name}");
+        Console.WriteLine($"Деньги: {Money} руб.");
+        Console.WriteLine("Товары: " + (Items.Count > 0 ? string.Join(", ", Items) : "нет"));
+    }
+}
+
+public class Seller : Person
+{
+    public Seller(string name, decimal money, List<string> products) : base(name, money)
+    {
+        Items = products;
+    }
+
+    public void ShowProducts()
+    {
+        Console.WriteLine($"\n{Name} предлагает товары:");
+
+        if (Items.Count == 0)
+            Console.WriteLine("Товаров нет");
+        else
+            Console.WriteLine(string.Join(", ", Items));
+    }
+
+    public bool SellItem(string item, Buyer buyer)
+    {
+        int productPrice = 5;
+
+        if (!Items.Contains(item))
+        {
+            Console.WriteLine($"У {Name} нет товара '{item}'!");
+            return false;
+        }
+
+        if (buyer.Money <= 0)
+        {
+            Console.WriteLine($"У {buyer.Name} нет денег");
+            return false;
+        }
+
+        Items.Remove(item);
+        buyer.Items.Add(item);
+        Money += productPrice;
+        buyer.Money -= productPrice;
+
+        Console.WriteLine($"{Name} продал '{item}' {buyer.Name} за {productPrice} рублей");
+        return true;
+    }
+}
+
+public class Buyer : Person
+{
+    public Buyer(string name, decimal money) : base(name, money) { }
+
+    public bool BuyItem(string item, Seller seller)
+    {
+        return seller.SellItem(item, this);
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        const string CommandShowAllProductsSeller = "1";
+        const string CommandBuyProducts = "2";
+        const string CommandShowInformationOnSeller = "3";
+        const string CommandShowInformationOnBuyer = "4";
+        const string CommandExit = "0";
+
+        int buyerBalance = 50;
+        int sellerBalance = 100;
+
+        var seller = new Seller("Иван", sellerBalance, new List<string> { "Яблоко", "Хлеб", "Молоко", "Сыр" });
+        var buyer = new Buyer("Алексей", buyerBalance);
+
+        Console.WriteLine("=== Магазин ===");
+        Console.WriteLine($"{CommandShowAllProductsSeller} - Показать товары продавца");
+        Console.WriteLine($"{CommandBuyProducts} - Купить товар");
+        Console.WriteLine($"{CommandShowInformationOnSeller} - Показать информацию о покупателе");
+        Console.WriteLine($"{CommandShowInformationOnBuyer} - Показать информацию о продавце");
+        Console.WriteLine($"{CommandExit} - Выход");
+
+        while (true)
+        {
+            Console.Write("\nВыберите действие: ");
+            string input = Console.ReadLine();
+
+            if (input == CommandExit) break;
+
+            switch (input)
+            {
+                case CommandShowAllProductsSeller:
+                    seller.ShowProducts();
+                    break;
+
+                case CommandBuyProducts:
+                    Console.Write("Введите название товара: ");
+                    string item = Console.ReadLine();
+                    buyer.BuyItem(item, seller);
+                    break;
+
+                case CommandShowInformationOnSeller:
+                    Console.WriteLine("\nИнформация о покупателе:");
+                    buyer.ShowInfo();
+                    break;
+
+                case CommandShowInformationOnBuyer:
+                    Console.WriteLine("\nИнформация о продавце:");
+                    seller.ShowInfo();
+                    break;
+
+                default:
+                    Console.WriteLine("Неизвестная команда");
+                    break;
+            }
+        }
+    }
+}
