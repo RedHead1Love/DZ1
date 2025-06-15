@@ -4,36 +4,55 @@ class Program
 {
     static void Main()
     {
-        Console.WriteLine("Введите элементы массива через пробел:");
-        int[] digit = Array.ConvertAll(Console.ReadLine().Split(' '), int.Parse);
+        int numberOnArray = 10;
+
+        int minimumRandomNumber = 0;
+        int maximumRandomNumber = 100;
+
+
+        Random rand = new Random();
+        int[] digits = new int[numberOnArray]; 
+
+        for (int i = 0; i < digits.Length; i++)
+        {
+            digits[i] = rand.Next(minimumRandomNumber, maximumRandomNumber); 
+        }
+
+        Console.WriteLine("Сгенерированный массив:");
+        Console.WriteLine(string.Join(", ", digits));
 
         Console.WriteLine("Введите количество позиций для сдвига влево:");
-        int shift = int.Parse(Console.ReadLine());
+        bool parseResult = int.TryParse(Console.ReadLine(), out int shift);
 
-        Console.WriteLine("Исходный массив:");
-        Console.WriteLine(string.Join(", ", digit));
-
-        if (digit.Length > 0)
+        if (parseResult == false)
         {
-            shift = shift % digit.Length;
+            Console.WriteLine("Ошибка ввода, массив остаётся прежним");
+            shift = 0;
+        }
 
-            if (shift < 0)
-                shift += digit.Length;
+        if (digits.Length == 0)
+        {
+            Console.WriteLine("Массив пуст");
+            return;
+        }
 
+        shift %= digits.Length;
+
+        if (shift < 0) shift += digits.Length;
+
+        bool needShift = (shift != 0);
+
+        if (needShift == true)
+        {
             for (int i = 0; i < shift; i++)
             {
-                int temp = digit[0];
-
-                for (int number = 0; number < digit.Length - 1; number++)
-                {
-                    digit[number] = digit[number + 1];
-                }
-
-                digit[digit.Length - 1] = temp;
+                int temp = digits[0];
+                Array.Copy(digits, 1, digits, 0, digits.Length - 1);
+                digits[digits.Length - 1] = temp;
             }
         }
 
         Console.WriteLine("Массив после сдвига:");
-        Console.WriteLine(string.Join(", ", digit));
+        Console.WriteLine(string.Join(", ", digits));
     }
 }
