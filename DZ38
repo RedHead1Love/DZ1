@@ -4,13 +4,95 @@ using System.Linq;
 
 namespace TrainDispatcher
 {
+    public class Program
+    {
+        static void Main()
+        {
+            var application = new TrainDispatcherApplication();
+            application.Run();
+        }
+    }
+
+    public static class TrainConstants
+    {
+        public const int MinWagonCapacity = 10;
+        public const int MaxWagonCapacity = 51;
+        public const int MinPassengers = 50;
+        public const int MaxPassengers = 201;
+    }
+
+    public static class UserUtils
+    {
+        private static readonly Random Random = new Random();
+
+        public static int GenerateRandomNumber(int min, int max)
+        {
+            return Random.Next(min, max);
+        }
+    }
+
+    public class TrainDispatcherApplication
+    {
+        const string CommandCreateNewTrain = "1";
+        const string CommandExit = "2";
+
+
+        private readonly Dispatcher _dispatcher = new Dispatcher();
+        private bool _isRunning = true;
+
+        public void Run()
+        {
+            while (_isRunning)
+            {
+                Console.Clear();
+                _dispatcher.ShowAllTrains();
+                ShowMenu();
+                ProcessUserInput();
+            }
+        }
+
+        private void ShowMenu()
+        {
+            Console.WriteLine("\nМеню:");
+            Console.WriteLine($"{CommandCreateNewTrain}. Создать новый поезд");
+            Console.WriteLine($"{CommandExit}. Завершить работу");
+            Console.Write("Выберите действие: ");
+        }
+
+        private void ProcessUserInput()
+        {
+            string choice = Console.ReadLine();
+
+            switch (choice)
+            {
+                case CommandCreateNewTrain:
+                    if (!_dispatcher.CreateNewTrain())
+                    {
+                        Console.WriteLine("Не удалось создать поезд. Проверьте введенные данные.");
+                    }
+                    break;
+
+                case CommandExit:
+                    _isRunning = false;
+                    Console.WriteLine("Работа завершена");
+                    break;
+                default:
+                    Console.WriteLine("Некорректный ввод, попробуйте еще раз");
+                    break;
+            }
+
+            if (_isRunning)
+            {
+                Console.WriteLine("\nНажмите любую клавишу для продолжения");
+                Console.ReadKey();
+            }
+        }
+    }
+
     public class Route
     {
-        private readonly string _from;
-        private readonly string _to;
-
-        public string From => _from;
-        public string To => _to;
+        public string From { get; }
+        public string To { get; }
 
         public Route(string from, string to)
         {
@@ -20,84 +102,78 @@ namespace TrainDispatcher
             if (string.IsNullOrWhiteSpace(to))
                 throw new ArgumentException("Пункт назначения не может быть пустым");
 
-            _from = from;
-            _to = to;
+            if (string.Equals(from, to, StringComparison.OrdinalIgnoreCase))
+                throw new ArgumentException("Пункт отправления и назначения не могут совпадать");
+
+            From = from;
+            To = to;
         }
 
-        public override string ToString() => $"{_from} - {_to}";
+        public override string ToString() => $"{From} - {To}";
     }
 
     public class Wagon
     {
-        private readonly int _capacity;
-        private readonly int _passengers;
-
-        public int Capacity => _capacity;
-        public int Passengers => _passengers;
+        public int Capacity { get; }
+        public int Passengers { get; }
 
         public Wagon(int capacity, int passengers)
         {
             if (capacity <= 0)
                 throw new ArgumentException("Вместимость вагона должна быть положительной");
 
-            _capacity = capacity;
-            _passengers = Math.Min(passengers, capacity);
+            Capacity = capacity;
+            Passengers = Math.Min(passengers, capacity);
         }
 
         public override string ToString() =>
-            $"Вагон (Вместимость: {_capacity}, Пассажиров: {_passengers})";
+            $"Вагон (Вместимость: {Capacity}, Пассажиров: {Passengers})";
     }
 
     public class Train
     {
-        private readonly Route _route;
-        private readonly int _totalPassengers;
-        private readonly List<Wagon> _wagons = new List<Wagon>();
-
-        public Route Route => _route;
-        public int TotalPassengers => _totalPassengers;
-        public IReadOnlyList<Wagon> Wagons => _wagons.AsReadOnly();
+        public Route Route { get; }
+        public int TotalPassengers { get; }
+        public IReadOnlyList<Wagon> Wagons { get; }
 
         public Train(Route route, int passengers)
         {
-            _route = route ?? throw new ArgumentNullException(nameof(route));
+            Route = route ?? throw new ArgumentNullException(nameof(route));
 
             if (passengers <= 0)
                 throw new ArgumentException("Количество пассажиров должно быть положительным");
 
-            _totalPassengers = passengers;
-            FormTrain(passengers);
+            TotalPassengers = passengers;
+            Wagons = FormTrain(passengers);
         }
 
-        private void FormTrain(int passengers)
+        private List<Wagon> FormTrain(int passengers)
         {
-
-            int minimumCapacityCarriage = 10;
-            int maximumCapacityCarriage = 51;
-
-                        Random random = new Random();
+            var wagons = new List<Wagon>();
             int remainingPassengers = passengers;
 
             while (remainingPassengers > 0)
             {
-                int capacity = random.Next(minimumCapacityCarriage, maximumCapacityCarriage);
+                int capacity = UserUtils.GenerateRandomNumber(TrainConstants.MinWagonCapacity, TrainConstants.MaxWagonCapacity);
                 int passengersInWagon = Math.Min(capacity, remainingPassengers);
-                _wagons.Add(new Wagon(capacity, passengersInWagon));
+                wagons.Add(new Wagon(capacity, passengersInWagon));
                 remainingPassengers -= passengersInWagon;
             }
+
+            return wagons;
         }
 
         public string GetShortInfo() =>
-            $"[Поезд {_route}] Пассажиров: {_totalPassengers}, Вагонов: {_wagons.Count}";
+            $"[Поезд {Route}] Пассажиров: {TotalPassengers}, Вагонов: {Wagons.Count}";
 
         public string GetFullInfo()
         {
-            var info = $"Поезд {_route}\n";
-            info += $"Общее количество пассажиров: {_totalPassengers}\n";
-            info += $"Количество вагонов: {_wagons.Count}\n";
+            var info = $"Поезд {Route}\n";
+            info += $"Общее количество пассажиров: {TotalPassengers}\n";
+            info += $"Количество вагонов: {Wagons.Count}\n";
             info += "Состав поезда:\n";
 
-            return _wagons.Select((w, i) => $"{i + 1}. {w}")
+            return Wagons.Select((wagon, index) => $"{index + 1}. {wagon}")
                        .Aggregate(info, (current, wagonInfo) => current + (wagonInfo + "\n"));
         }
     }
@@ -105,9 +181,6 @@ namespace TrainDispatcher
     public class Dispatcher
     {
         private readonly List<Train> _trains = new List<Train>();
-        private readonly Random _random = new Random();
-
-        public IReadOnlyList<Train> Trains => _trains.AsReadOnly();
 
         public void ShowAllTrains()
         {
@@ -120,30 +193,23 @@ namespace TrainDispatcher
             }
 
             Console.WriteLine(string.Join("\n",
-                _trains.Select((t, i) => $"{i + 1}. {t.GetShortInfo()}")));
+                _trains.Select((train, index) => $"{index + 1}. {train.GetShortInfo()}")));
         }
 
-        public bool TryCreateNewTrain()
+        public bool CreateNewTrain()
         {
             Console.WriteLine("\nСоздание нового поезда");
 
-            var route = GetRouteFromUser();
+            var route = CreateRoute();
             if (route == null)
             {
-                Console.WriteLine("Ошибка: не удалось создать маршрут");
                 return false;
             }
 
-            int passengers = _random.Next(50, 201);
+            int passengers = UserUtils.GenerateRandomNumber(TrainConstants.MinPassengers, TrainConstants.MaxPassengers);
             Console.WriteLine($"Продано билетов: {passengers}");
 
-            var train = CreateTrain(route, passengers);
-            if (train == null)
-            {
-                Console.WriteLine("Ошибка: не удалось создать поезд");
-                return false;
-            }
-
+            var train = new Train(route, passengers);
             _trains.Add(train);
 
             Console.WriteLine("\nПоезд успешно создан:");
@@ -151,71 +217,27 @@ namespace TrainDispatcher
             return true;
         }
 
-        private Route GetRouteFromUser()
+        private Route CreateRoute()
         {
             Console.Write("Введите пункт отправления: ");
-            string from = Console.ReadLine();
+            string from = Console.ReadLine()?.Trim();
 
             Console.Write("Введите пункт назначения: ");
-            string to = Console.ReadLine();
+            string to = Console.ReadLine()?.Trim();
 
             if (string.IsNullOrWhiteSpace(from) || string.IsNullOrWhiteSpace(to))
+            {
+                Console.WriteLine("Ошибка: оба пункта должны быть указаны");
                 return null;
+            }
+
+            if (string.Equals(from, to, StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine("Ошибка: пункты отправления и назначения не могут совпадать");
+                return null;
+            }
 
             return new Route(from, to);
-        }
-
-        private Train CreateTrain(Route route, int passengers)
-        {
-            if (route == null || passengers <= 0)
-                return null;
-
-            return new Train(route, passengers);
-        }
-    }
-
-    class Program
-    {
-        static void Main()
-        {
-            const string CommandCreateNewTrain = "1";
-            const string CommandExit = "2";
-
-
-            var dispatcher = new Dispatcher();
-
-            while (true)
-            {
-                Console.Clear();
-                dispatcher.ShowAllTrains();
-
-                Console.WriteLine("\nМеню:");
-                Console.WriteLine($"{CommandCreateNewTrain}. Создать новый поезд");
-                Console.WriteLine($"{CommandExit}. Завершить работу");
-                Console.Write("Выберите действие: ");
-
-                string choice = Console.ReadLine();
-
-                if (choice == CommandCreateNewTrain)
-                {
-                    if (!dispatcher.TryCreateNewTrain())
-                    {
-                        Console.WriteLine("Не удалось создать поезд, проверьте введенные данные.");
-                    }
-                }
-                else if (choice == CommandExit)
-                {
-                    Console.WriteLine("Работа завершена");
-                    return;
-                }
-                else
-                {
-                    Console.WriteLine("Некорректный ввод, попробуйте еще раз");
-                }
-
-                Console.WriteLine("\nНажмите любую клавишу для продолжения");
-                Console.ReadKey();
-            }
         }
     }
 }
