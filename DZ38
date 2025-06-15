@@ -15,11 +15,11 @@ namespace TrainDispatcher
 
     public static class UserUtils
     {
-        private static readonly Random Random = new Random();
+        private static readonly Random s_random = new Random();
 
         public static int GenerateRandomNumber(int min, int max)
         {
-            return Random.Next(min, max);
+            return s_random.Next(min, max);
         }
     }
 
@@ -27,15 +27,15 @@ namespace TrainDispatcher
     {
         private const string CommandCreateTrain = "1";
         private const string CommandExit = "2";
-        public const int MinPassengers = 50;  
-        public const int MaxPassengers = 201; 
+        public const int MinPassengers = 50;
+        public const int MaxPassengers = 201;
 
         private readonly Dispatcher _dispatcher = new Dispatcher();
-        private bool _isRunning = true;
+        private bool _isRun = true;
 
         public void Run()
         {
-            while (_isRunning)
+            while (_isRun)
             {
                 Console.Clear();
                 _dispatcher.ShowAll();
@@ -59,22 +59,23 @@ namespace TrainDispatcher
             switch (choice)
             {
                 case CommandCreateTrain:
-                    if (!_dispatcher.CreateTrain())
+                    if (_dispatcher.IsCreateTrain() == false)
                     {
                         Console.WriteLine("Не удалось создать поезд. Проверьте введенные данные.");
                     }
                     break;
 
                 case CommandExit:
-                    _isRunning = false;
+                    _isRun = false;
                     Console.WriteLine("Работа завершена");
                     break;
+
                 default:
                     Console.WriteLine("Некорректный ввод, попробуйте еще раз");
                     break;
             }
 
-            if (_isRunning)
+            if (_isRun)
             {
                 Console.WriteLine("\nНажмите любую клавишу для продолжения");
                 Console.ReadKey();
@@ -166,7 +167,7 @@ namespace TrainDispatcher
         {
             Console.WriteLine("\nСписок всех поездов:");
 
-            if (!_trains.Any())
+            if (_trains.Any() == false)
             {
                 Console.WriteLine("Поездов нет");
                 return;
@@ -176,7 +177,7 @@ namespace TrainDispatcher
                 _trains.Select((train, index) => $"{index + 1}. {train.GetShortInfo()}")));
         }
 
-        public bool CreateTrain()
+        public bool IsCreateTrain()
         {
             Console.WriteLine("\nСоздание нового поезда");
 
