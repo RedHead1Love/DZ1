@@ -4,20 +4,20 @@ class Program
 {
     static void Main()
     {
-        int numberOnArray = 10;
+        int numbersInArray = 10;
         int minimumRandomNumber = 0;
         int maximumRandomNumber = 100;
 
-        Random rand = new Random();
-        int[] digits = new int[numberOnArray];
+        Random random = new Random();
+        int[] numbers = new int[numbersInArray];
 
-        for (int i = 0; i < digits.Length; i++)
+        for (int i = 0; i < numbers.Length; i++)
         {
-            digits[i] = rand.Next(minimumRandomNumber, maximumRandomNumber);
+            numbers[i] = random.Next(minimumRandomNumber, maximumRandomNumber + 1);
         }
 
         Console.WriteLine("Сгенерированный массив:");
-        Console.WriteLine(string.Join(", ", digits));
+        Console.WriteLine(string.Join(", ", numbers));
 
         Console.WriteLine("Введите количество позиций для сдвига влево:");
 
@@ -27,32 +27,35 @@ class Program
             shift = 0;
         }
 
-        if (digits.Length == 0)
+        if (numbers.Length == 0)
         {
             Console.WriteLine("Массив пуст");
             return;
         }
 
-        shift = shift % digits.Length;
-
         if (shift < 0)
         {
-            shift = digits.Length + shift;
+            Console.WriteLine("Отрицательное значение сдвига не поддерживается, массив остаётся прежним");
+            shift = 0;
+        }
+        else
+        {
+            shift = shift % numbers.Length;
         }
 
         for (int i = 0; i < shift; i++)
         {
-            int firstElement = digits[0];
+            int firstElement = numbers[0];
 
-            for (int temp = 0; temp < digits.Length - 1; temp++)
+            for (int temp = 0; temp < numbers.Length - 1; temp++)
             {
-                digits[temp] = digits[temp + 1];
+                numbers[temp] = numbers[temp + 1];
             }
 
-            digits[digits.Length - 1] = firstElement;
+            numbers[numbers.Length - 1] = firstElement;
         }
 
         Console.WriteLine("Массив после сдвига:");
-        Console.WriteLine(string.Join(", ", digits));
+        Console.WriteLine(string.Join(", ", numbers));
     }
 }
