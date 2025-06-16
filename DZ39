@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace Coliseum
@@ -11,30 +10,22 @@ namespace Coliseum
 
     public static class UserUtils
     {
-        private static int _maximumRandomNumber = 100;
-
         private static readonly Random s_random = new Random();
+        private const int MaximumRandomNumber = 100;
 
         public static int GenerateRandomNumber(int min, int max)
         {
             return s_random.Next(min, max);
         }
 
-        public static bool CalculateChance(int chancePercent)
+        public static bool RollChance(int chancePercent)
         {
-            return s_random.Next(_maximumRandomNumber) < chancePercent;
+            return s_random.Next(MaximumRandomNumber) < chancePercent;
         }
     }
 
     public abstract class Fighter : IDamageable
     {
-        public string Name { get; protected set; }
-        public int Damage { get; protected set; }
-        public int Defense { get; protected set; }
-        public int Health { get; protected set; }
-        public int MaxHealth { get; protected set; }
-        public string SpecialAbility { get; protected set; }
-
         protected Fighter(string name, int damage, int defense, int health, string specialAbility)
         {
             Name = name;
@@ -45,19 +36,25 @@ namespace Coliseum
             SpecialAbility = specialAbility;
         }
 
+        public string Name { get; protected set; }
+        public int Damage { get; protected set; }
+        public int Defense { get; protected set; }
+        public int Health { get; protected set; }
+        public int MaxHealth { get; protected set; }
+        public string SpecialAbility { get; protected set; }
+        public bool IsAlive => Health > 0;
+
         public abstract void Attack(IDamageable target);
 
         public virtual void TakeDamage(int damage)
         {
-            int minimumPossibleDamage = 1;
+            const int MinimumPossibleDamage = 1;
 
-            int actualDamage = Math.Max(damage - Defense, minimumPossibleDamage);
+            int actualDamage = Math.Max(damage - Defense, MinimumPossibleDamage);
             Health -= actualDamage;
 
             Console.WriteLine($"{Name} получает {actualDamage} урона. Осталось здоровья: {Health}");
         }
-
-        public bool IsAlive => Health > 0;
 
         public virtual void DisplayStats()
         {
@@ -78,31 +75,26 @@ namespace Coliseum
 
     public class DoubleChanceFighter : Fighter
     {
-        private static int _doubleDamageChance = 30;
-        private static int _baseDamage = 15;
-        private static int _defense = 5;
-        private static int _maxHealth = 100;
+        private const int DoubleDamageChance = 30;
+        private const int DamageMultiplier = 2;
 
         public DoubleChanceFighter() : base(
             "Воин с двойным ударом",
-            _baseDamage,
-            _defense,
-            _maxHealth,
 
-            $"{_doubleDamageChance} процентов шанс нанести двойной урон")
+            damage: 15,
+            defense: 5,
+            health: 100,
+            specialAbility: $"{DoubleDamageChance}% шанс нанести двойной урон")
         {
         }
 
         public override void Attack(IDamageable target)
         {
             int damage = Damage;
-            int damageIncrease = 2;
 
-            bool isDouble = UserUtils.CalculateChance(_doubleDamageChance);
-
-            if (isDouble)
+            if (UserUtils.RollChance(DoubleDamageChance))
             {
-                damage *= damageIncrease;
+                damage *= DamageMultiplier;
                 Console.WriteLine($"{Name} использует двойной удар, урон: {damage}");
             }
             else
@@ -116,35 +108,30 @@ namespace Coliseum
 
     public class TripleAttackFighter : Fighter
     {
+        private const int SpecialAttackFrequency = 3;
+        private const int DamageMultiplierForSpecialAttack = 2;
+
         private int _attackCount = 0;
-
-        private static int _baseDamage = 12;
-        private static int _defense = 8;
-        private static int _health = 110;
-
-        private static int _specialAttackFrequency = 3;
-        private static int damageMultiplierForSpecialAttack = 2;
 
         public TripleAttackFighter() : base(
             "Воин с тройной атакой",
-            _baseDamage,
-            _defense,
-            _health,
 
-            $"Каждую {_specialAttackFrequency}-ю атаку наносит {damageMultiplierForSpecialAttack}-ой урон")
+            damage: 12,
+            defense: 8,
+            health: 110,
+            specialAbility: $"Каждую {SpecialAttackFrequency}-ю атаку наносит {DamageMultiplierForSpecialAttack}x урон")
         {
         }
 
         public override void Attack(IDamageable target)
         {
-
             _attackCount++;
             int damage = Damage;
 
-            if (_attackCount % _specialAttackFrequency == 0)
+            if (_attackCount % SpecialAttackFrequency == 0)
             {
-                damage *= damageMultiplierForSpecialAttack;
-                Console.WriteLine($"{Name} использует {_specialAttackFrequency}-ую атаку, Урон: {damage}");
+                damage *= DamageMultiplierForSpecialAttack;
+                Console.WriteLine($"{Name} использует {SpecialAttackFrequency}-ю атаку, Урон: {damage}");
             }
             else
             {
@@ -159,39 +146,35 @@ namespace Coliseum
     {
         private const int MaxRage = 100;
         private const int HealAmount = 30;
-        private int rage = 0;
+        private const int MinimumPossibleDamage = 1;
+        private const int DamageIncrease = 2;
 
-        private static int baseDamage = 18;
-        private static int defense = 3;
-        private static int health = 90;
-
-        int minimumPossibleDamage = 1;
-        int damageIncrease = 2;
+        private int _rage = 0;
 
         public RageFighter() : base(
             "Воин с яростью",
-            baseDamage,
-            defense,
-            health,
 
-            "Накопление ярости при получении урона, лечение при максимуме ярости")
+            damage: 18,
+            defense: 3,
+            health: 90,
+            specialAbility: "Накопление ярости при получении урона, лечение при максимуме ярости")
         {
         }
 
         public override void TakeDamage(int damage)
         {
-            int actualDamage = Math.Max(damage - Defense, minimumPossibleDamage);
+            int actualDamage = Math.Max(damage - Defense, MinimumPossibleDamage);
             Health -= actualDamage;
-            rage += actualDamage * damageIncrease;
+            _rage += actualDamage * DamageIncrease;
 
             Console.WriteLine($"{Name} получает {actualDamage} урона. Осталось здоровья: {Health}");
-            Console.WriteLine($"{Name} ярость: {rage}/{MaxRage}");
+            Console.WriteLine($"{Name} ярость: {_rage}/{MaxRage}");
 
-            if (rage >= MaxRage)
+            if (_rage >= MaxRage)
             {
-                rage = 0;
+                _rage = 0;
                 Health = Math.Min(Health + HealAmount, MaxHealth);
-                Console.WriteLine($"{Name} использует ярость для лечения + {HealAmount} здоровья. Теперь здоровья: {Health}");
+                Console.WriteLine($"{Name} использует ярость для лечения +{HealAmount} здоровья. Теперь здоровья: {Health}");
             }
         }
 
@@ -207,39 +190,34 @@ namespace Coliseum
         private const int MaxMana = 100;
         private const int FireballCost = 30;
         private const int FireballMultiplier = 2;
-        private int _mana = MaxMana;
+        private const int ManaGainedFromAnAttack = 15;
 
-        private static int _baseDamage = 10;
-        private static int _defense = 2;
-        private static int _health = 80;
+        private int _mana = MaxMana;
 
         public MageFighter() : base(
             "Маг",
-            _baseDamage,
-            _defense,
-            _health,
 
-            $"Использует ману для огненного шара, {FireballMultiplier}-ой урон")
+            damage: 10,
+            defense: 2,
+            health: 80,
+            specialAbility: $"Использует ману для огненного шара ({FireballMultiplier}x урон)")
         {
         }
 
         public override void Attack(IDamageable target)
         {
-            int manaGainedFromAnAttack = 15;
-
             if (_mana >= FireballCost)
             {
                 int damage = Damage * FireballMultiplier;
                 _mana -= FireballCost;
 
                 Console.WriteLine($"{Name} использует огненный шар, урон: {damage}. Осталось маны: {_mana}/{MaxMana}");
-
                 target.TakeDamage(damage);
             }
             else
             {
-                _mana += manaGainedFromAnAttack;
-                Console.WriteLine($"{Name} атакует посохом. Урон: {Damage}. Восстановлено {manaGainedFromAnAttack} маны. Мана: {_mana}/{MaxMana}");
+                _mana += ManaGainedFromAnAttack;
+                Console.WriteLine($"{Name} атакует посохом. Урон: {Damage}. Восстановлено {ManaGainedFromAnAttack} маны. Мана: {_mana}/{MaxMana}");
                 target.TakeDamage(Damage);
             }
         }
@@ -255,23 +233,19 @@ namespace Coliseum
     {
         private const int DodgeChance = 25;
 
-        private static int _baseDamage = 14;
-        private static int _defense = 4;
-        private static int _health = 95;
-
         public DodgeFighter() : base(
             "Ловкий воин",
-            _baseDamage,
-            _defense,
-            _health,
 
-            $"{DodgeChance} шанс уклониться от атаки")
+            damage: 14,
+            defense: 4,
+            health: 95,
+            specialAbility: $"{DodgeChance}% шанс уклониться от атаки")
         {
         }
 
         public override void TakeDamage(int damage)
         {
-            if (UserUtils.CalculateChance(DodgeChance))
+            if (UserUtils.RollChance(DodgeChance))
             {
                 Console.WriteLine($"{Name} уклоняется от атаки");
                 return;
@@ -287,9 +261,9 @@ namespace Coliseum
         }
     }
 
-    class Program
+    public class Coliseum
     {
-        private static readonly List<Fighter> availableFighters = new List<Fighter>
+        private readonly List<Fighter> _availableFighters = new List<Fighter>
         {
             new DoubleChanceFighter(),
             new TripleAttackFighter(),
@@ -298,20 +272,20 @@ namespace Coliseum
             new DodgeFighter()
         };
 
-        static void Main(string[] args)
+        public void Work()
         {
             const string CommandShowAllFighter = "1";
             const string CommandStartFight = "2";
             const string CommandExit = "3";
 
-            bool exit = false;
+            bool isExitRequested = false;
 
-            while (exit == false)
+            while (isExitRequested == false)
             {
                 Console.WriteLine("=== ДОБРО ПОЖАЛОВАТЬ В КОЛИЗЕЙ ===");
-                Console.WriteLine($"CommandShowAllFighter. Посмотреть список бойцов");
-                Console.WriteLine($"CommandStartFight. Начать бой");
-                Console.WriteLine($"CommandExit. Выход");
+                Console.WriteLine($"{CommandShowAllFighter}. Посмотреть список бойцов");
+                Console.WriteLine($"{CommandStartFight}. Начать бой");
+                Console.WriteLine($"{CommandExit}. Выход");
                 Console.Write("Выберите действие: ");
 
                 string input = Console.ReadLine();
@@ -327,7 +301,7 @@ namespace Coliseum
                         break;
 
                     case CommandExit:
-                        exit = true;
+                        isExitRequested = true;
                         break;
 
                     default:
@@ -339,38 +313,35 @@ namespace Coliseum
             }
         }
 
-        static void ShowFighters()
+        private void ShowFighters()
         {
             Console.WriteLine("\n=== ДОСТУПНЫЕ БОЙЦЫ ===");
 
-            for (int i = 0; i < availableFighters.Count; i++)
+            for (int i = 0; i < _availableFighters.Count; i++)
             {
                 Console.WriteLine($"Боец #{i + 1}");
-                availableFighters[i].DisplayStats();
+                _availableFighters[i].DisplayStats();
             }
         }
 
-        static void StartFight()
+        private void StartFight()
         {
-            int minimumFightersRequiredStartFight = 2;
+            const int MinimumFightersRequired = 2;
+            const int MinimumRandomNumber = 0;
+            const int MaximumRandomNumber = 2;
 
-            int minimumRandomNumber = 0;
-            int maximumRandomNumber = 2;
-
-            if (availableFighters.Count < minimumFightersRequiredStartFight)
+            if (_availableFighters.Count < MinimumFightersRequired)
             {
                 Console.WriteLine("Недостаточно бойцов для сражения");
                 return;
             }
 
             Console.WriteLine("\n=== ВЫБОР ПЕРВОГО БОЙЦА ===");
-
             Fighter fighter1 = SelectFighter();
 
             if (fighter1 == null) return;
 
             Console.WriteLine("\n=== ВЫБОР ВТОРОГО БОЙЦА ===");
-
             Fighter fighter2 = SelectFighter();
 
             if (fighter2 == null) return;
@@ -381,29 +352,27 @@ namespace Coliseum
 
             while (fighter1.IsAlive && fighter2.IsAlive)
             {
-                if (UserUtils.GenerateRandomNumber(minimumRandomNumber, maximumRandomNumber) == 0)
+                if (UserUtils.GenerateRandomNumber(MinimumRandomNumber, MaximumRandomNumber) == 0)
                 {
                     if (fighter1.IsAlive) fighter1.Attack(fighter2);
-
                     if (fighter2.IsAlive) fighter2.Attack(fighter1);
                 }
                 else
                 {
                     if (fighter2.IsAlive) fighter2.Attack(fighter1);
-
                     if (fighter1.IsAlive) fighter1.Attack(fighter2);
                 }
 
                 Console.WriteLine();
             }
 
-            if (fighter1.IsAlive && !fighter2.IsAlive)
+            if (fighter1.IsAlive && fighter2.IsAlive == false)
             {
-                Console.WriteLine($"=== {fighter1.Name} Победил ===");
+                Console.WriteLine($"=== {fighter1.Name} ПОБЕДИЛ ===");
             }
-            else if (!fighter1.IsAlive && fighter2.IsAlive)
+            else if (fighter1.IsAlive == false && fighter2.IsAlive)
             {
-                Console.WriteLine($"=== {fighter2.Name} Победил ===");
+                Console.WriteLine($"=== {fighter2.Name} ПОБЕДИЛ ===");
             }
             else
             {
@@ -411,25 +380,34 @@ namespace Coliseum
             }
         }
 
-        static Fighter SelectFighter()
+        private Fighter SelectFighter()
         {
             Console.WriteLine("Выберите бойца (введите номер):");
 
-            for (int i = 0; i < availableFighters.Count; i++)
+            for (int i = 0; i < _availableFighters.Count; i++)
             {
-                Console.WriteLine($"{i + 1}. {availableFighters[i].Name}");
+                Console.WriteLine($"{i + 1}. {_availableFighters[i].Name}");
             }
 
             Console.Write("Ваш выбор: ");
             string input = Console.ReadLine();
 
-            if (int.TryParse(input, out int index) && index >= 1 && index <= availableFighters.Count)
+            if (int.TryParse(input, out int index) && index >= 1 && index <= _availableFighters.Count)
             {
-                return availableFighters[index - 1].Clone();
+                return _availableFighters[index - 1].Clone();
             }
 
             Console.WriteLine("Неверный ввод. Пожалуйста, выберите номер из списка.");
             return null;
+        }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Coliseum coliseum = new Coliseum();
+            coliseum.Work();
         }
     }
 }
