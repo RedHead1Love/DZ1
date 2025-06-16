@@ -4,6 +4,9 @@ class Program
 {
     static void Main()
     {
+        const char OpeningBracket = '(';
+        const char ClosingBracket = ')';
+
         Console.WriteLine("Введите строку из скобок ( и ):");
         string input = Console.ReadLine();
 
@@ -11,19 +14,18 @@ class Program
         int maxDepth = 0;
         bool isValid = true;
 
-        for (int i = 0; i < input.Length; i++)
+        foreach (char bracket in input)
         {
-            char brackets = input[i];
-
-            if (brackets == '(')
+            if (bracket == OpeningBracket)
             {
                 currentDepth++;
+
                 if (currentDepth > maxDepth)
                 {
                     maxDepth = currentDepth;
                 }
             }
-            else if (brackets == ')')
+            else if (bracket == ClosingBracket)
             {
                 currentDepth--;
 
@@ -45,8 +47,10 @@ class Program
             isValid = false;
         }
 
+        string validationStatus = isValid ? "Да" : "Нет";
+
         Console.WriteLine("\nРезультат анализа:");
-        Console.WriteLine($"Корректность: {(isValid ? "Да" : "Нет")}");
+        Console.WriteLine($"Корректность: {validationStatus}");
 
         if (isValid)
         {
