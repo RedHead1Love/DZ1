@@ -1,0 +1,56 @@
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        Console.WriteLine("Введите строку из скобок ( и ):");
+        string input = Console.ReadLine();
+
+        int currentDepth = 0;
+        int maxDepth = 0;
+        bool isValid = true;
+
+        for (int i = 0; i < input.Length; i++)
+        {
+            char brackets = input[i];
+
+            if (brackets == '(')
+            {
+                currentDepth++;
+                if (currentDepth > maxDepth)
+                {
+                    maxDepth = currentDepth;
+                }
+            }
+            else if (brackets == ')')
+            {
+                currentDepth--;
+
+                if (currentDepth < 0)
+                {
+                    isValid = false;
+                    break;
+                }
+            }
+            else
+            {
+                isValid = false;
+                break;
+            }
+        }
+
+        if (currentDepth != 0)
+        {
+            isValid = false;
+        }
+
+        Console.WriteLine("\nРезультат анализа:");
+        Console.WriteLine($"Корректность: {(isValid ? "Да" : "Нет")}");
+
+        if (isValid)
+        {
+            Console.WriteLine($"Максимальная глубина вложенности: {maxDepth}");
+        }
+    }
+}
