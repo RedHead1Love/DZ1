@@ -3,6 +3,15 @@ using System.Collections.Generic;
 
 namespace Coliseum
 {
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Coliseum coliseum = new Coliseum();
+            coliseum.Run();
+        }
+    }
+
     public interface IDamageable
     {
         void TakeDamage(int damage);
@@ -69,40 +78,40 @@ namespace Coliseum
 
         public virtual Fighter Clone()
         {
-            return (Fighter)this.MemberwiseClone();
+            return CreateFighterClone();
         }
+
+        protected abstract Fighter CreateFighterClone();
     }
 
-    public class DoubleChanceFighter : Fighter
+    public class DoubleAttackFighter : Fighter
     {
-        private const int DoubleDamageChance = 30;
-        private const int DamageMultiplier = 2;
+        private const int DoubleAttackChance = 30;
+        private const int AttacksCount = 2;
 
-        public DoubleChanceFighter() : base(
-            "Воин с двойным ударом",
-
+        public DoubleAttackFighter() : base(
+            "Воин с двойной атакой",
             damage: 15,
             defense: 5,
             health: 100,
-            specialAbility: $"{DoubleDamageChance}% шанс нанести двойной урон")
+            specialAbility: $"{DoubleAttackChance}% шанс атаковать дважды")
         {
         }
 
         public override void Attack(IDamageable target)
         {
-            int damage = Damage;
+            int attacks = UserUtils.RollChance(DoubleAttackChance) ? AttacksCount : 1;
 
-            if (UserUtils.RollChance(DoubleDamageChance))
+            for (int i = 0; i < attacks; i++)
             {
-                damage *= DamageMultiplier;
-                Console.WriteLine($"{Name} использует двойной удар, урон: {damage}");
+                Console.WriteLine($"{Name} атакует с уроном: {Damage}");
+                target.TakeDamage(Damage);
             }
-            else
-            {
-                Console.WriteLine($"{Name} атакует с уроном: {damage}");
-            }
+        }
 
-            target.TakeDamage(damage);
+        protected override Fighter CreateFighterClone()
+        {
+            return new DoubleAttackFighter();
         }
     }
 
@@ -115,7 +124,6 @@ namespace Coliseum
 
         public TripleAttackFighter() : base(
             "Воин с тройной атакой",
-
             damage: 12,
             defense: 8,
             health: 110,
@@ -140,6 +148,11 @@ namespace Coliseum
 
             target.TakeDamage(damage);
         }
+
+        protected override Fighter CreateFighterClone()
+        {
+            return new TripleAttackFighter();
+        }
     }
 
     public class RageFighter : Fighter
@@ -153,7 +166,6 @@ namespace Coliseum
 
         public RageFighter() : base(
             "Воин с яростью",
-
             damage: 18,
             defense: 3,
             health: 90,
@@ -183,6 +195,11 @@ namespace Coliseum
             Console.WriteLine($"{Name} атакует с уроном: {Damage}");
             target.TakeDamage(Damage);
         }
+
+        protected override Fighter CreateFighterClone()
+        {
+            return new RageFighter();
+        }
     }
 
     public class MageFighter : Fighter
@@ -196,7 +213,6 @@ namespace Coliseum
 
         public MageFighter() : base(
             "Маг",
-
             damage: 10,
             defense: 2,
             health: 80,
@@ -227,6 +243,11 @@ namespace Coliseum
             base.DisplayStats();
             Console.WriteLine($"Мана: {_mana}/{MaxMana}");
         }
+
+        protected override Fighter CreateFighterClone()
+        {
+            return new MageFighter();
+        }
     }
 
     public class DodgeFighter : Fighter
@@ -235,7 +256,6 @@ namespace Coliseum
 
         public DodgeFighter() : base(
             "Ловкий воин",
-
             damage: 14,
             defense: 4,
             health: 95,
@@ -259,33 +279,39 @@ namespace Coliseum
             Console.WriteLine($"{Name} атакует с уроном: {Damage}");
             target.TakeDamage(Damage);
         }
+
+        protected override Fighter CreateFighterClone()
+        {
+            return new DodgeFighter();
+        }
     }
 
     public class Coliseum
     {
         private readonly List<Fighter> _availableFighters = new List<Fighter>
         {
-            new DoubleChanceFighter(),
+            new DoubleAttackFighter(),
             new TripleAttackFighter(),
             new RageFighter(),
             new MageFighter(),
             new DodgeFighter()
         };
 
-        public void Work()
+        public void Run()
         {
             const string CommandShowAllFighter = "1";
             const string CommandStartFight = "2";
             const string CommandExit = "3";
 
-            bool isExitRequested = false;
+            bool isRun = true;
 
-            while (isExitRequested == false)
+            while (isRun)
             {
                 Console.WriteLine("=== ДОБРО ПОЖАЛОВАТЬ В КОЛИЗЕЙ ===");
                 Console.WriteLine($"{CommandShowAllFighter}. Посмотреть список бойцов");
                 Console.WriteLine($"{CommandStartFight}. Начать бой");
                 Console.WriteLine($"{CommandExit}. Выход");
+
                 Console.Write("Выберите действие: ");
 
                 string input = Console.ReadLine();
@@ -301,7 +327,7 @@ namespace Coliseum
                         break;
 
                     case CommandExit:
-                        isExitRequested = true;
+                        isRun = false;
                         break;
 
                     default:
@@ -327,8 +353,6 @@ namespace Coliseum
         private void StartFight()
         {
             const int MinimumFightersRequired = 2;
-            const int MinimumRandomNumber = 0;
-            const int MaximumRandomNumber = 2;
 
             if (_availableFighters.Count < MinimumFightersRequired)
             {
@@ -339,44 +363,71 @@ namespace Coliseum
             Console.WriteLine("\n=== ВЫБОР ПЕРВОГО БОЙЦА ===");
             Fighter fighter1 = SelectFighter();
 
-            if (fighter1 == null) return;
+            if (fighter1 == null)
+            {
+                return;
+            }
 
             Console.WriteLine("\n=== ВЫБОР ВТОРОГО БОЙЦА ===");
             Fighter fighter2 = SelectFighter();
 
-            if (fighter2 == null) return;
+            if (fighter2 == null)
+            {
+                return;
+            }
 
             Console.WriteLine("\n=== НАЧАЛО БОЯ ===");
             Console.WriteLine($"{fighter1.Name} против {fighter2.Name}");
             Console.WriteLine();
 
+            PerformFight(fighter1, fighter2);
+
+            DisplayFightResult(fighter1, fighter2);
+        }
+
+        private void PerformFight(Fighter fighter1, Fighter fighter2)
+        {
+            const int MinimumRandomNumber = 0;
+            const int MaximumRandomNumber = 2;
+
             while (fighter1.IsAlive && fighter2.IsAlive)
             {
                 if (UserUtils.GenerateRandomNumber(MinimumRandomNumber, MaximumRandomNumber) == 0)
                 {
-                    if (fighter1.IsAlive) fighter1.Attack(fighter2);
-                    if (fighter2.IsAlive) fighter2.Attack(fighter1);
+                    PerformAttack(fighter1, fighter2);
+                    PerformAttack(fighter2, fighter1);
                 }
                 else
                 {
-                    if (fighter2.IsAlive) fighter2.Attack(fighter1);
-                    if (fighter1.IsAlive) fighter1.Attack(fighter2);
+                    PerformAttack(fighter2, fighter1);
+                    PerformAttack(fighter1, fighter2);
                 }
 
                 Console.WriteLine();
             }
+        }
 
+        private void PerformAttack(Fighter attacker, Fighter defender)
+        {
+            if (attacker.IsAlive && defender.IsAlive)
+            {
+                attacker.Attack(defender);
+            }
+        }
+
+        private void DisplayFightResult(Fighter fighter1, Fighter fighter2)
+        {
             if (fighter1.IsAlive && fighter2.IsAlive == false)
             {
-                Console.WriteLine($"=== {fighter1.Name} ПОБЕДИЛ ===");
+                Console.WriteLine($"=== {fighter1.Name} Победил ===");
             }
             else if (fighter1.IsAlive == false && fighter2.IsAlive)
             {
-                Console.WriteLine($"=== {fighter2.Name} ПОБЕДИЛ ===");
+                Console.WriteLine($"=== {fighter2.Name} Победил ===");
             }
             else
             {
-                Console.WriteLine("=== НИЧЬЯ ===");
+                Console.WriteLine("ничья");
             }
         }
 
@@ -399,15 +450,6 @@ namespace Coliseum
 
             Console.WriteLine("Неверный ввод. Пожалуйста, выберите номер из списка.");
             return null;
-        }
-    }
-
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            Coliseum coliseum = new Coliseum();
-            coliseum.Work();
         }
     }
 }
