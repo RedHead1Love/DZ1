@@ -1,0 +1,435 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
+namespace Coliseum
+{
+    public interface IDamageable
+    {
+        void TakeDamage(int damage);
+    }
+
+    public static class UserUtils
+    {
+        private static int _maximumRandomNumber = 100;
+
+        private static readonly Random s_random = new Random();
+
+        public static int GenerateRandomNumber(int min, int max)
+        {
+            return s_random.Next(min, max);
+        }
+
+        public static bool CalculateChance(int chancePercent)
+        {
+            return s_random.Next(_maximumRandomNumber) < chancePercent;
+        }
+    }
+
+    public abstract class Fighter : IDamageable
+    {
+        public string Name { get; protected set; }
+        public int Damage { get; protected set; }
+        public int Defense { get; protected set; }
+        public int Health { get; protected set; }
+        public int MaxHealth { get; protected set; }
+        public string SpecialAbility { get; protected set; }
+
+        protected Fighter(string name, int damage, int defense, int health, string specialAbility)
+        {
+            Name = name;
+            Damage = damage;
+            Defense = defense;
+            Health = health;
+            MaxHealth = health;
+            SpecialAbility = specialAbility;
+        }
+
+        public abstract void Attack(IDamageable target);
+
+        public virtual void TakeDamage(int damage)
+        {
+            int minimumPossibleDamage = 1;
+
+            int actualDamage = Math.Max(damage - Defense, minimumPossibleDamage);
+            Health -= actualDamage;
+
+            Console.WriteLine($"{Name} получает {actualDamage} урона. Осталось здоровья: {Health}");
+        }
+
+        public bool IsAlive => Health > 0;
+
+        public virtual void DisplayStats()
+        {
+            Console.WriteLine($"=== {Name} ===");
+            Console.WriteLine($"Тип: {GetType().Name}");
+            Console.WriteLine($"Урон: {Damage}");
+            Console.WriteLine($"Защита: {Defense}");
+            Console.WriteLine($"Здоровье: {Health}/{MaxHealth}");
+            Console.WriteLine($"Особенность: {SpecialAbility}");
+            Console.WriteLine();
+        }
+
+        public virtual Fighter Clone()
+        {
+            return (Fighter)this.MemberwiseClone();
+        }
+    }
+
+    public class DoubleChanceFighter : Fighter
+    {
+        private static int _doubleDamageChance = 30;
+        private static int _baseDamage = 15;
+        private static int _defense = 5;
+        private static int _maxHealth = 100;
+
+        public DoubleChanceFighter() : base(
+            "Воин с двойным ударом",
+            _baseDamage,
+            _defense,
+            _maxHealth,
+
+            $"{_doubleDamageChance} процентов шанс нанести двойной урон")
+        {
+        }
+
+        public override void Attack(IDamageable target)
+        {
+            int damage = Damage;
+            int damageIncrease = 2;
+
+            bool isDouble = UserUtils.CalculateChance(_doubleDamageChance);
+
+            if (isDouble)
+            {
+                damage *= damageIncrease;
+                Console.WriteLine($"{Name} использует двойной удар, урон: {damage}");
+            }
+            else
+            {
+                Console.WriteLine($"{Name} атакует с уроном: {damage}");
+            }
+
+            target.TakeDamage(damage);
+        }
+    }
+
+    public class TripleAttackFighter : Fighter
+    {
+        private int _attackCount = 0;
+
+        private static int _baseDamage = 12;
+        private static int _defense = 8;
+        private static int _health = 110;
+
+        private static int _specialAttackFrequency = 3;
+        private static int damageMultiplierForSpecialAttack = 2;
+
+        public TripleAttackFighter() : base(
+            "Воин с тройной атакой",
+            _baseDamage,
+            _defense,
+            _health,
+
+            $"Каждую {_specialAttackFrequency}-ю атаку наносит {damageMultiplierForSpecialAttack}-ой урон")
+        {
+        }
+
+        public override void Attack(IDamageable target)
+        {
+
+            _attackCount++;
+            int damage = Damage;
+
+            if (_attackCount % _specialAttackFrequency == 0)
+            {
+                damage *= damageMultiplierForSpecialAttack;
+                Console.WriteLine($"{Name} использует {_specialAttackFrequency}-ую атаку, Урон: {damage}");
+            }
+            else
+            {
+                Console.WriteLine($"{Name} атакует с уроном: {damage}");
+            }
+
+            target.TakeDamage(damage);
+        }
+    }
+
+    public class RageFighter : Fighter
+    {
+        private const int MaxRage = 100;
+        private const int HealAmount = 30;
+        private int rage = 0;
+
+        private static int baseDamage = 18;
+        private static int defense = 3;
+        private static int health = 90;
+
+        int minimumPossibleDamage = 1;
+        int damageIncrease = 2;
+
+        public RageFighter() : base(
+            "Воин с яростью",
+            baseDamage,
+            defense,
+            health,
+
+            "Накопление ярости при получении урона, лечение при максимуме ярости")
+        {
+        }
+
+        public override void TakeDamage(int damage)
+        {
+            int actualDamage = Math.Max(damage - Defense, minimumPossibleDamage);
+            Health -= actualDamage;
+            rage += actualDamage * damageIncrease;
+
+            Console.WriteLine($"{Name} получает {actualDamage} урона. Осталось здоровья: {Health}");
+            Console.WriteLine($"{Name} ярость: {rage}/{MaxRage}");
+
+            if (rage >= MaxRage)
+            {
+                rage = 0;
+                Health = Math.Min(Health + HealAmount, MaxHealth);
+                Console.WriteLine($"{Name} использует ярость для лечения + {HealAmount} здоровья. Теперь здоровья: {Health}");
+            }
+        }
+
+        public override void Attack(IDamageable target)
+        {
+            Console.WriteLine($"{Name} атакует с уроном: {Damage}");
+            target.TakeDamage(Damage);
+        }
+    }
+
+    public class MageFighter : Fighter
+    {
+        private const int MaxMana = 100;
+        private const int FireballCost = 30;
+        private const int FireballMultiplier = 2;
+        private int _mana = MaxMana;
+
+        private static int _baseDamage = 10;
+        private static int _defense = 2;
+        private static int _health = 80;
+
+        public MageFighter() : base(
+            "Маг",
+            _baseDamage,
+            _defense,
+            _health,
+
+            $"Использует ману для огненного шара, {FireballMultiplier}-ой урон")
+        {
+        }
+
+        public override void Attack(IDamageable target)
+        {
+            int manaGainedFromAnAttack = 15;
+
+            if (_mana >= FireballCost)
+            {
+                int damage = Damage * FireballMultiplier;
+                _mana -= FireballCost;
+
+                Console.WriteLine($"{Name} использует огненный шар, урон: {damage}. Осталось маны: {_mana}/{MaxMana}");
+
+                target.TakeDamage(damage);
+            }
+            else
+            {
+                _mana += manaGainedFromAnAttack;
+                Console.WriteLine($"{Name} атакует посохом. Урон: {Damage}. Восстановлено {manaGainedFromAnAttack} маны. Мана: {_mana}/{MaxMana}");
+                target.TakeDamage(Damage);
+            }
+        }
+
+        public override void DisplayStats()
+        {
+            base.DisplayStats();
+            Console.WriteLine($"Мана: {_mana}/{MaxMana}");
+        }
+    }
+
+    public class DodgeFighter : Fighter
+    {
+        private const int DodgeChance = 25;
+
+        private static int _baseDamage = 14;
+        private static int _defense = 4;
+        private static int _health = 95;
+
+        public DodgeFighter() : base(
+            "Ловкий воин",
+            _baseDamage,
+            _defense,
+            _health,
+
+            $"{DodgeChance} шанс уклониться от атаки")
+        {
+        }
+
+        public override void TakeDamage(int damage)
+        {
+            if (UserUtils.CalculateChance(DodgeChance))
+            {
+                Console.WriteLine($"{Name} уклоняется от атаки");
+                return;
+            }
+
+            base.TakeDamage(damage);
+        }
+
+        public override void Attack(IDamageable target)
+        {
+            Console.WriteLine($"{Name} атакует с уроном: {Damage}");
+            target.TakeDamage(Damage);
+        }
+    }
+
+    class Program
+    {
+        private static readonly List<Fighter> availableFighters = new List<Fighter>
+        {
+            new DoubleChanceFighter(),
+            new TripleAttackFighter(),
+            new RageFighter(),
+            new MageFighter(),
+            new DodgeFighter()
+        };
+
+        static void Main(string[] args)
+        {
+            const string CommandShowAllFighter = "1";
+            const string CommandStartFight = "2";
+            const string CommandExit = "3";
+
+            bool exit = false;
+
+            while (exit == false)
+            {
+                Console.WriteLine("=== ДОБРО ПОЖАЛОВАТЬ В КОЛИЗЕЙ ===");
+                Console.WriteLine($"CommandShowAllFighter. Посмотреть список бойцов");
+                Console.WriteLine($"CommandStartFight. Начать бой");
+                Console.WriteLine($"CommandExit. Выход");
+                Console.Write("Выберите действие: ");
+
+                string input = Console.ReadLine();
+
+                switch (input)
+                {
+                    case CommandShowAllFighter:
+                        ShowFighters();
+                        break;
+
+                    case CommandStartFight:
+                        StartFight();
+                        break;
+
+                    case CommandExit:
+                        exit = true;
+                        break;
+
+                    default:
+                        Console.WriteLine($"Неверный ввод. Пожалуйста, выберите {CommandShowAllFighter}, {CommandStartFight} или {CommandExit}.");
+                        break;
+                }
+
+                Console.WriteLine();
+            }
+        }
+
+        static void ShowFighters()
+        {
+            Console.WriteLine("\n=== ДОСТУПНЫЕ БОЙЦЫ ===");
+
+            for (int i = 0; i < availableFighters.Count; i++)
+            {
+                Console.WriteLine($"Боец #{i + 1}");
+                availableFighters[i].DisplayStats();
+            }
+        }
+
+        static void StartFight()
+        {
+            int minimumFightersRequiredStartFight = 2;
+
+            int minimumRandomNumber = 0;
+            int maximumRandomNumber = 2;
+
+            if (availableFighters.Count < minimumFightersRequiredStartFight)
+            {
+                Console.WriteLine("Недостаточно бойцов для сражения");
+                return;
+            }
+
+            Console.WriteLine("\n=== ВЫБОР ПЕРВОГО БОЙЦА ===");
+
+            Fighter fighter1 = SelectFighter();
+
+            if (fighter1 == null) return;
+
+            Console.WriteLine("\n=== ВЫБОР ВТОРОГО БОЙЦА ===");
+
+            Fighter fighter2 = SelectFighter();
+
+            if (fighter2 == null) return;
+
+            Console.WriteLine("\n=== НАЧАЛО БОЯ ===");
+            Console.WriteLine($"{fighter1.Name} против {fighter2.Name}");
+            Console.WriteLine();
+
+            while (fighter1.IsAlive && fighter2.IsAlive)
+            {
+                if (UserUtils.GenerateRandomNumber(minimumRandomNumber, maximumRandomNumber) == 0)
+                {
+                    if (fighter1.IsAlive) fighter1.Attack(fighter2);
+
+                    if (fighter2.IsAlive) fighter2.Attack(fighter1);
+                }
+                else
+                {
+                    if (fighter2.IsAlive) fighter2.Attack(fighter1);
+
+                    if (fighter1.IsAlive) fighter1.Attack(fighter2);
+                }
+
+                Console.WriteLine();
+            }
+
+            if (fighter1.IsAlive && !fighter2.IsAlive)
+            {
+                Console.WriteLine($"=== {fighter1.Name} Победил ===");
+            }
+            else if (!fighter1.IsAlive && fighter2.IsAlive)
+            {
+                Console.WriteLine($"=== {fighter2.Name} Победил ===");
+            }
+            else
+            {
+                Console.WriteLine("=== НИЧЬЯ ===");
+            }
+        }
+
+        static Fighter SelectFighter()
+        {
+            Console.WriteLine("Выберите бойца (введите номер):");
+
+            for (int i = 0; i < availableFighters.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {availableFighters[i].Name}");
+            }
+
+            Console.Write("Ваш выбор: ");
+            string input = Console.ReadLine();
+
+            if (int.TryParse(input, out int index) && index >= 1 && index <= availableFighters.Count)
+            {
+                return availableFighters[index - 1].Clone();
+            }
+
+            Console.WriteLine("Неверный ввод. Пожалуйста, выберите номер из списка.");
+            return null;
+        }
+    }
+}
