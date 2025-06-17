@@ -1,22 +1,25 @@
-public static int ReadInt()
+using System;
+
+class Program
 {
-    bool isCorrectNumber = false;
-    int number = 0;
-    
-    while (isCorrectNumber == false)
+    static int ReadInt()
     {
-        Console.Write("Введите целое число: ");
-        string userInput = Console.ReadLine();
-        
-        if (int.TryParse(userInput, out number))
+        int number;
+
+        while (int.TryParse(Console.ReadLine(), out number) == false)
         {
-            isCorrectNumber = true;
+            Console.WriteLine("Неверный ввод. Пожалуйста, введите целое число:");
         }
-        else
-        {
-            Console.WriteLine("Ошибка: введите корректное целое число.");
-        }
+
+        return number;
     }
-    
-    return number;
+
+    static void Main(string[] args)
+    {
+        Console.WriteLine("Введите целое число:");
+
+        int num = ReadInt();
+
+        Console.WriteLine($"Вы ввели число: {num}");
+    }
 }
