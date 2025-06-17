@@ -1,0 +1,29 @@
+using System;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        int[] array = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+
+        Console.WriteLine("Исходный массив: " + string.Join(" ", array));
+
+        Shuffle(array);
+
+        Console.WriteLine("Массив перемешанный: " + string.Join(" ", array));
+    }
+
+    static void Shuffle<Temp>(Temp[] array)
+    {
+        Random random = new Random();
+
+        for (int i = array.Length - 1; i > 0; i--)
+        {
+            int numbers = random.Next(i + 1);
+
+            Temp temp = array[i];
+            array[i] = array[numbers];
+            array[numbers] = temp;
+        }
+    }
+}
