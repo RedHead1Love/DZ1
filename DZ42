@@ -1,0 +1,25 @@
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        int number;
+
+        while (true)
+        {
+            Console.Write("Введите целое число: ");
+
+            string input = Console.ReadLine();
+
+            if (int.TryParse(input, out number))
+            {
+                break; 
+            }
+
+            Console.WriteLine("Ошибка, введите корректное целое число.");
+        }
+
+        Console.WriteLine($"Вы ввели число: {number}");
+    }
+}
