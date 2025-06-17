@@ -6,16 +6,6 @@ namespace SupermarketAdministration
 {
     class Program
     {
-        public const string CommandMenuOptionShowProducts = "1";
-        public const string CommandMenuOptionAddClient = "2";
-        public const string CommandMenuOptionServeClient = "3";
-        public const string CommandMenuOptionShowEarnings = "4";
-        public const string CommandMenuOptionExit = "5";
-
-        public const string CommandAddProductToCart = "1";
-        public const string CommandFinishShopping = "2";
-        public const string CommandRemoveProductFromCart = "3";
-
         static void Main(string[] args)
         {
             SupermarketManager manager = new SupermarketManager();
@@ -28,62 +18,69 @@ namespace SupermarketAdministration
         private readonly Supermarket _supermarket;
         private readonly List<Product> _availableProducts;
 
-        private int _bread = 50;
-        private int _milk = 80;
-        private int _eggs = 120;
-        private int _sugar = 60;
-        private int _butter = 150;
-
         public SupermarketManager()
         {
+            int _bread = 50;
+            int _milk = 80;
+            int _sugar = 60;
+            int eggs = 120;
+            int _butter = 150;
+
+
             _availableProducts = new List<Product>
             {
                 new Product("Хлеб", _bread),
                 new Product("Молоко", _milk),
-                new Product("Яйца", _eggs),
+                new Product("Яйца", eggs),
                 new Product("Сахар", _sugar),
                 new Product("Масло", _butter)
             };
 
             _supermarket = new Supermarket(_availableProducts);
-        }
+        }    
 
         public void Run()
         {
+            const string CommandMenuOptionShowProducts = "1";
+            const string CommandMenuOptionAddClient = "2";
+            const string CommandMenuOptionServeClient = "3";
+            const string CommandMenuOptionShowEarnings = "4";
+            const string CommandMenuOptionExit = "5";
+
+
             bool isRunning = true;
 
             while (isRunning)
             {
                 Console.WriteLine("\nМеню управления супермаркетом:");
-                Console.WriteLine($"{Program.CommandMenuOptionShowProducts}. Показать список продуктов");
-                Console.WriteLine($"{Program.CommandMenuOptionAddClient}. Добавить клиента");
-                Console.WriteLine($"{Program.CommandMenuOptionServeClient}. Обслужить клиента");
-                Console.WriteLine($"{Program.CommandMenuOptionShowEarnings}. Показать доход");
-                Console.WriteLine($"{Program.CommandMenuOptionExit}. Выход из программы");
+                Console.WriteLine($"{CommandMenuOptionShowProducts}. Показать список продуктов");
+                Console.WriteLine($"{CommandMenuOptionAddClient}. Добавить клиента");
+                Console.WriteLine($"{CommandMenuOptionServeClient}. Обслужить клиента");
+                Console.WriteLine($"{CommandMenuOptionShowEarnings}. Показать доход");
+                Console.WriteLine($"{CommandMenuOptionExit}. Выход из программы");
 
                 Console.Write("Выберите действие: ");
-
                 string choice = Console.ReadLine();
 
                 switch (choice)
                 {
-                    case Program.CommandMenuOptionShowProducts:
+                    case CommandMenuOptionShowProducts:
                         ShowProducts();
                         break;
 
-                    case Program.CommandMenuOptionAddClient:
+                    case CommandMenuOptionAddClient:
                         AddClient();
                         break;
 
-                    case Program.CommandMenuOptionServeClient:
+                    case CommandMenuOptionServeClient:
                         ServeClient();
                         break;
 
-                    case Program.CommandMenuOptionShowEarnings:
+                    case CommandMenuOptionShowEarnings:
                         ShowEarnings();
                         break;
 
-                    case Program.CommandMenuOptionExit:
+                    case CommandMenuOptionExit:
                         isRunning = false;
                         break;
 
@@ -97,6 +94,7 @@ namespace SupermarketAdministration
         private void ShowProducts()
         {
             Console.WriteLine("\nДоступные товары:");
+
             for (int i = 0; i < _availableProducts.Count; i++)
             {
                 Console.WriteLine($"{i + 1}. {_availableProducts[i].Name} - {_availableProducts[i].Price} руб.");
@@ -124,33 +122,38 @@ namespace SupermarketAdministration
 
         private void ManageClientShopping(Client client)
         {
+            const string CommandAddProductToCart = "1";
+            const string CommandFinishShopping = "2";
+            const string CommandRemoveProductFromCart = "3";
+
             bool isShopping = true;
 
             while (isShopping)
             {
                 Console.WriteLine($"\nТекущий баланс: {client.Money} руб.");
                 Console.WriteLine("Товары в корзине:");
+
                 ShowClientCart(client);
 
                 Console.WriteLine("\nМеню покупок:");
-                Console.WriteLine($"{Program.CommandAddProductToCart}. Добавить товар в корзину");
-                Console.WriteLine($"{Program.CommandRemoveProductFromCart}. Удалить товар из корзины");
-                Console.WriteLine($"{Program.CommandFinishShopping}. Завершить покупки");
+                Console.WriteLine($"{CommandAddProductToCart}. Добавить товар в корзину");
+                Console.WriteLine($"{CommandFinishShopping}. Удалить товар из корзины");
+                Console.WriteLine($"{CommandRemoveProductFromCart}. Завершить покупки");
 
                 Console.Write("Выберите действие: ");
                 string choice = Console.ReadLine();
 
                 switch (choice)
                 {
-                    case Program.CommandAddProductToCart:
+                    case CommandAddProductToCart:
                         AddProductToClientCart(client);
                         break;
 
-                    case Program.CommandRemoveProductFromCart:
+                    case CommandFinishShopping:
                         RemoveProductFromClientCart(client);
                         break;
 
-                    case Program.CommandFinishShopping:
+                    case CommandRemoveProductFromCart:
                         isShopping = false;
                         break;
 
@@ -173,7 +176,7 @@ namespace SupermarketAdministration
             {
                 Console.WriteLine($"{i + 1}. {client.ShoppingCart[i].Name} - {client.ShoppingCart[i].Price} рублей");
             }
-            Console.WriteLine($"Итого: {client.ShoppingCart.Sum(p => p.Price)} рублей");
+            Console.WriteLine($"Итого: {client.ShoppingCart.Sum(price => price.Price)} рублей");
         }
 
         private void AddProductToClientCart(Client client)
@@ -297,16 +300,14 @@ namespace SupermarketAdministration
             _shoppingCart.RemoveAt(index);
         }
 
-        public void Pay(decimal amount)
+        public void CompletePurchase(decimal amount)
         {
             if (CanPay(amount))
+            {
                 _money -= amount;
-        }
-
-        public void MovePurchasedToBag()
-        {
-            _shoppingBag.AddRange(_shoppingCart);
-            _shoppingCart.Clear();
+                _shoppingBag.AddRange(_shoppingCart);
+                _shoppingCart.Clear();
+            }
         }
     }
 
@@ -359,9 +360,8 @@ namespace SupermarketAdministration
 
             if (client.ShoppingCart.Count > 0)
             {
-                client.Pay(totalAmount);
+                client.CompletePurchase(totalAmount);
                 _earnedMoney += totalAmount;
-                client.MovePurchasedToBag();
                 Console.WriteLine($"Клиент {client.Name} оплатил покупку на сумму {totalAmount} руб.");
             }
             else
