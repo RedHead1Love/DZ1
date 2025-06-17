@@ -1,0 +1,373 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace SupermarketAdministration
+{
+    class Program
+    {
+        public const string CommandMenuOptionShowProducts = "1";
+        public const string CommandMenuOptionAddClient = "2";
+        public const string CommandMenuOptionServeClient = "3";
+        public const string CommandMenuOptionShowEarnings = "4";
+        public const string CommandMenuOptionExit = "5";
+
+        public const string CommandAddProductToCart = "1";
+        public const string CommandFinishShopping = "2";
+        public const string CommandRemoveProductFromCart = "3";
+
+        static void Main(string[] args)
+        {
+            SupermarketManager manager = new SupermarketManager();
+            manager.Run();
+        }
+    }
+
+    public class SupermarketManager
+    {
+        private readonly Supermarket _supermarket;
+        private readonly List<Product> _availableProducts;
+
+        private int _bread = 50;
+        private int _milk = 80;
+        private int _eggs = 120;
+        private int _sugar = 60;
+        private int _butter = 150;
+
+        public SupermarketManager()
+        {
+            _availableProducts = new List<Product>
+            {
+                new Product("Хлеб", _bread),
+                new Product("Молоко", _milk),
+                new Product("Яйца", _eggs),
+                new Product("Сахар", _sugar),
+                new Product("Масло", _butter)
+            };
+
+            _supermarket = new Supermarket(_availableProducts);
+        }
+
+        public void Run()
+        {
+            bool isRunning = true;
+
+            while (isRunning)
+            {
+                Console.WriteLine("\nМеню управления супермаркетом:");
+                Console.WriteLine($"{Program.CommandMenuOptionShowProducts}. Показать список продуктов");
+                Console.WriteLine($"{Program.CommandMenuOptionAddClient}. Добавить клиента");
+                Console.WriteLine($"{Program.CommandMenuOptionServeClient}. Обслужить клиента");
+                Console.WriteLine($"{Program.CommandMenuOptionShowEarnings}. Показать доход");
+                Console.WriteLine($"{Program.CommandMenuOptionExit}. Выход из программы");
+
+                Console.Write("Выберите действие: ");
+
+                string choice = Console.ReadLine();
+
+                switch (choice)
+                {
+                    case Program.CommandMenuOptionShowProducts:
+                        ShowProducts();
+                        break;
+
+                    case Program.CommandMenuOptionAddClient:
+                        AddClient();
+                        break;
+
+                    case Program.CommandMenuOptionServeClient:
+                        ServeClient();
+                        break;
+
+                    case Program.CommandMenuOptionShowEarnings:
+                        ShowEarnings();
+                        break;
+
+                    case Program.CommandMenuOptionExit:
+                        isRunning = false;
+                        break;
+
+                    default:
+                        Console.WriteLine("Неверный выбор, попробуйте снова.");
+                        break;
+                }
+            }
+        }
+
+        private void ShowProducts()
+        {
+            Console.WriteLine("\nДоступные товары:");
+            for (int i = 0; i < _availableProducts.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {_availableProducts[i].Name} - {_availableProducts[i].Price} руб.");
+            }
+        }
+
+        private void AddClient()
+        {
+            Console.Write("Введите имя клиента: ");
+            string name = Console.ReadLine();
+
+            Console.Write("Введите количество денег у клиента: ");
+            if (decimal.TryParse(Console.ReadLine(), out decimal money) == false)
+            {
+                Console.WriteLine("Некорректная сумма денег.");
+                return;
+            }
+
+            var client = new Client(name, money);
+            ManageClientShopping(client);
+
+            _supermarket.AddClient(client);
+            Console.WriteLine($"Клиент {name} добавлен в очередь.");
+        }
+
+        private void ManageClientShopping(Client client)
+        {
+            bool isShopping = true;
+
+            while (isShopping)
+            {
+                Console.WriteLine($"\nТекущий баланс: {client.Money} руб.");
+                Console.WriteLine("Товары в корзине:");
+                ShowClientCart(client);
+
+                Console.WriteLine("\nМеню покупок:");
+                Console.WriteLine($"{Program.CommandAddProductToCart}. Добавить товар в корзину");
+                Console.WriteLine($"{Program.CommandRemoveProductFromCart}. Удалить товар из корзины");
+                Console.WriteLine($"{Program.CommandFinishShopping}. Завершить покупки");
+
+                Console.Write("Выберите действие: ");
+                string choice = Console.ReadLine();
+
+                switch (choice)
+                {
+                    case Program.CommandAddProductToCart:
+                        AddProductToClientCart(client);
+                        break;
+
+                    case Program.CommandRemoveProductFromCart:
+                        RemoveProductFromClientCart(client);
+                        break;
+
+                    case Program.CommandFinishShopping:
+                        isShopping = false;
+                        break;
+
+                    default:
+                        Console.WriteLine("Неверный выбор, попробуйте снова.");
+                        break;
+                }
+            }
+        }
+
+        private void ShowClientCart(Client client)
+        {
+            if (client.ShoppingCart.Count == 0)
+            {
+                Console.WriteLine("Корзина пуста");
+                return;
+            }
+
+            for (int i = 0; i < client.ShoppingCart.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {client.ShoppingCart[i].Name} - {client.ShoppingCart[i].Price} рублей");
+            }
+            Console.WriteLine($"Итого: {client.ShoppingCart.Sum(p => p.Price)} рублей");
+        }
+
+        private void AddProductToClientCart(Client client)
+        {
+            ShowProducts();
+            Console.Write("Введите номер товара: ");
+
+            if (int.TryParse(Console.ReadLine(), out int productNumber) == false ||
+                productNumber < 1 || productNumber > _availableProducts.Count)
+            {
+                Console.WriteLine("Некорректный номер товара.");
+                return;
+            }
+
+            var product = _availableProducts[productNumber - 1];
+            client.AddToCart(product);
+
+            Console.WriteLine($"Товар {product.Name} добавлен в корзину.");
+        }
+
+        private void RemoveProductFromClientCart(Client client)
+        {
+            if (client.ShoppingCart.Count == 0)
+            {
+                Console.WriteLine("Корзина пуста");
+                return;
+            }
+
+            ShowClientCart(client);
+            Console.Write("Введите номер товара для удаления: ");
+
+            if (int.TryParse(Console.ReadLine(), out int productNumber) == false ||
+                productNumber < 1 || productNumber > client.ShoppingCart.Count)
+            {
+                Console.WriteLine("Некорректный номер товара.");
+                return;
+            }
+
+            var product = client.ShoppingCart[productNumber - 1];
+            client.RemoveFromCart(productNumber - 1);
+
+            Console.WriteLine($"Товар {product.Name} удален из корзины.");
+        }
+
+        private void ServeClient()
+        {
+            if (_supermarket.ClientsCount == 0)
+            {
+                Console.WriteLine("Нет клиентов в очереди.");
+                return;
+            }
+
+            _supermarket.ServeNextClient();
+            Console.WriteLine("Клиент обслужен.");
+        }
+
+        private void ShowEarnings()
+        {
+            Console.WriteLine($"\nОбщий доход: {_supermarket.EarnedMoney} руб.");
+        }
+    }
+
+    public class Product
+    {
+        public string Name { get; }
+        public decimal Price { get; }
+
+        public Product(string name, decimal price)
+        {
+            Name = name;
+            Price = price;
+        }
+    }
+
+    public class Client
+    {
+        private readonly Random _random;
+        private readonly string _name;
+        private decimal _money;
+        private readonly List<Product> _shoppingCart;
+        private readonly List<Product> _shoppingBag;
+
+        public string Name => _name;
+        public decimal Money => _money;
+        public IReadOnlyList<Product> ShoppingCart => _shoppingCart.AsReadOnly();
+        public IReadOnlyList<Product> ShoppingBag => _shoppingBag.AsReadOnly();
+
+        public Client(string name, decimal money)
+        {
+            _random = new Random();
+            _name = name;
+            _money = money;
+            _shoppingCart = new List<Product>();
+            _shoppingBag = new List<Product>();
+        }
+
+        public void AddToCart(Product product)
+        {
+            _shoppingCart.Add(product);
+        }
+
+        public void RemoveFromCart(int index)
+        {
+            if (index >= 0 && index < _shoppingCart.Count)
+            {
+                _shoppingCart.RemoveAt(index);
+            }
+        }
+
+        public bool CanPay(decimal amount)
+        {
+            return _money >= amount;
+        }
+
+        public void RemoveRandomProductFromCart()
+        {
+            if (_shoppingCart.Count == 0)
+                return;
+
+            int index = _random.Next(_shoppingCart.Count);
+            _shoppingCart.RemoveAt(index);
+        }
+
+        public void Pay(decimal amount)
+        {
+            if (CanPay(amount))
+                _money -= amount;
+        }
+
+        public void MovePurchasedToBag()
+        {
+            _shoppingBag.AddRange(_shoppingCart);
+            _shoppingCart.Clear();
+        }
+    }
+
+    public class Supermarket
+    {
+        private readonly List<Product> _products;
+        private readonly Queue<Client> _clients;
+        private decimal _earnedMoney;
+
+        public IReadOnlyList<Product> Products => _products.AsReadOnly();
+        public int ClientsCount => _clients.Count;
+        public decimal EarnedMoney => _earnedMoney;
+
+        public Supermarket(IEnumerable<Product> products)
+        {
+            _products = products.ToList();
+            _clients = new Queue<Client>();
+            _earnedMoney = 0;
+        }
+
+        public void AddClient(Client client)
+        {
+            if (client == null)
+                throw new ArgumentNullException(nameof(client));
+
+            _clients.Enqueue(client);
+        }
+
+        public void ServeNextClient()
+        {
+            if (_clients.Count == 0)
+                return;
+
+            Client currentClient = _clients.Dequeue();
+            ProcessClientPurchase(currentClient);
+        }
+
+        private void ProcessClientPurchase(Client client)
+        {
+            decimal totalAmount = client.ShoppingCart.Sum(p => p.Price);
+
+            while (!client.CanPay(totalAmount) && client.ShoppingCart.Count > 0)
+            {
+                Console.WriteLine($"У клиента {client.Name} недостаточно денег (нужно {totalAmount} руб., есть {client.Money} руб.)");
+                Console.WriteLine("Удаляем случайный товар из корзины");
+
+                client.RemoveRandomProductFromCart();
+                totalAmount = client.ShoppingCart.Sum(p => p.Price);
+            }
+
+            if (client.ShoppingCart.Count > 0)
+            {
+                client.Pay(totalAmount);
+                _earnedMoney += totalAmount;
+                client.MovePurchasedToBag();
+                Console.WriteLine($"Клиент {client.Name} оплатил покупку на сумму {totalAmount} руб.");
+            }
+            else
+            {
+                Console.WriteLine($"Клиент {client.Name} не смог оплатить ни один товар.");
+            }
+        }
+    }
+}
