@@ -4,6 +4,16 @@ using System.Linq;
 
 namespace SupermarketAdministration
 {
+    public static class UserUtils
+    {
+        private static readonly Random s_random = new Random();
+
+        public static int GenerateRandomNumber(int min, int max)
+        {
+            return s_random.Next(min, max);
+        }
+    }
+
     class Program
     {
         static void Main(string[] args)
@@ -20,24 +30,17 @@ namespace SupermarketAdministration
 
         public SupermarketManager()
         {
-            int _bread = 50;
-            int _milk = 80;
-            int _sugar = 60;
-            int eggs = 120;
-            int _butter = 150;
-
-
             _availableProducts = new List<Product>
             {
-                new Product("Хлеб", _bread),
-                new Product("Молоко", _milk),
-                new Product("Яйца", eggs),
-                new Product("Сахар", _sugar),
-                new Product("Масло", _butter)
+                new Product("Хлеб", 50),
+                new Product("Молоко", 80),
+                new Product("Яйца", 120),
+                new Product("Сахар", 60),
+                new Product("Масло", 150)
             };
 
             _supermarket = new Supermarket(_availableProducts);
-        }    
+        }
 
         public void Run()
         {
@@ -47,10 +50,9 @@ namespace SupermarketAdministration
             const string CommandMenuOptionShowEarnings = "4";
             const string CommandMenuOptionExit = "5";
 
+            bool isRun = true;
 
-            bool isRunning = true;
-
-            while (isRunning)
+            while (isRun)
             {
                 Console.WriteLine("\nМеню управления супермаркетом:");
                 Console.WriteLine($"{CommandMenuOptionShowProducts}. Показать список продуктов");
@@ -81,7 +83,7 @@ namespace SupermarketAdministration
                         break;
 
                     case CommandMenuOptionExit:
-                        isRunning = false;
+                        isRun = false;
                         break;
 
                     default:
@@ -123,22 +125,21 @@ namespace SupermarketAdministration
         private void ManageClientShopping(Client client)
         {
             const string CommandAddProductToCart = "1";
-            const string CommandFinishShopping = "2";
-            const string CommandRemoveProductFromCart = "3";
+            const string CommandRemoveProductFromCart = "2";
+            const string CommandFinishShopping = "3";
 
-            bool isShopping = true;
+            bool isShop = true;
 
-            while (isShopping)
+            while (isShop)
             {
                 Console.WriteLine($"\nТекущий баланс: {client.Money} руб.");
                 Console.WriteLine("Товары в корзине:");
-
                 ShowClientCart(client);
 
                 Console.WriteLine("\nМеню покупок:");
                 Console.WriteLine($"{CommandAddProductToCart}. Добавить товар в корзину");
-                Console.WriteLine($"{CommandFinishShopping}. Удалить товар из корзины");
-                Console.WriteLine($"{CommandRemoveProductFromCart}. Завершить покупки");
+                Console.WriteLine($"{CommandRemoveProductFromCart}. Удалить товар из корзины");
+                Console.WriteLine($"{CommandFinishShopping}. Завершить покупки");
 
                 Console.Write("Выберите действие: ");
                 string choice = Console.ReadLine();
@@ -149,12 +150,12 @@ namespace SupermarketAdministration
                         AddProductToClientCart(client);
                         break;
 
-                    case CommandFinishShopping:
+                    case CommandRemoveProductFromCart:
                         RemoveProductFromClientCart(client);
                         break;
 
-                    case CommandRemoveProductFromCart:
-                        isShopping = false;
+                    case CommandFinishShopping:
+                        isShop = false;
                         break;
 
                     default:
@@ -176,7 +177,7 @@ namespace SupermarketAdministration
             {
                 Console.WriteLine($"{i + 1}. {client.ShoppingCart[i].Name} - {client.ShoppingCart[i].Price} рублей");
             }
-            Console.WriteLine($"Итого: {client.ShoppingCart.Sum(price => price.Price)} рублей");
+            Console.WriteLine($"Итого: {client.ShoppingCart.Sum(product => product.Price)} рублей");
         }
 
         private void AddProductToClientCart(Client client)
@@ -253,7 +254,6 @@ namespace SupermarketAdministration
 
     public class Client
     {
-        private readonly Random _random;
         private readonly string _name;
         private decimal _money;
         private readonly List<Product> _shoppingCart;
@@ -266,7 +266,6 @@ namespace SupermarketAdministration
 
         public Client(string name, decimal money)
         {
-            _random = new Random();
             _name = name;
             _money = money;
             _shoppingCart = new List<Product>();
@@ -296,7 +295,7 @@ namespace SupermarketAdministration
             if (_shoppingCart.Count == 0)
                 return;
 
-            int index = _random.Next(_shoppingCart.Count);
+            int index = UserUtils.GenerateRandomNumber(0, _shoppingCart.Count);
             _shoppingCart.RemoveAt(index);
         }
 
@@ -347,15 +346,15 @@ namespace SupermarketAdministration
 
         private void ProcessClientPurchase(Client client)
         {
-            decimal totalAmount = client.ShoppingCart.Sum(p => p.Price);
+            decimal totalAmount = client.ShoppingCart.Sum(product => product.Price);
 
-            while (!client.CanPay(totalAmount) && client.ShoppingCart.Count > 0)
+            while (client.CanPay(totalAmount) == false && client.ShoppingCart.Count > 0)
             {
                 Console.WriteLine($"У клиента {client.Name} недостаточно денег (нужно {totalAmount} руб., есть {client.Money} руб.)");
                 Console.WriteLine("Удаляем случайный товар из корзины");
 
                 client.RemoveRandomProductFromCart();
-                totalAmount = client.ShoppingCart.Sum(p => p.Price);
+                totalAmount = client.ShoppingCart.Sum(product => product.Price);
             }
 
             if (client.ShoppingCart.Count > 0)
