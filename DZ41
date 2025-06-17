@@ -6,11 +6,11 @@ namespace SupermarketAdministration
 {
     public static class UserUtils
     {
-        private static readonly Random s_random = new Random();
+        private static readonly Random Random = new Random();
 
         public static int GenerateRandomNumber(int min, int max)
         {
-            return s_random.Next(min, max);
+            return Random.Next(min, max);
         }
     }
 
@@ -26,11 +26,10 @@ namespace SupermarketAdministration
     public class SupermarketManager
     {
         private readonly Supermarket _supermarket;
-        private readonly List<Product> _availableProducts;
 
         public SupermarketManager()
         {
-            _availableProducts = new List<Product>
+            List<Product> availableProducts = new List<Product>
             {
                 new Product("Хлеб", 50),
                 new Product("Молоко", 80),
@@ -39,7 +38,7 @@ namespace SupermarketAdministration
                 new Product("Масло", 150)
             };
 
-            _supermarket = new Supermarket(_availableProducts);
+            _supermarket = new Supermarket(availableProducts);
         }
 
         public void Run()
@@ -67,7 +66,7 @@ namespace SupermarketAdministration
                 switch (choice)
                 {
                     case CommandMenuOptionShowProducts:
-                        ShowProducts();
+                        _supermarket.ShowProducts();
                         break;
 
                     case CommandMenuOptionAddClient:
@@ -75,11 +74,11 @@ namespace SupermarketAdministration
                         break;
 
                     case CommandMenuOptionServeClient:
-                        ServeClient();
+                        _supermarket.ServeNextClient();
                         break;
 
                     case CommandMenuOptionShowEarnings:
-                        ShowEarnings();
+                        Console.WriteLine($"\nОбщий доход: {_supermarket.EarnedMoney} руб.");
                         break;
 
                     case CommandMenuOptionExit:
@@ -93,29 +92,20 @@ namespace SupermarketAdministration
             }
         }
 
-        private void ShowProducts()
-        {
-            Console.WriteLine("\nДоступные товары:");
-
-            for (int i = 0; i < _availableProducts.Count; i++)
-            {
-                Console.WriteLine($"{i + 1}. {_availableProducts[i].Name} - {_availableProducts[i].Price} руб.");
-            }
-        }
-
         private void AddClient()
         {
             Console.Write("Введите имя клиента: ");
             string name = Console.ReadLine();
 
             Console.Write("Введите количество денег у клиента: ");
+
             if (decimal.TryParse(Console.ReadLine(), out decimal money) == false)
             {
                 Console.WriteLine("Некорректная сумма денег.");
                 return;
             }
 
-            var client = new Client(name, money);
+            Client client = new Client(name, money);
             ManageClientShopping(client);
 
             _supermarket.AddClient(client);
@@ -133,8 +123,7 @@ namespace SupermarketAdministration
             while (isShop)
             {
                 Console.WriteLine($"\nТекущий баланс: {client.Money} руб.");
-                Console.WriteLine("Товары в корзине:");
-                ShowClientCart(client);
+                client.ShowCart();
 
                 Console.WriteLine("\nМеню покупок:");
                 Console.WriteLine($"{CommandAddProductToCart}. Добавить товар в корзину");
@@ -165,78 +154,55 @@ namespace SupermarketAdministration
             }
         }
 
-        private void ShowClientCart(Client client)
-        {
-            if (client.ShoppingCart.Count == 0)
-            {
-                Console.WriteLine("Корзина пуста");
-                return;
-            }
-
-            for (int i = 0; i < client.ShoppingCart.Count; i++)
-            {
-                Console.WriteLine($"{i + 1}. {client.ShoppingCart[i].Name} - {client.ShoppingCart[i].Price} рублей");
-            }
-            Console.WriteLine($"Итого: {client.ShoppingCart.Sum(product => product.Price)} рублей");
-        }
-
         private void AddProductToClientCart(Client client)
         {
-            ShowProducts();
+            _supermarket.ShowProducts();
             Console.Write("Введите номер товара: ");
 
-            if (int.TryParse(Console.ReadLine(), out int productNumber) == false ||
-                productNumber < 1 || productNumber > _availableProducts.Count)
+            if (int.TryParse(Console.ReadLine(), out int productNumber) == false)
             {
                 Console.WriteLine("Некорректный номер товара.");
                 return;
             }
 
-            var product = _availableProducts[productNumber - 1];
-            client.AddToCart(product);
+            Product product = _supermarket.GetProductByIndex(productNumber - 1);
 
-            Console.WriteLine($"Товар {product.Name} добавлен в корзину.");
+            if (product != null)
+            {
+                client.AddToCart(product);
+                Console.WriteLine($"Товар {product.Name} добавлен в корзину.");
+            }
+            else
+            {
+                Console.WriteLine("Товар с таким номером не найден.");
+            }
         }
 
         private void RemoveProductFromClientCart(Client client)
         {
-            if (client.ShoppingCart.Count == 0)
+            if (client.ShoppingCartCount == 0)
             {
                 Console.WriteLine("Корзина пуста");
                 return;
             }
 
-            ShowClientCart(client);
+            client.ShowCart();
             Console.Write("Введите номер товара для удаления: ");
 
-            if (int.TryParse(Console.ReadLine(), out int productNumber) == false ||
-                productNumber < 1 || productNumber > client.ShoppingCart.Count)
+            if (int.TryParse(Console.ReadLine(), out int productNumber) == false)
             {
                 Console.WriteLine("Некорректный номер товара.");
                 return;
             }
 
-            var product = client.ShoppingCart[productNumber - 1];
-            client.RemoveFromCart(productNumber - 1);
-
-            Console.WriteLine($"Товар {product.Name} удален из корзины.");
-        }
-
-        private void ServeClient()
-        {
-            if (_supermarket.ClientsCount == 0)
+            if (client.RemoveFromCart(productNumber - 1))
             {
-                Console.WriteLine("Нет клиентов в очереди.");
-                return;
+                Console.WriteLine("Товар удален из корзины.");
             }
-
-            _supermarket.ServeNextClient();
-            Console.WriteLine("Клиент обслужен.");
-        }
-
-        private void ShowEarnings()
-        {
-            Console.WriteLine($"\nОбщий доход: {_supermarket.EarnedMoney} руб.");
+            else
+            {
+                Console.WriteLine("Не удалось удалить товар.");
+            }
         }
     }
 
@@ -254,40 +220,61 @@ namespace SupermarketAdministration
 
     public class Client
     {
-        private readonly string _name;
-        private decimal _money;
         private readonly List<Product> _shoppingCart;
-        private readonly List<Product> _shoppingBag;
 
         public Client(string name, decimal money)
         {
-            _name = name;
-            _money = money;
+            Name = name;
+            Money = money;
             _shoppingCart = new List<Product>();
-            _shoppingBag = new List<Product>();
         }
 
-        public string Name => _name;
-        public decimal Money => _money;
-        public IReadOnlyList<Product> ShoppingCart => _shoppingCart.AsReadOnly();
-        public IReadOnlyList<Product> ShoppingBag => _shoppingBag.AsReadOnly();
+        public string Name { get; }
+        public decimal Money { get; private set; }
+        public int ShoppingCartCount => _shoppingCart.Count;
 
         public void AddToCart(Product product)
         {
             _shoppingCart.Add(product);
         }
 
-        public void RemoveFromCart(int index)
+        public bool RemoveFromCart(int index)
         {
             if (index >= 0 && index < _shoppingCart.Count)
             {
                 _shoppingCart.RemoveAt(index);
+                return true;
             }
+
+            return false;
+        }
+
+        public void ShowCart()
+        {
+            Console.WriteLine("Товары в корзине:");
+
+            if (_shoppingCart.Count == 0)
+            {
+                Console.WriteLine("Корзина пуста");
+                return;
+            }
+
+            for (int i = 0; i < _shoppingCart.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {_shoppingCart[i].Name} - {_shoppingCart[i].Price} рублей");
+            }
+
+            Console.WriteLine($"Итого: {GetCartTotal()} рублей");
+        }
+
+        public decimal GetCartTotal()
+        {
+            return _shoppingCart.Sum(product => product.Price);
         }
 
         public bool CanPay(decimal amount)
         {
-            return _money >= amount;
+            return Money >= amount;
         }
 
         public void RemoveRandomProductFromCart()
@@ -303,8 +290,7 @@ namespace SupermarketAdministration
         {
             if (CanPay(amount))
             {
-                _money -= amount;
-                _shoppingBag.AddRange(_shoppingCart);
+                Money -= amount;
                 _shoppingCart.Clear();
             }
         }
@@ -314,18 +300,16 @@ namespace SupermarketAdministration
     {
         private readonly List<Product> _products;
         private readonly Queue<Client> _clients;
-        private decimal _earnedMoney;
 
         public Supermarket(IEnumerable<Product> products)
         {
             _products = products.ToList();
             _clients = new Queue<Client>();
-            _earnedMoney = 0;
+            EarnedMoney = 0;
         }
 
-        public IReadOnlyList<Product> Products => _products.AsReadOnly();
+        public decimal EarnedMoney { get; private set; }
         public int ClientsCount => _clients.Count;
-        public decimal EarnedMoney => _earnedMoney;
 
         public void AddClient(Client client)
         {
@@ -338,29 +322,53 @@ namespace SupermarketAdministration
         public void ServeNextClient()
         {
             if (_clients.Count == 0)
+            {
+                Console.WriteLine("Нет клиентов в очереди.");
                 return;
+            }
 
             Client currentClient = _clients.Dequeue();
             ProcessClientPurchase(currentClient);
+            Console.WriteLine("Клиент обслужен.");
+        }
+
+        public void ShowProducts()
+        {
+            Console.WriteLine("\nДоступные товары:");
+
+            for (int i = 0; i < _products.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {_products[i].Name} - {_products[i].Price} руб.");
+            }
+        }
+
+        public Product GetProductByIndex(int index)
+        {
+            if (index >= 0 && index < _products.Count)
+            {
+                return _products[index];
+            }
+
+            return null;
         }
 
         private void ProcessClientPurchase(Client client)
         {
-            decimal totalAmount = client.ShoppingCart.Sum(product => product.Price);
+            decimal totalAmount = client.GetCartTotal();
 
-            while (client.CanPay(totalAmount) == false && client.ShoppingCart.Count > 0)
+            while (client.CanPay(totalAmount) == false && client.ShoppingCartCount > 0)
             {
                 Console.WriteLine($"У клиента {client.Name} недостаточно денег (нужно {totalAmount} руб., есть {client.Money} руб.)");
                 Console.WriteLine("Удаляем случайный товар из корзины");
 
                 client.RemoveRandomProductFromCart();
-                totalAmount = client.ShoppingCart.Sum(product => product.Price);
+                totalAmount = client.GetCartTotal();
             }
 
-            if (client.ShoppingCart.Count > 0)
+            if (client.ShoppingCartCount > 0)
             {
                 client.CompletePurchase(totalAmount);
-                _earnedMoney += totalAmount;
+                EarnedMoney += totalAmount;
                 Console.WriteLine($"Клиент {client.Name} оплатил покупку на сумму {totalAmount} руб.");
             }
             else
