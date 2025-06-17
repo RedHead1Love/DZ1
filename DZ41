@@ -106,103 +106,8 @@ namespace SupermarketAdministration
             }
 
             Client client = new Client(name, money);
-            ManageClientShopping(client);
-
             _supermarket.AddClient(client);
             Console.WriteLine($"Клиент {name} добавлен в очередь.");
-        }
-
-        private void ManageClientShopping(Client client)
-        {
-            const string CommandAddProductToCart = "1";
-            const string CommandRemoveProductFromCart = "2";
-            const string CommandFinishShopping = "3";
-
-            bool isShop = true;
-
-            while (isShop)
-            {
-                Console.WriteLine($"\nТекущий баланс: {client.Money} руб.");
-                client.ShowCart();
-
-                Console.WriteLine("\nМеню покупок:");
-                Console.WriteLine($"{CommandAddProductToCart}. Добавить товар в корзину");
-                Console.WriteLine($"{CommandRemoveProductFromCart}. Удалить товар из корзины");
-                Console.WriteLine($"{CommandFinishShopping}. Завершить покупки");
-
-                Console.Write("Выберите действие: ");
-                string choice = Console.ReadLine();
-
-                switch (choice)
-                {
-                    case CommandAddProductToCart:
-                        AddProductToClientCart(client);
-                        break;
-
-                    case CommandRemoveProductFromCart:
-                        RemoveProductFromClientCart(client);
-                        break;
-
-                    case CommandFinishShopping:
-                        isShop = false;
-                        break;
-
-                    default:
-                        Console.WriteLine("Неверный выбор, попробуйте снова.");
-                        break;
-                }
-            }
-        }
-
-        private void AddProductToClientCart(Client client)
-        {
-            _supermarket.ShowProducts();
-            Console.Write("Введите номер товара: ");
-
-            if (int.TryParse(Console.ReadLine(), out int productNumber) == false)
-            {
-                Console.WriteLine("Некорректный номер товара.");
-                return;
-            }
-
-            Product product = _supermarket.GetProductByIndex(productNumber - 1);
-
-            if (product != null)
-            {
-                client.AddToCart(product);
-                Console.WriteLine($"Товар {product.Name} добавлен в корзину.");
-            }
-            else
-            {
-                Console.WriteLine("Товар с таким номером не найден.");
-            }
-        }
-
-        private void RemoveProductFromClientCart(Client client)
-        {
-            if (client.ShoppingCartCount == 0)
-            {
-                Console.WriteLine("Корзина пуста");
-                return;
-            }
-
-            client.ShowCart();
-            Console.Write("Введите номер товара для удаления: ");
-
-            if (int.TryParse(Console.ReadLine(), out int productNumber) == false)
-            {
-                Console.WriteLine("Некорректный номер товара.");
-                return;
-            }
-
-            if (client.RemoveFromCart(productNumber - 1))
-            {
-                Console.WriteLine("Товар удален из корзины.");
-            }
-            else
-            {
-                Console.WriteLine("Не удалось удалить товар.");
-            }
         }
     }
 
@@ -221,17 +126,20 @@ namespace SupermarketAdministration
     public class Client
     {
         private readonly List<Product> _shoppingCart;
+        private readonly List<Product> _bag;
 
         public Client(string name, decimal money)
         {
             Name = name;
             Money = money;
             _shoppingCart = new List<Product>();
+            _bag = new List<Product>();
         }
 
         public string Name { get; }
         public decimal Money { get; private set; }
         public int ShoppingCartCount => _shoppingCart.Count;
+        public int BagCount => _bag.Count;
 
         public void AddToCart(Product product)
         {
@@ -291,7 +199,24 @@ namespace SupermarketAdministration
             if (CanPay(amount))
             {
                 Money -= amount;
+                _bag.AddRange(_shoppingCart);
                 _shoppingCart.Clear();
+            }
+        }
+
+        public void ShowBag()
+        {
+            Console.WriteLine("Товары в сумке:");
+
+            if (_bag.Count == 0)
+            {
+                Console.WriteLine("Сумка пуста");
+                return;
+            }
+
+            for (int i = 0; i < _bag.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {_bag[i].Name}");
             }
         }
     }
@@ -328,7 +253,50 @@ namespace SupermarketAdministration
             }
 
             Client currentClient = _clients.Dequeue();
-            ProcessClientPurchase(currentClient);
+            Console.WriteLine($"Обслуживаем клиента: {currentClient.Name}");
+
+            bool isShopping = true;
+
+            while (isShopping)
+            {
+                const string CommandAddProductToCart = "1";
+                const string CommandRemoveProductFromCart = "2";
+                const string CommandFinishShopping = "3";
+
+                Console.WriteLine($"\nТекущий баланс: {currentClient.Money} руб.");
+                currentClient.ShowCart();
+
+                Console.WriteLine("\nМеню покупок:");
+                Console.WriteLine($"{CommandAddProductToCart}. Добавить товар в корзину");
+                Console.WriteLine($"{CommandRemoveProductFromCart}. Удалить товар из корзины");
+                Console.WriteLine($"{CommandFinishShopping}. Завершить покупки");
+
+                Console.Write("Выберите действие: ");
+                string choice = Console.ReadLine();
+
+                switch (choice)
+                {
+                    case CommandAddProductToCart:
+                        AddProductToClientCart(currentClient);
+                        break;
+
+                    case CommandRemoveProductFromCart:
+                        RemoveProductFromClientCart(currentClient);
+                        break;
+
+                    case CommandFinishShopping:
+                        isShopping = false;
+                        break;
+
+                    default:
+                        Console.WriteLine("Неверный выбор, попробуйте снова.");
+                        break;
+                }
+            }
+
+            ProcessPurchase(currentClient);
+            currentClient.ShowBag();
+
             Console.WriteLine("Клиент обслужен.");
         }
 
@@ -342,17 +310,69 @@ namespace SupermarketAdministration
             }
         }
 
-        public Product GetProductByIndex(int index)
+        public bool TryGetProduct(int index, out Product product)
         {
+            product = null;
+
             if (index >= 0 && index < _products.Count)
             {
-                return _products[index];
+                product = _products[index];
+                return true;
             }
 
-            return null;
+            return false;
         }
 
-        private void ProcessClientPurchase(Client client)
+        private void AddProductToClientCart(Client client)
+        {
+            ShowProducts();
+            Console.Write("Введите номер товара: ");
+
+            if (int.TryParse(Console.ReadLine(), out int productNumber) == false)
+            {
+                Console.WriteLine("Некорректный номер товара.");
+                return;
+            }
+
+            if (TryGetProduct(productNumber - 1, out Product product))
+            {
+                client.AddToCart(product);
+                Console.WriteLine($"Товар {product.Name} добавлен в корзину.");
+            }
+            else
+            {
+                Console.WriteLine("Товар с таким номером не найден.");
+            }
+        }
+
+        private void RemoveProductFromClientCart(Client client)
+        {
+            if (client.ShoppingCartCount == 0)
+            {
+                Console.WriteLine("Корзина пуста");
+                return;
+            }
+
+            client.ShowCart();
+            Console.Write("Введите номер товара для удаления: ");
+
+            if (int.TryParse(Console.ReadLine(), out int productNumber) == false)
+            {
+                Console.WriteLine("Некорректный номер товара.");
+                return;
+            }
+
+            if (client.RemoveFromCart(productNumber - 1))
+            {
+                Console.WriteLine("Товар удален из корзины.");
+            }
+            else
+            {
+                Console.WriteLine("Не удалось удалить товар.");
+            }
+        }
+
+        private void ProcessPurchase(Client client)
         {
             decimal totalAmount = client.GetCartTotal();
 
