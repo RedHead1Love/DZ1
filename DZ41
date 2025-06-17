@@ -242,14 +242,14 @@ namespace SupermarketAdministration
 
     public class Product
     {
-        public string Name { get; }
-        public decimal Price { get; }
-
         public Product(string name, decimal price)
         {
             Name = name;
             Price = price;
         }
+
+        public string Name { get; }
+        public decimal Price { get; }
     }
 
     public class Client
@@ -259,11 +259,6 @@ namespace SupermarketAdministration
         private readonly List<Product> _shoppingCart;
         private readonly List<Product> _shoppingBag;
 
-        public string Name => _name;
-        public decimal Money => _money;
-        public IReadOnlyList<Product> ShoppingCart => _shoppingCart.AsReadOnly();
-        public IReadOnlyList<Product> ShoppingBag => _shoppingBag.AsReadOnly();
-
         public Client(string name, decimal money)
         {
             _name = name;
@@ -271,6 +266,11 @@ namespace SupermarketAdministration
             _shoppingCart = new List<Product>();
             _shoppingBag = new List<Product>();
         }
+
+        public string Name => _name;
+        public decimal Money => _money;
+        public IReadOnlyList<Product> ShoppingCart => _shoppingCart.AsReadOnly();
+        public IReadOnlyList<Product> ShoppingBag => _shoppingBag.AsReadOnly();
 
         public void AddToCart(Product product)
         {
@@ -316,16 +316,16 @@ namespace SupermarketAdministration
         private readonly Queue<Client> _clients;
         private decimal _earnedMoney;
 
-        public IReadOnlyList<Product> Products => _products.AsReadOnly();
-        public int ClientsCount => _clients.Count;
-        public decimal EarnedMoney => _earnedMoney;
-
         public Supermarket(IEnumerable<Product> products)
         {
             _products = products.ToList();
             _clients = new Queue<Client>();
             _earnedMoney = 0;
         }
+
+        public IReadOnlyList<Product> Products => _products.AsReadOnly();
+        public int ClientsCount => _clients.Count;
+        public decimal EarnedMoney => _earnedMoney;
 
         public void AddClient(Client client)
         {
