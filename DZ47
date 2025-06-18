@@ -1,0 +1,186 @@
+using System;
+using System.Xml.Linq;
+
+class Program
+{
+    static void Main()
+    {
+        Game game = new Game();
+        game.Run();
+    }
+}
+
+public class Game
+{
+    const string CommandMoveForward = "W";
+    const string CommandMoveRight = "A";
+    const string CommandMoveBack = "S";
+    const string CommandMoveLeft = "D";
+    const string CommandExit = "Q";
+
+    private GameMap _map;
+    private bool _isRun;
+
+    public Game()
+    {
+        _map = new GameMap(10, 20);
+        _isRun = true;
+    }
+
+    public void Run()
+    {
+        while (_isRun)
+        {
+            Console.Clear();
+            _map.DisplayMap();
+
+            Console.WriteLine($"{CommandMoveForward}{CommandMoveRight}{CommandMoveBack}{CommandMoveLeft} - перемещение, {CommandExit} - выход");
+
+            HandleInput();
+        }
+    }
+
+    private void HandleInput()
+    {
+        ConsoleKeyInfo key = Console.ReadKey(true);
+
+        switch (key.Key)
+        {
+            case ConsoleKey.W:
+                _map.MovePlayer(0, -1);
+                break;
+
+            case ConsoleKey.S:
+                _map.MovePlayer(0, 1);
+                break;
+
+            case ConsoleKey.A:
+                _map.MovePlayer(-1, 0);
+                break;
+
+            case ConsoleKey.D:
+                _map.MovePlayer(1, 0);
+                break;
+
+            case ConsoleKey.Q:
+                _isRun = false;
+                break;
+        }
+    }
+}
+
+public class GameMap
+{
+    private const char PlayerSymbol = '@';
+    private const char WallSymbol = '#';
+    private const char EmptySymbol = '.';
+    private const char TreasureSymbol = '$';
+    private const char DoorSymbol = 'D';
+
+    private char[,] _map;
+    private int _playerX;
+    private int _playerY;
+
+    public GameMap(int width, int height)
+    {
+        int mapWidth = 5;
+        int mapHeight = 5;
+
+        if (width < mapWidth || height < mapHeight)
+        {
+            throw new ArgumentException($"Карта должна быть минимум {mapWidth}x{mapHeight}");
+        }
+
+        _map = new char[height, width];
+        _playerX = 1;
+        _playerY = 1;
+
+        InitializeMap();
+    }
+
+    private void InitializeMap()
+    {
+        int randomProbabilityOccurrenceElements = 0;
+
+        int randomProbabilityWallColor1 = 10;
+        int randomProbabilityTreasureAppearing = 20;
+        int randomProbabilityDoorAppearance = 30;
+
+        Random rnd = new Random();
+
+        for (int y = 0; y < _map.GetLength(0); y++)
+        {
+            for (int x = 0; x < _map.GetLength(1); x++)
+            {
+                if (x == 0 || y == 0 || x == _map.GetLength(1) - 1 || y == _map.GetLength(0) - 1)
+                {
+                    _map[y, x] = WallSymbol;
+                }
+                else if (rnd.Next(randomProbabilityOccurrenceElements, randomProbabilityWallColor1) < 2 && x != _playerX && y != _playerY)
+                {
+                    _map[y, x] = WallSymbol;
+                }
+                else if (rnd.Next(randomProbabilityOccurrenceElements, randomProbabilityTreasureAppearing) < 1 && x != _playerX && y != _playerY)
+                {
+                    _map[y, x] = TreasureSymbol;
+                }
+                else if (rnd.Next(randomProbabilityOccurrenceElements, randomProbabilityDoorAppearance) < 1 && x != _playerX && y != _playerY)
+                {
+                    _map[y, x] = DoorSymbol;
+                }
+                else
+                {
+                    _map[y, x] = EmptySymbol;
+                }
+            }
+        }
+
+        _map[_playerY, _playerX] = PlayerSymbol;
+    }
+
+    public void DisplayMap()
+    {
+        for (int y = 0; y < _map.GetLength(0); y++)
+        {
+            for (int x = 0; x < _map.GetLength(1); x++)
+            {
+                Console.Write(_map[y, x]);
+            }
+            Console.WriteLine();
+        }
+    }
+
+    public void MovePlayer(int dx, int dy)
+    {
+        int newX = _playerX + dx;
+        int newY = _playerY + dy;
+
+        if (newX < 0 || newY < 0 || newX >= _map.GetLength(1) || newY >= _map.GetLength(0))
+        {
+            return;
+        }
+
+        char targetCell = _map[newY, newX];
+
+        if (targetCell == WallSymbol)
+        {
+            return;
+        }
+
+        if (targetCell == TreasureSymbol)
+        {
+            Console.WriteLine("Вы нашли сокровище");
+            Console.ReadKey();
+        }
+        else if (targetCell == DoorSymbol)
+        {
+            Console.WriteLine("Вы нашли дверь");
+            Console.ReadKey();
+        }
+
+        _map[_playerY, _playerX] = EmptySymbol;
+        _playerX = newX;
+        _playerY = newY;
+        _map[_playerY, _playerX] = PlayerSymbol;
+    }
+}
