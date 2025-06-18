@@ -11,15 +11,25 @@ class Program
     }
 }
 
+static class UserUtils
+{
+    private static readonly Random _random = new Random();
+
+    public static int GenerateRandomNumber(int min, int max)
+    {
+        return _random.Next(min, max);
+    }
+}
+
 class BattleSimulator
 {
     private Platoon _platoon1;
     private Platoon _platoon2;
-    private Random _random;
+    private readonly List<Soldier> _soldierPrototypes;
 
     public BattleSimulator()
     {
-        _random = new Random();
+        _soldierPrototypes = CreateSoldierPrototypes();
         _platoon1 = CreatePlatoon(1);
         _platoon2 = CreatePlatoon(2);
     }
@@ -33,10 +43,10 @@ class BattleSimulator
             Console.WriteLine($"\n--- Раунд {round} ---");
 
             Console.WriteLine("\nАтака взвода 1:");
-            _platoon1.Attack(_platoon2);
+            _platoon1.Attack(_platoon2.GetAliveSoldiers());
 
             Console.WriteLine("\nАтака взвода 2:");
-            _platoon2.Attack(_platoon1);
+            _platoon2.Attack(_platoon1.GetAliveSoldiers());
 
             _platoon1.RemoveDeadSoldiers();
             _platoon2.RemoveDeadSoldiers();
@@ -49,12 +59,19 @@ class BattleSimulator
         }
 
         Console.WriteLine("\n--- Битва завершена ---");
+        DetermineWinner();
+    }
 
-        if (_platoon1.HasAliveSoldiers() && _platoon2.HasAliveSoldiers() == false)
+    private void DetermineWinner()
+    {
+        bool platoon1Alive = _platoon1.HasAliveSoldiers();
+        bool platoon2Alive = _platoon2.HasAliveSoldiers();
+
+        if (platoon1Alive && platoon2Alive == false)
         {
             Console.WriteLine("Победил взвод 1!");
         }
-        else if (_platoon2.HasAliveSoldiers() && _platoon1.HasAliveSoldiers() == false)
+        else if (platoon2Alive && platoon1Alive == false)
         {
             Console.WriteLine("Победил взвод 2!");
         }
@@ -64,63 +81,35 @@ class BattleSimulator
         }
     }
 
+    private List<Soldier> CreateSoldierPrototypes()
+    {
+        return new List<Soldier>
+        {
+            new RegularSoldier(0, 100, 15, 5),
+            new StrongSoldier(0, 120, 12, 8),
+            new MultiTargetSoldier(0, 90, 10, 3),
+            new RandomMultiTargetSoldier(0, 80, 8, 2)
+        };
+    }
+
     private Platoon CreatePlatoon(int number)
     {
         int minimumRandomSoldierCount = 5;
         int maximumRandomSoldierCount = 11;
 
-        int minimumRandomSoldierType = 1;
-        int maximumRandomSoldierType = 5;
-
         var soldiers = new List<Soldier>();
-        int soldierCount = _random.Next(minimumRandomSoldierCount, maximumRandomSoldierCount); 
+        int soldierCount = UserUtils.GenerateRandomNumber(minimumRandomSoldierCount, maximumRandomSoldierCount);
 
         for (int i = 0; i < soldierCount; i++)
         {
-            int soldierType = _random.Next(minimumRandomSoldierType, maximumRandomSoldierType);
-            soldiers.Add(CreateSoldier(soldierType, i + 1));
+            int soldierTypeIndex = UserUtils.GenerateRandomNumber(0, _soldierPrototypes.Count);
+            Soldier prototype = _soldierPrototypes[soldierTypeIndex];
+            Soldier newSoldier = prototype.Clone();
+            newSoldier.Id = i + 1;
+            soldiers.Add(newSoldier);
         }
 
         return new Platoon(number, soldiers);
-    }
-
-    private Soldier CreateSoldier(int type, int id)
-    {
-        const int SoldierTypeRegular = 1;
-        const int SoldierTypeStrong = 2;
-        const int SoldierTypeMultiTarget = 3;
-        const int SoldierTypeRandomMultiTarget = 4;
-
-        int minimumRandomHealth = 80;
-        int maximumRandomHealth = 121;
-
-        int minimumRandomDamage = 10;
-        int maximumRandomDamage = 21;
-
-        int minimumRandomArmor = 0;
-        int maximumRandomArmor = 11;
-
-        int health = _random.Next(minimumRandomHealth, maximumRandomHealth);
-        int damage = _random.Next(minimumRandomDamage, maximumRandomDamage);
-        int armor = _random.Next(minimumRandomArmor, maximumRandomArmor);
-
-        switch (type)
-        {
-            case SoldierTypeRegular:
-                return new RegularSoldier(id, health, damage, armor);
-
-            case SoldierTypeStrong:
-                return new StrongSoldier(id, health, damage, armor);
-
-            case SoldierTypeMultiTarget:
-                return new MultiTargetSoldier(id, health, damage, armor);
-
-            case SoldierTypeRandomMultiTarget:
-                return new RandomMultiTargetSoldier(id, health, damage, armor);
-
-            default:
-                return new RegularSoldier(id, health, damage, armor);
-        }
     }
 }
 
@@ -131,44 +120,36 @@ class Platoon
 
     public Platoon(int number, List<Soldier> soldiers)
     {
-        this._number = number;
-        this._soldiers = soldiers;
+        _number = number;
+        _soldiers = soldiers;
     }
 
     public bool HasAliveSoldiers()
     {
-        return _soldiers.Any(s => s.IsAlive());
+        return _soldiers.Any(soldier => soldier.IsAlive());
     }
 
-    public void Attack(Platoon enemyPlatoon)
+    public void Attack(List<Soldier> enemySoldiers)
     {
-        foreach (var soldier in _soldiers.Where(s => s.IsAlive()))
+        foreach (var soldier in _soldiers.Where(soldier => soldier.IsAlive()))
         {
-            soldier.Attack(enemyPlatoon);
+            soldier.Attack(enemySoldiers);
         }
     }
 
     public void RemoveDeadSoldiers()
     {
-        _soldiers = _soldiers.Where(Infantryman => Infantryman.IsAlive()).ToList();
+        _soldiers = _soldiers.Where(soldier => soldier.IsAlive()).ToList();
     }
 
     public void PrintStatus()
     {
-        Console.WriteLine($"Взвод {_number}: {_soldiers.Count(s => s.IsAlive())} живых солдат");
+        Console.WriteLine($"Взвод {_number}: {_soldiers.Count(soldier => soldier.IsAlive())} живых солдат");
     }
 
     public List<Soldier> GetAliveSoldiers()
     {
-        return _soldiers.Where(Trooper => Trooper.IsAlive()).ToList();
-    }
-
-    public Soldier GetRandomAliveSoldier(Random random)
-    {
-        var alive = GetAliveSoldiers();
-
-        if (alive.Count == 0) return null;
-        return alive[random.Next(alive.Count)];
+        return _soldiers.Where(soldier => soldier.IsAlive()).ToList();
     }
 }
 
@@ -182,7 +163,7 @@ abstract class Soldier
         Armor = armor;
     }
 
-    public int Id { get; }
+    public int Id { get; set; }
     public int Health { get; protected set; }
     public int Damage { get; protected set; }
     public int Armor { get; protected set; }
@@ -198,11 +179,18 @@ abstract class Soldier
         Health -= actualDamage;
     }
 
-    public abstract void Attack(Platoon enemyPlatoon);
+    public abstract void Attack(List<Soldier> enemySoldiers);
+    public abstract Soldier Clone();
+
+    protected Soldier GetRandomTarget(List<Soldier> enemySoldiers)
+    {
+        if (enemySoldiers.Count == 0) return null;
+        return enemySoldiers[UserUtils.GenerateRandomNumber(0, enemySoldiers.Count)];
+    }
 
     protected virtual void PerformAttack(Soldier target)
     {
-        if (target.IsAlive() == false) return;
+        if (target == null || target.IsAlive() == false) return;
 
         Console.WriteLine($"Солдат {Id} атакует солдата {target.Id} и наносит {Damage} урона");
         target.TakeDamage(Damage);
@@ -219,13 +207,15 @@ class RegularSoldier : Soldier
     public RegularSoldier(int id, int health, int damage, int armor)
         : base(id, health, damage, armor) { }
 
-    public override void Attack(Platoon enemyPlatoon)
+    public override void Attack(List<Soldier> enemySoldiers)
     {
-        var target = enemyPlatoon.GetRandomAliveSoldier(new Random());
-
-        if (target == null) return;
-
+        var target = GetRandomTarget(enemySoldiers);
         PerformAttack(target);
+    }
+
+    public override Soldier Clone()
+    {
+        return new RegularSoldier(Id, Health, Damage, Armor);
     }
 }
 
@@ -236,14 +226,12 @@ class StrongSoldier : Soldier
     public StrongSoldier(int id, int health, int damage, int armor)
         : base(id, health, damage, armor) { }
 
-    public override void Attack(Platoon enemyPlatoon)
+    public override void Attack(List<Soldier> enemySoldiers)
     {
-        var target = enemyPlatoon.GetRandomAliveSoldier(new Random());
-
+        var target = GetRandomTarget(enemySoldiers);
         if (target == null) return;
 
         int multipliedDamage = (int)(Damage * DamageMultiplier);
-
         Console.WriteLine($"Солдат {Id} атакует солдата {target.Id} с усиленным уроном {multipliedDamage}");
 
         target.TakeDamage(multipliedDamage);
@@ -252,6 +240,11 @@ class StrongSoldier : Soldier
         {
             Console.WriteLine($"Солдат {target.Id} погиб!");
         }
+    }
+
+    public override Soldier Clone()
+    {
+        return new StrongSoldier(Id, Health, Damage, Armor);
     }
 }
 
@@ -262,14 +255,12 @@ class MultiTargetSoldier : Soldier
     public MultiTargetSoldier(int id, int health, int damage, int armor)
         : base(id, health, damage, armor) { }
 
-    public override void Attack(Platoon enemyPlatoon)
+    public override void Attack(List<Soldier> enemySoldiers)
     {
-        var aliveEnemies = enemyPlatoon.GetAliveSoldiers();
+        if (enemySoldiers.Count == 0) return;
 
-        if (aliveEnemies.Count == 0) return;
-
-        int targetsCount = Math.Min(MaxTargets, aliveEnemies.Count);
-        var targets = aliveEnemies.OrderBy(x => Guid.NewGuid()).Take(targetsCount).ToList();
+        int targetsCount = Math.Min(MaxTargets, enemySoldiers.Count);
+        var targets = enemySoldiers.OrderBy(x => Guid.NewGuid()).Take(targetsCount).ToList();
 
         Console.WriteLine($"Солдат {Id} атакует {targets.Count} целей:");
 
@@ -277,6 +268,11 @@ class MultiTargetSoldier : Soldier
         {
             PerformAttack(target);
         }
+    }
+
+    public override Soldier Clone()
+    {
+        return new MultiTargetSoldier(Id, Health, Damage, Armor);
     }
 }
 
@@ -287,21 +283,22 @@ class RandomMultiTargetSoldier : Soldier
     public RandomMultiTargetSoldier(int id, int health, int damage, int armor)
         : base(id, health, damage, armor) { }
 
-    public override void Attack(Platoon enemyPlatoon)
+    public override void Attack(List<Soldier> enemySoldiers)
     {
-        var random = new Random();
-        var aliveEnemies = enemyPlatoon.GetAliveSoldiers();
+        if (enemySoldiers.Count == 0) return;
 
-        if (aliveEnemies.Count == 0) return;
-
-        int targetsCount = Math.Min(MaxTargets, aliveEnemies.Count);
-
+        int targetsCount = Math.Min(MaxTargets, enemySoldiers.Count);
         Console.WriteLine($"Солдат {Id} атакует {targetsCount} целей:");
 
         for (int i = 0; i < targetsCount; i++)
         {
-            var target = aliveEnemies[random.Next(aliveEnemies.Count)];
+            var target = GetRandomTarget(enemySoldiers);
             PerformAttack(target);
         }
+    }
+
+    public override Soldier Clone()
+    {
+        return new RandomMultiTargetSoldier(Id, Health, Damage, Armor);
     }
 }
