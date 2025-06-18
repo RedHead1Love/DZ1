@@ -6,8 +6,25 @@ class Program
 {
     static void Main()
     {
-        BattleSimulator simulator = new BattleSimulator();
+        var soldierPrototypes = CreateSoldierPrototypes();
+        var platoonFactory = new PlatoonFactory(soldierPrototypes);
+
+        Platoon platoon1 = platoonFactory.Create(1);
+        Platoon platoon2 = platoonFactory.Create(2);
+
+        BattleSimulator simulator = new BattleSimulator(platoon1, platoon2);
         simulator.RunBattle();
+    }
+
+    private static List<Soldier> CreateSoldierPrototypes()
+    {
+        return new List<Soldier>
+        {
+            new RegularSoldier(0, 100, 15, 5),
+            new StrongSoldier(0, 120, 12, 8),
+            new MultiTargetSoldier(0, 90, 10, 3),
+            new RandomMultiTargetSoldier(0, 80, 8, 2)
+        };
     }
 }
 
@@ -21,39 +38,66 @@ static class UserUtils
     }
 }
 
+class PlatoonFactory
+{
+    private readonly List<Soldier> _soldierPrototypes;
+    private const int MinimumRandomSoldierCount = 5;
+    private const int MaximumRandomSoldierCount = 11;
+
+    public PlatoonFactory(List<Soldier> soldierPrototypes)
+    {
+        _soldierPrototypes = soldierPrototypes;
+    }
+
+    public Platoon Create(int number)
+    {
+        var soldiers = new List<Soldier>();
+        int soldierCount = UserUtils.GenerateRandomNumber(MinimumRandomSoldierCount, MaximumRandomSoldierCount);
+
+        for (int i = 0; i < soldierCount; i++)
+        {
+            int soldierTypeIndex = UserUtils.GenerateRandomNumber(0, _soldierPrototypes.Count);
+            Soldier prototype = _soldierPrototypes[soldierTypeIndex];
+            Soldier newSoldier = prototype.Clone();
+            newSoldier.Id = i + 1;
+            soldiers.Add(newSoldier);
+        }
+
+        return new Platoon(number, soldiers);
+    }
+}
+
 class BattleSimulator
 {
-    private Platoon _platoon1;
-    private Platoon _platoon2;
-    private readonly List<Soldier> _soldierPrototypes;
+    private readonly Platoon _platoon1;
+    private readonly Platoon _platoon2;
 
-    public BattleSimulator()
+    public BattleSimulator(Platoon platoon1, Platoon platoon2)
     {
-        _soldierPrototypes = CreateSoldierPrototypes();
-        _platoon1 = CreatePlatoon(1);
-        _platoon2 = CreatePlatoon(2);
+        _platoon1 = platoon1;
+        _platoon2 = platoon2;
     }
 
     public void RunBattle()
     {
         int round = 1;
 
-        while (_platoon1.HasAliveSoldiers() && _platoon2.HasAliveSoldiers())
+        while (_platoon1.HasAliveSoldiers && _platoon2.HasAliveSoldiers)
         {
             Console.WriteLine($"\n--- Раунд {round} ---");
 
             Console.WriteLine("\nАтака взвода 1:");
-            _platoon1.Attack(_platoon2.GetAliveSoldiers());
+            _platoon1.Attack(_platoon2.AliveSoldiers);
 
             Console.WriteLine("\nАтака взвода 2:");
-            _platoon2.Attack(_platoon1.GetAliveSoldiers());
+            _platoon2.Attack(_platoon1.AliveSoldiers);
 
             _platoon1.RemoveDeadSoldiers();
             _platoon2.RemoveDeadSoldiers();
 
             Console.WriteLine("\nСостояние после раунда:");
-            _platoon1.PrintStatus();
-            _platoon2.PrintStatus();
+            Console.WriteLine(_platoon1.GetStatus());
+            Console.WriteLine(_platoon2.GetStatus());
 
             round++;
         }
@@ -64,59 +108,28 @@ class BattleSimulator
 
     private void DetermineWinner()
     {
-        bool platoon1Alive = _platoon1.HasAliveSoldiers();
-        bool platoon2Alive = _platoon2.HasAliveSoldiers();
+        bool platoon1Alive = _platoon1.HasAliveSoldiers;
+        bool platoon2Alive = _platoon2.HasAliveSoldiers;
 
-        if (platoon1Alive && !platoon2Alive)
+        if (platoon1Alive && platoon2Alive == false)
         {
-            Console.WriteLine("Победил взвод 1!");
+            Console.WriteLine("Победил взвод 1");
         }
-        else if (platoon2Alive && !platoon1Alive)
+        else if (platoon2Alive && platoon1Alive == false)
         {
-            Console.WriteLine("Победил взвод 2!");
+            Console.WriteLine("Победил взвод 2");
         }
         else
         {
-            Console.WriteLine("Ничья - оба взвода уничтожены!");
+            Console.WriteLine("Ничья - оба взвода уничтожены");
         }
-    }
-
-    private List<Soldier> CreateSoldierPrototypes()
-    {
-        return new List<Soldier>
-        {
-            new RegularSoldier(0, 100, 15, 5),
-            new StrongSoldier(0, 120, 12, 8),
-            new MultiTargetSoldier(0, 90, 10, 3),
-            new RandomMultiTargetSoldier(0, 80, 8, 2)
-        };
-    }
-
-    private Platoon CreatePlatoon(int number)
-    {
-        int minimumRandomSoldierCount = 5;
-        int maximumRandomSoldierCount = 11;
-
-        var soldiers = new List<Soldier>();
-        int soldierCount = UserUtils.GenerateRandomNumber(minimumRandomSoldierCount, maximumRandomSoldierCount);
-
-        for (int i = 0; i < soldierCount; i++)
-        {
-            int soldierTypeIndex = UserUtils.GenerateRandomNumber(0, _soldierPrototypes.Count);
-            Soldier prototype = _soldierPrototypes[soldierTypeIndex];
-            Soldier newSoldier = prototype.Clone();
-            newSoldier.SetId(i + 1);
-            soldiers.Add(newSoldier);
-        }
-
-        return new Platoon(number, soldiers);
     }
 }
 
 class Platoon
 {
     private List<Soldier> _soldiers;
-    private int _number;
+    private readonly int _number;
 
     public Platoon(int number, List<Soldier> soldiers)
     {
@@ -124,14 +137,12 @@ class Platoon
         _soldiers = soldiers;
     }
 
-    public bool HasAliveSoldiers()
-    {
-        return _soldiers.Any(soldier => soldier.IsAlive());
-    }
+    public bool HasAliveSoldiers => AliveSoldiers.Any();
+    public List<Soldier> AliveSoldiers => _soldiers.Where(soldier => soldier.IsAlive).ToList();
 
     public void Attack(List<Soldier> enemySoldiers)
     {
-        foreach (var soldier in _soldiers.Where(soldier => soldier.IsAlive()))
+        foreach (var soldier in _soldiers.Where(soldier => soldier.IsAlive))
         {
             soldier.Attack(enemySoldiers);
         }
@@ -139,17 +150,12 @@ class Platoon
 
     public void RemoveDeadSoldiers()
     {
-        _soldiers = _soldiers.Where(soldier => soldier.IsAlive()).ToList();
+        _soldiers = AliveSoldiers;
     }
 
-    public void PrintStatus()
+    public string GetStatus()
     {
-        Console.WriteLine($"Взвод {_number}: {_soldiers.Count(soldier => soldier.IsAlive())} живых солдат");
-    }
-
-    public List<Soldier> GetAliveSoldiers()
-    {
-        return _soldiers.Where(soldier => soldier.IsAlive()).ToList();
+        return $"Взвод {_number}: {AliveSoldiers.Count} живых солдат";
     }
 }
 
@@ -163,20 +169,11 @@ abstract class Soldier
         Armor = armor;
     }
 
-    public int Id { get; private set; }
+    public int Id { get; set; }
     public int Health { get; protected set; }
     public int Damage { get; protected set; }
     public int Armor { get; protected set; }
-
-    public bool IsAlive()
-    {
-        return Health > 0;
-    }
-
-    public void SetId(int id)
-    {
-        Id = id;
-    }
+    public bool IsAlive => Health > 0;
 
     public void TakeDamage(int damage)
     {
@@ -199,7 +196,7 @@ abstract class Soldier
 
     protected virtual void PerformAttack(Soldier target)
     {
-        if (target == null || target.IsAlive() == false)
+        if (target == null || target.IsAlive == false)
         {
             return;
         }
@@ -207,9 +204,9 @@ abstract class Soldier
         Console.WriteLine($"Солдат {Id} атакует солдата {target.Id} и наносит {Damage} урона");
         target.TakeDamage(Damage);
 
-        if (target.IsAlive() == false)
+        if (target.IsAlive == false)
         {
-            Console.WriteLine($"Солдат {target.Id} погиб!");
+            Console.WriteLine($"Солдат {target.Id} погиб");
         }
     }
 }
@@ -251,9 +248,9 @@ class StrongSoldier : Soldier
 
         target.TakeDamage(multipliedDamage);
 
-        if (!target.IsAlive())
+        if (target.IsAlive == false)
         {
-            Console.WriteLine($"Солдат {target.Id} погиб!");
+            Console.WriteLine($"Солдат {target.Id} погиб");
         }
     }
 
