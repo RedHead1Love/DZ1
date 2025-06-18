@@ -13,11 +13,11 @@ class Program
 
 static class UserUtils
 {
-    private static readonly Random _random = new Random();
+    private static readonly Random s_random = new Random();
 
     public static int GenerateRandomNumber(int min, int max)
     {
-        return _random.Next(min, max);
+        return s_random.Next(min, max);
     }
 }
 
@@ -67,11 +67,11 @@ class BattleSimulator
         bool platoon1Alive = _platoon1.HasAliveSoldiers();
         bool platoon2Alive = _platoon2.HasAliveSoldiers();
 
-        if (platoon1Alive && platoon2Alive == false)
+        if (platoon1Alive && !platoon2Alive)
         {
             Console.WriteLine("Победил взвод 1!");
         }
-        else if (platoon2Alive && platoon1Alive == false)
+        else if (platoon2Alive && !platoon1Alive)
         {
             Console.WriteLine("Победил взвод 2!");
         }
@@ -105,7 +105,7 @@ class BattleSimulator
             int soldierTypeIndex = UserUtils.GenerateRandomNumber(0, _soldierPrototypes.Count);
             Soldier prototype = _soldierPrototypes[soldierTypeIndex];
             Soldier newSoldier = prototype.Clone();
-            newSoldier.Id = i + 1;
+            newSoldier.SetId(i + 1);
             soldiers.Add(newSoldier);
         }
 
@@ -163,7 +163,7 @@ abstract class Soldier
         Armor = armor;
     }
 
-    public int Id { get; set; }
+    public int Id { get; private set; }
     public int Health { get; protected set; }
     public int Damage { get; protected set; }
     public int Armor { get; protected set; }
@@ -171,6 +171,11 @@ abstract class Soldier
     public bool IsAlive()
     {
         return Health > 0;
+    }
+
+    public void SetId(int id)
+    {
+        Id = id;
     }
 
     public void TakeDamage(int damage)
@@ -184,13 +189,20 @@ abstract class Soldier
 
     protected Soldier GetRandomTarget(List<Soldier> enemySoldiers)
     {
-        if (enemySoldiers.Count == 0) return null;
+        if (enemySoldiers.Count == 0)
+        {
+            return null;
+        }
+
         return enemySoldiers[UserUtils.GenerateRandomNumber(0, enemySoldiers.Count)];
     }
 
     protected virtual void PerformAttack(Soldier target)
     {
-        if (target == null || target.IsAlive() == false) return;
+        if (target == null || target.IsAlive() == false)
+        {
+            return;
+        }
 
         Console.WriteLine($"Солдат {Id} атакует солдата {target.Id} и наносит {Damage} урона");
         target.TakeDamage(Damage);
@@ -229,14 +241,17 @@ class StrongSoldier : Soldier
     public override void Attack(List<Soldier> enemySoldiers)
     {
         var target = GetRandomTarget(enemySoldiers);
-        if (target == null) return;
+        if (target == null)
+        {
+            return;
+        }
 
         int multipliedDamage = (int)(Damage * DamageMultiplier);
         Console.WriteLine($"Солдат {Id} атакует солдата {target.Id} с усиленным уроном {multipliedDamage}");
 
         target.TakeDamage(multipliedDamage);
 
-        if (target.IsAlive() == false)
+        if (!target.IsAlive())
         {
             Console.WriteLine($"Солдат {target.Id} погиб!");
         }
@@ -257,10 +272,13 @@ class MultiTargetSoldier : Soldier
 
     public override void Attack(List<Soldier> enemySoldiers)
     {
-        if (enemySoldiers.Count == 0) return;
+        if (enemySoldiers.Count == 0)
+        {
+            return;
+        }
 
         int targetsCount = Math.Min(MaxTargets, enemySoldiers.Count);
-        var targets = enemySoldiers.OrderBy(x => Guid.NewGuid()).Take(targetsCount).ToList();
+        var targets = enemySoldiers.OrderBy(soldier => Guid.NewGuid()).Take(targetsCount).ToList();
 
         Console.WriteLine($"Солдат {Id} атакует {targets.Count} целей:");
 
@@ -285,7 +303,10 @@ class RandomMultiTargetSoldier : Soldier
 
     public override void Attack(List<Soldier> enemySoldiers)
     {
-        if (enemySoldiers.Count == 0) return;
+        if (enemySoldiers.Count == 0)
+        {
+            return;
+        }
 
         int targetsCount = Math.Min(MaxTargets, enemySoldiers.Count);
         Console.WriteLine($"Солдат {Id} атакует {targetsCount} целей:");
