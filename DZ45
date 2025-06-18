@@ -4,26 +4,11 @@ class Program
 {
     static void Main()
     {
-        DossierManager manager = new DossierManager();
-        manager.Run();
-    }
-}
+        string[] fullNames = Array.Empty<string>();
+        string[] positions = Array.Empty<string>();
 
-class DossierManager
-{
-    private string[] fullNames;
-    private string[] positions;
-    private int count;
+        int count = 0;
 
-    public DossierManager()
-    {
-        fullNames = new string[10];
-        positions = new string[10];
-        count = 0;
-    }
-
-    public void Run()
-    {
         const string CommandAddDossier = "1";
         const string CommandPrintAllDossiers = "2";
         const string CommandRemoveDossier = "3";
@@ -47,20 +32,25 @@ class DossierManager
             switch (choice)
             {
                 case CommandAddDossier:
-                    AddDossier();
+                    AddDossier(ref fullNames, ref positions, ref count);
                     break;
+
                 case CommandPrintAllDossiers:
-                    PrintAllDossiers();
+                    PrintAllDossiers(fullNames, positions, count);
                     break;
+
                 case CommandRemoveDossier:
-                    RemoveDossier();
+                    RemoveDossier(ref fullNames, ref positions, ref count);
                     break;
+
                 case CommandSearchByLastName:
-                    SearchByLastName();
+                    SearchByLastName(fullNames, positions, count);
                     break;
+
                 case CommandExit:
                     isRunning = false;
                     break;
+
                 default:
                     Console.WriteLine("Неверный ввод. Попробуйте снова.");
                     break;
@@ -68,8 +58,11 @@ class DossierManager
         }
     }
 
-    private void AddDossier()
+    static void AddDossier(ref string[] fullNames, ref string[] positions, ref int count)
     {
+        int initialArraySize = 4;
+        int arrayExpansionFactor = 2; 
+
         Console.Write("Введите ФИО сотрудника: ");
         string name = Console.ReadLine();
 
@@ -78,8 +71,8 @@ class DossierManager
 
         if (count == fullNames.Length)
         {
-            ResizeArrays(ref fullNames, fullNames.Length * 2);
-            ResizeArrays(ref positions, positions.Length * 2);
+            ResizeArray(ref fullNames, count == 0 ? initialArraySize : fullNames.Length * arrayExpansionFactor);
+            ResizeArray(ref positions, count == 0 ? initialArraySize : positions.Length * arrayExpansionFactor);
         }
 
         fullNames[count] = name;
@@ -89,37 +82,36 @@ class DossierManager
         Console.WriteLine("Досье добавлено.");
     }
 
-    private void ResizeArrays(ref string[] array, int newSize)
+    static void ResizeArray(ref string[] array, int newSize)
     {
         string[] newArray = new string[newSize];
-
-        for (int i = 0; i < array.Length; i++)
-        {
-            newArray[i] = array[i];
-        }
-
+        Array.Copy(array, newArray, array.Length);
         array = newArray;
     }
 
-    private void PrintAllDossiers()
+    static void PrintAllDossiers(string[] fullNames, string[] positions, int count)
     {
         if (count == 0)
         {
             Console.WriteLine("Нет досье для отображения.");
+
             return;
         }
 
         for (int i = 0; i < count; i++)
         {
-            Console.WriteLine($"{i + 1}) {fullNames[i]} ——— {positions[i]}");
+            Console.WriteLine($"{i + 1}) {fullNames[i]} — {positions[i]}");
         }
     }
 
-    private void RemoveDossier()
+    static void RemoveDossier(ref string[] fullNames, ref string[] positions, ref int count)
     {
+        int arrayReductionFactor = 2;
+
         if (count == 0)
         {
             Console.WriteLine("Нет досье для удаления.");
+
             return;
         }
 
@@ -128,10 +120,11 @@ class DossierManager
         if (int.TryParse(Console.ReadLine(), out int index) == false || index < 1 || index > count)
         {
             Console.WriteLine("Неверный номер досье.");
+
             return;
         }
 
-        index--; 
+        index--;
 
         for (int i = index; i < count - 1; i++)
         {
@@ -140,14 +133,27 @@ class DossierManager
         }
 
         count--;
+
+        if (count > 0 && count == fullNames.Length / arrayReductionFactor)
+        {
+            ResizeArray(ref fullNames, fullNames.Length / arrayReductionFactor);
+            ResizeArray(ref positions, positions.Length / arrayReductionFactor);
+        }
+        else if (count == 0)
+        {
+            fullNames = Array.Empty<string>();
+            positions = Array.Empty<string>();
+        }
+
         Console.WriteLine("Досье удалено.");
     }
 
-    private void SearchByLastName()
+    static void SearchByLastName(string[] fullNames, string[] positions, int count)
     {
         if (count == 0)
         {
             Console.WriteLine("Нет досье для поиска.");
+
             return;
         }
 
