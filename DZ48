@@ -1,0 +1,217 @@
+using System;
+using System.Collections.Generic;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Aquarium aquarium = new Aquarium(5); 
+        aquarium.Run();
+    }
+}
+
+class Aquarium
+{
+    const string CommandAddFish = "1";
+    const string CommandDeleteFish = "2";
+    const string CommandContinueObservation = "3";
+
+    private int _maxFishCount;
+    private List<Fish> _fishes;
+    private Random _random;
+
+    public Aquarium(int maxFishCount)
+    {
+        this._maxFishCount = maxFishCount;
+        _fishes = new List<Fish>();
+        _random = new Random();
+    }
+
+    public int CurrentFishCount => _fishes.Count;
+    public int MaxFishCount => _maxFishCount;
+
+    private int _minimumAgeNewFish = 5;
+    private int _maximumAgeNewFish = 15;
+
+    public void Run()
+    {
+
+        int delayTimeMilliseconds = 1000;
+
+        while (true)
+        {
+            Console.Clear();
+            DisplayStatus();
+            DisplayMenu();
+
+            string input = Console.ReadLine();
+            HandleInput(input);
+
+            AgeFishes();
+            RemoveDeadFishes();
+
+            System.Threading.Thread.Sleep(delayTimeMilliseconds); 
+        }
+    }
+
+    private void DisplayStatus()
+    {
+        Console.WriteLine($"Аквариум (рыб: {CurrentFishCount}/{MaxFishCount}):");
+
+        if (_fishes.Count == 0)
+        {
+            Console.WriteLine("Аквариум пуст");
+        }
+        else
+        {
+            foreach (var fish in _fishes)
+            {
+                Console.WriteLine(fish);
+            }
+        }
+        Console.WriteLine();
+    }
+
+    private void DisplayMenu()
+    {
+        Console.WriteLine($"{CommandAddFish} - Добавить рыбу");
+        Console.WriteLine($"{CommandDeleteFish} - Убрать рыбу");
+        Console.WriteLine($"{CommandContinueObservation} - Продолжить наблюдение");
+        Console.Write("Выберите действие: ");
+    }
+
+    private void HandleInput(string input)
+    {
+        switch (input)
+        {
+            case CommandAddFish:
+                AddFish();
+                break;
+
+            case CommandDeleteFish:
+                RemoveFish();
+                break;
+
+            case CommandContinueObservation:
+                break;
+
+            default:
+                Console.WriteLine("Неизвестная команда");
+                break;
+        }
+    }
+
+    private void AddFish()
+    {
+        if (CurrentFishCount >= MaxFishCount)
+        {
+            Console.WriteLine("Аквариум переполнен, нельзя добавить больше рыб");
+            Console.ReadKey();
+
+            return;
+        }
+
+        Console.Write("Введите имя рыбы: ");
+        string name = Console.ReadLine();
+
+        int maxAge = _random.Next(_minimumAgeNewFish, _maximumAgeNewFish); 
+        _fishes.Add(new Fish(name, maxAge));
+    }
+
+    private void RemoveFish()
+    {
+        if (CurrentFishCount == 0)
+        {
+            Console.WriteLine("В аквариуме нет рыб!");
+            Console.ReadKey();
+
+            return;
+        }
+
+        Console.WriteLine("Выберите рыбу для удаления:");
+
+        for (int i = 0; i < _fishes.Count; i++)
+        {
+            Console.WriteLine($"{i + 1} - {_fishes[i]}");
+        }
+
+        if (int.TryParse(Console.ReadLine(), out int index) && index > 0 && index <= _fishes.Count)
+        {
+            _fishes.RemoveAt(index - 1);
+        }
+        else
+        {
+            Console.WriteLine("Некорректный ввод");
+            Console.ReadKey();
+        }
+    }
+
+    private void AgeFishes()
+    {
+        foreach (var fish in _fishes)
+        {
+            fish.Age();
+        }
+    }
+
+    private void RemoveDeadFishes()
+    {
+        float probabilityFishAppearing = 0.1f;
+
+
+        for (int i = _fishes.Count - 1; i >= 0; i--)
+        {
+            if (_fishes[i].IsDead)
+            {
+                Console.WriteLine($"Рыба {_fishes[i].Name} умерла от старости...");
+                _fishes.RemoveAt(i);
+            }
+        }
+
+        if (_fishes.Count > 0 && _fishes.Count < MaxFishCount)
+        {
+            if (_random.NextDouble() < probabilityFishAppearing)
+            {
+                string[] randomNames = { "Дора", "Игорь", "Николаев", "Денис", "Хамитов" };
+                string name = randomNames[_random.Next(randomNames.Length)];
+
+                int maxAge = _random.Next(_minimumAgeNewFish, _maximumAgeNewFish);
+
+                _fishes.Add(new Fish(name, maxAge));
+
+                Console.WriteLine($"В аквариуме появилась новая рыба: {name}!");
+            }
+        }
+    }
+}
+
+class Fish
+{
+    private string _name;
+    private int _age;
+    private int _maxAge;
+
+    public Fish(string name, int maxAge)
+    {
+        this._name = name;
+        this._maxAge = maxAge;
+
+        _age = 0;
+    }
+
+    public string Name => _name;
+    public bool IsDead => _age >= _maxAge;
+
+    public void Age()
+    {
+        if (IsDead == false)
+        {
+            _age++;
+        }
+    }
+
+    public override string ToString()
+    {
+        return $"{_name} - возраст: {_age}/{_maxAge} {(IsDead ? "погибла" : "")}";
+    }
+}
