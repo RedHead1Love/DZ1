@@ -2,33 +2,17 @@ using System;
 
 class Program
 {
-    private const int MapWidth = 20;
-    private const int MapHeight = 10;
-    private const int WallSpawnChance = 20;
-    private const int TreasureSpawnChance = 5; 
-    private const int DoorSpawnChance = 3;
-
-    private const ConsoleKey MoveUpCommand = ConsoleKey.W;
-    private const ConsoleKey MoveDownCommand = ConsoleKey.S;
-    private const ConsoleKey MoveLeftCommand = ConsoleKey.A;
-    private const ConsoleKey MoveRightCommand = ConsoleKey.D;
-    private const ConsoleKey ExitCommand = ConsoleKey.Q;
-
-    private const char WallSymbol = '#';
-    private const char EmptySymbol = '.';
-    private const char TreasureSymbol = '$';
-    private const char DoorSymbol = 'D';
-    private const char PlayerSymbol = '@';
-
     static void Main()
     {
+        const ConsoleKey ExitCommand = ConsoleKey.Q;
+
         int playerX = 1;
         int playerY = 1;
-        bool isRunning = true;
+        bool isRun = true;
 
         char[,] map = InitializeMap();
 
-        while (isRunning)
+        while (isRun)
         {
             Console.Clear();
             DrawMap(map);
@@ -40,19 +24,42 @@ class Program
 
             if (key == ExitCommand)
             {
-                isRunning = false;
+                isRun = false;
                 continue;
             }
 
             GetDirection(key, out int xDirection, out int yDirection);
             TryMovePlayer(ref playerX, ref playerY, xDirection, yDirection, map);
 
-            CheckPlayerPosition(playerX, playerY, map);
+            VerifyPlayerPosition(playerX, playerY, map);
         }
     }
 
     static char[,] InitializeMap()
     {
+        int MapWidth = 20;
+        int MapHeight = 10;
+        int WallSpawnChance = 20;
+        int TreasureSpawnChance = 5;
+        int DoorSpawnChance = 3;
+
+        char WallSymbol = '#';
+        char EmptySymbol = '.';
+        char TreasureSymbol = '$';
+        char DoorSymbol = 'D';
+
+        int minimumRandomWallSpawnChance = 0;
+        int maximumRandomWallSpawnChance = 100;
+
+        int minimumRandomTreasureSpawnChance = 0;
+        int maximumRandomTreasureSpawnChance = 100;
+
+        int minimumRandomDoorSpawnChance = 0;
+        int maximumRandomDoorSpawnChance = 100;
+
+
+
+
         char[,] map = new char[MapHeight, MapWidth];
         Random random = new Random();
 
@@ -64,15 +71,15 @@ class Program
                 {
                     map[y, x] = WallSymbol;
                 }
-                else if (random.Next(0, 100) < WallSpawnChance)
+                else if (random.Next(minimumRandomWallSpawnChance, maximumRandomWallSpawnChance) < WallSpawnChance)
                 {
                     map[y, x] = WallSymbol;
                 }
-                else if (random.Next(0, 100) < TreasureSpawnChance)
+                else if (random.Next(minimumRandomTreasureSpawnChance, maximumRandomTreasureSpawnChance) < TreasureSpawnChance)
                 {
                     map[y, x] = TreasureSymbol;
                 }
-                else if (random.Next(0, 100) < DoorSpawnChance)
+                else if (random.Next(minimumRandomDoorSpawnChance, maximumRandomDoorSpawnChance) < DoorSpawnChance)
                 {
                     map[y, x] = DoorSymbol;
                 }
@@ -100,6 +107,8 @@ class Program
 
     static void DrawPlayer(int playerX, int playerY)
     {
+        char PlayerSymbol = '@';
+
         Console.SetCursorPosition(playerX, playerY);
         Console.Write(PlayerSymbol);
         Console.SetCursorPosition(0, Console.WindowHeight - 1);
@@ -112,6 +121,11 @@ class Program
 
     static void GetDirection(ConsoleKey key, out int xDirection, out int yDirection)
     {
+        const ConsoleKey MoveUpCommand = ConsoleKey.W;
+        const ConsoleKey MoveDownCommand = ConsoleKey.S;
+        const ConsoleKey MoveLeftCommand = ConsoleKey.A;
+        const ConsoleKey MoveRightCommand = ConsoleKey.D;
+
         xDirection = 0;
         yDirection = 0;
 
@@ -134,6 +148,8 @@ class Program
 
     static void TryMovePlayer(ref int playerX, ref int playerY, int xDirection, int yDirection, char[,] map)
     {
+        char WallSymbol = '#';
+
         int newX = playerX + xDirection;
         int newY = playerY + yDirection;
 
@@ -147,15 +163,19 @@ class Program
         playerY = newY;
     }
 
-    static void CheckPlayerPosition(int playerX, int playerY, char[,] map)
+    static void VerifyPlayerPosition(int playerX, int playerY, char[,] map)
     {
+        char EmptySymbol = '.';
+        char TreasureSymbol = '$';
+        char DoorSymbol = 'D';
+
         char cell = map[playerY, playerX];
 
         if (cell == TreasureSymbol)
         {
             Console.WriteLine("Вы нашли сокровище");
             Console.ReadKey();
-            map[playerY, playerX] = EmptySymbol; 
+            map[playerY, playerX] = EmptySymbol;
         }
         else if (cell == DoorSymbol)
         {
