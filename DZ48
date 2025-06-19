@@ -5,24 +5,26 @@ class Program
 {
     static void Main(string[] args)
     {
-        Aquarium aquarium = new Aquarium(5); 
+        Aquarium aquarium = new Aquarium(5);
         aquarium.Run();
     }
 }
 
 class Aquarium
 {
-    const string CommandAddFish = "1";
-    const string CommandDeleteFish = "2";
-    const string CommandContinueObservation = "3";
+    private const string CommandAddFish = "1";
+    private const string CommandDeleteFish = "2";
+    private const string CommandContinueObservation = "3";
 
     private int _maxFishCount;
+    private int _minimumAgeNewFish = 5;
+    private int _maximumAgeNewFish = 15;
     private List<Fish> _fishes;
     private Random _random;
 
     public Aquarium(int maxFishCount)
     {
-        this._maxFishCount = maxFishCount;
+        _maxFishCount = maxFishCount;
         _fishes = new List<Fish>();
         _random = new Random();
     }
@@ -30,15 +32,12 @@ class Aquarium
     public int CurrentFishCount => _fishes.Count;
     public int MaxFishCount => _maxFishCount;
 
-    private int _minimumAgeNewFish = 5;
-    private int _maximumAgeNewFish = 15;
-
     public void Run()
     {
-
         int delayTimeMilliseconds = 1000;
+        bool isRunning = true;
 
-        while (true)
+        while (isRunning)
         {
             Console.Clear();
             DisplayStatus();
@@ -47,10 +46,10 @@ class Aquarium
             string input = Console.ReadLine();
             HandleInput(input);
 
-            AgeFishes();
+            IncreaseAgeForAllFishes();
             RemoveDeadFishes();
 
-            System.Threading.Thread.Sleep(delayTimeMilliseconds); 
+            System.Threading.Thread.Sleep(delayTimeMilliseconds);
         }
     }
 
@@ -69,6 +68,7 @@ class Aquarium
                 Console.WriteLine(fish);
             }
         }
+
         Console.WriteLine();
     }
 
@@ -107,14 +107,13 @@ class Aquarium
         {
             Console.WriteLine("Аквариум переполнен, нельзя добавить больше рыб");
             Console.ReadKey();
-
             return;
         }
 
         Console.Write("Введите имя рыбы: ");
         string name = Console.ReadLine();
 
-        int maxAge = _random.Next(_minimumAgeNewFish, _maximumAgeNewFish); 
+        int maxAge = _random.Next(_minimumAgeNewFish, _maximumAgeNewFish);
         _fishes.Add(new Fish(name, maxAge));
     }
 
@@ -122,9 +121,8 @@ class Aquarium
     {
         if (CurrentFishCount == 0)
         {
-            Console.WriteLine("В аквариуме нет рыб!");
+            Console.WriteLine("В аквариуме нет рыб");
             Console.ReadKey();
-
             return;
         }
 
@@ -146,11 +144,11 @@ class Aquarium
         }
     }
 
-    private void AgeFishes()
+    private void IncreaseAgeForAllFishes()
     {
         foreach (var fish in _fishes)
         {
-            fish.Age();
+            fish.IncreaseAge();
         }
     }
 
@@ -158,12 +156,11 @@ class Aquarium
     {
         float probabilityFishAppearing = 0.1f;
 
-
         for (int i = _fishes.Count - 1; i >= 0; i--)
         {
             if (_fishes[i].IsDead)
             {
-                Console.WriteLine($"Рыба {_fishes[i].Name} умерла от старости...");
+                Console.WriteLine($"Рыба {_fishes[i].Name} умерла от старости");
                 _fishes.RemoveAt(i);
             }
         }
@@ -179,7 +176,7 @@ class Aquarium
 
                 _fishes.Add(new Fish(name, maxAge));
 
-                Console.WriteLine($"В аквариуме появилась новая рыба: {name}!");
+                Console.WriteLine($"В аквариуме появилась новая рыба: {name}");
             }
         }
     }
@@ -193,16 +190,15 @@ class Fish
 
     public Fish(string name, int maxAge)
     {
-        this._name = name;
-        this._maxAge = maxAge;
-
+        _name = name;
+        _maxAge = maxAge;
         _age = 0;
     }
 
     public string Name => _name;
     public bool IsDead => _age >= _maxAge;
 
-    public void Age()
+    public void IncreaseAge()
     {
         if (IsDead == false)
         {
