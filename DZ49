@@ -1,0 +1,118 @@
+using System;
+using System.Collections.Generic;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Zoo zoo = new Zoo();
+        zoo.Run();
+    }
+}
+
+class Zoo
+{
+    const string CommandExit = "0";
+
+    private List<Enclosure> _enclosures;
+
+    public Zoo()
+    {
+        int lionsCount = 3;
+        int penguinsCount = 10;
+        int monkeysCount = 5;
+        int zebrasCount = 4;
+
+        _enclosures = new List<Enclosure>
+        {
+            new Enclosure(new Sign("Львы", "Рычание", "Саванна"), lionsCount, "самцы"),
+            new Enclosure(new Sign("Пингвины", "Крики", "Антарктика"), penguinsCount, "самцы и самки"),
+            new Enclosure(new Sign("Обезьяны", "У-у-у-а-а-а!", "Джунгли"), monkeysCount, "самцы и самки"),
+            new Enclosure(new Sign("Зебры", "Фырканье", "Саванна"), zebrasCount, "самки")
+        };
+    }
+
+    public void Run()
+    {
+        Console.WriteLine("Добро пожаловать в зоопарк");
+
+        while (true)
+        {
+            Console.WriteLine("\nВыберите вольер для просмотра (введите номер):");
+
+            for (int i = 0; i < _enclosures.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {_enclosures[i].Sign.AnimalType}");
+            }
+
+            Console.WriteLine($"{CommandExit}. Выход из зоопарка");
+
+            string input = Console.ReadLine();
+
+            if (input == CommandExit)
+            {
+                Console.WriteLine("До свидания");
+                break;
+            }
+
+            if (int.TryParse(input, out int choice) && choice > 0 && choice <= _enclosures.Count)
+            {
+                _enclosures[choice - 1].DisplayInfo();
+            }
+            else
+            {
+                Console.WriteLine("Некорректный ввод. Попробуйте еще раз.");
+            }
+        }
+    }
+}
+
+class Enclosure
+{
+    private int _animalCount;
+    private string _animalGender;
+    private Sign _sign;
+
+    public Enclosure(Sign sign, int animalCount, string animalGender)
+    {
+        this._sign = sign;
+        this._animalCount = animalCount;
+        this._animalGender = animalGender;
+    }
+
+    public Sign Sign => _sign;
+
+    public void DisplayInfo()
+    {
+        Console.WriteLine("\n=== Информация о вольере ===");
+
+        _sign.DisplaySignInfo();
+
+        Console.WriteLine($"Количество животных: {_animalCount}");
+        Console.WriteLine($"Пол животных: {_animalGender}");
+        Console.WriteLine("============================");
+    }
+}
+
+class Sign
+{
+    private string _animalType;
+    private string _animalSound;
+    private string _habitat;
+
+    public Sign(string animalType, string animalSound, string habitat)
+    {
+        this._animalType = animalType;
+        this._animalSound = animalSound;
+        this._habitat = habitat;
+    }
+
+    public string AnimalType => _animalType;
+
+    public void DisplaySignInfo()
+    {
+        Console.WriteLine($"Тип животных: {_animalType}");
+        Console.WriteLine($"Среда обитания: {_habitat}");
+        Console.WriteLine($"Звук: {_animalSound}");
+    }
+}
