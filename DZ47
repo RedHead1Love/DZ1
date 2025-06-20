@@ -2,9 +2,14 @@ using System;
 
 class Program
 {
+        const ConsoleKey MoveUpCommand = ConsoleKey.W;
+        const ConsoleKey MoveDownCommand = ConsoleKey.S;
+        const ConsoleKey MoveLeftCommand = ConsoleKey.A;
+        const ConsoleKey MoveRightCommand = ConsoleKey.D;
+        const ConsoleKey ExitCommand = ConsoleKey.Q;
+
     static void Main()
     {
-        const ConsoleKey ExitCommand = ConsoleKey.Q;
 
         int playerX = 1;
         int playerY = 1;
@@ -18,7 +23,7 @@ class Program
             DrawMap(map);
             DrawPlayer(playerX, playerY);
 
-            Console.WriteLine("WASD - перемещение, Q - выход");
+            Console.WriteLine($"{MoveUpCommand}{MoveLeftCommand}{MoveDownCommand}{MoveRightCommand} - перемещение, {ExitCommand} - выход");
 
             ConsoleKey key = GetMovementInput();
 
@@ -104,10 +109,10 @@ class Program
 
     static void DrawPlayer(int playerX, int playerY)
     {
-        char PlayerSymbol = '@';
+        char playerSymbol = '@';
 
         Console.SetCursorPosition(playerX, playerY);
-        Console.Write(PlayerSymbol);
+        Console.Write(playerSymbol);
         Console.SetCursorPosition(0, Console.WindowHeight - 1);
     }
 
@@ -118,10 +123,6 @@ class Program
 
     static void GetDirection(ConsoleKey key, out int xDirection, out int yDirection)
     {
-        const ConsoleKey MoveUpCommand = ConsoleKey.W;
-        const ConsoleKey MoveDownCommand = ConsoleKey.S;
-        const ConsoleKey MoveLeftCommand = ConsoleKey.A;
-        const ConsoleKey MoveRightCommand = ConsoleKey.D;
 
         xDirection = 0;
         yDirection = 0;
@@ -145,7 +146,7 @@ class Program
 
     static void TryMovePlayer(ref int playerX, ref int playerY, int xDirection, int yDirection, char[,] map)
     {
-        char WallSymbol = '#';
+        char wallSymbol = '#';
 
         int newX = playerX + xDirection;
         int newY = playerY + yDirection;
@@ -153,7 +154,7 @@ class Program
         if (newX < 0 || newY < 0 || newX >= map.GetLength(1) || newY >= map.GetLength(0))
             return;
 
-        if (map[newY, newX] == WallSymbol)
+        if (map[newY, newX] == wallSymbol)
             return;
 
         playerX = newX;
@@ -162,19 +163,19 @@ class Program
 
     static void TryInterract(int playerX, int playerY, char[,] map)
     {
-        char EmptySymbol = '.';
-        char TreasureSymbol = '$';
-        char DoorSymbol = 'D';
+        char emptySymbol = '.';
+        char treasureSymbol = '$';
+        char doorSymbol = 'D';
 
         char cell = map[playerY, playerX];
 
-        if (cell == TreasureSymbol)
+        if (cell == treasureSymbol)
         {
             Console.WriteLine("Вы нашли сокровище");
             Console.ReadKey();
-            map[playerY, playerX] = EmptySymbol;
+            map[playerY, playerX] = emptySymbol;
         }
-        else if (cell == DoorSymbol)
+        else if (cell == doorSymbol)
         {
             Console.WriteLine("Вы нашли дверь");
             Console.ReadKey();
