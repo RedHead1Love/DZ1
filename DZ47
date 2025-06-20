@@ -31,22 +31,22 @@ class Program
             GetDirection(key, out int xDirection, out int yDirection);
             TryMovePlayer(ref playerX, ref playerY, xDirection, yDirection, map);
 
-            VerifyPlayerPosition(playerX, playerY, map);
+            TryInterract(playerX, playerY, map);
         }
     }
 
     static char[,] InitializeMap()
     {
-        int MapWidth = 20;
-        int MapHeight = 10;
-        int WallSpawnChance = 20;
-        int TreasureSpawnChance = 5;
-        int DoorSpawnChance = 3;
+        int mapWidth = 20;
+        int mapHeight = 10;
+        int wallSpawnChance = 20;
+        int treasureSpawnChance = 5;
+        int doorSpawnChance = 3;
 
-        char WallSymbol = '#';
-        char EmptySymbol = '.';
-        char TreasureSymbol = '$';
-        char DoorSymbol = 'D';
+        char wallSymbol = '#';
+        char emptySymbol = '.';
+        char treasureSymbol = '$';
+        char doorSymbol = 'D';
 
         int minimumRandomWallSpawnChance = 0;
         int maximumRandomWallSpawnChance = 100;
@@ -57,35 +57,32 @@ class Program
         int minimumRandomDoorSpawnChance = 0;
         int maximumRandomDoorSpawnChance = 100;
 
-
-
-
-        char[,] map = new char[MapHeight, MapWidth];
+        char[,] map = new char[mapHeight, mapWidth];
         Random random = new Random();
 
-        for (int y = 0; y < MapHeight; y++)
+        for (int y = 0; y < mapHeight; y++)
         {
-            for (int x = 0; x < MapWidth; x++)
+            for (int x = 0; x < mapWidth; x++)
             {
-                if (x == 0 || y == 0 || x == MapWidth - 1 || y == MapHeight - 1)
+                if (x == 0 || y == 0 || x == mapWidth - 1 || y == mapHeight - 1)
                 {
-                    map[y, x] = WallSymbol;
+                    map[y, x] = wallSymbol;
                 }
-                else if (random.Next(minimumRandomWallSpawnChance, maximumRandomWallSpawnChance) < WallSpawnChance)
+                else if (random.Next(minimumRandomWallSpawnChance, maximumRandomWallSpawnChance) < wallSpawnChance)
                 {
-                    map[y, x] = WallSymbol;
+                    map[y, x] = wallSymbol;
                 }
-                else if (random.Next(minimumRandomTreasureSpawnChance, maximumRandomTreasureSpawnChance) < TreasureSpawnChance)
+                else if (random.Next(minimumRandomTreasureSpawnChance, maximumRandomTreasureSpawnChance) < treasureSpawnChance)
                 {
-                    map[y, x] = TreasureSymbol;
+                    map[y, x] = treasureSymbol;
                 }
-                else if (random.Next(minimumRandomDoorSpawnChance, maximumRandomDoorSpawnChance) < DoorSpawnChance)
+                else if (random.Next(minimumRandomDoorSpawnChance, maximumRandomDoorSpawnChance) < doorSpawnChance)
                 {
-                    map[y, x] = DoorSymbol;
+                    map[y, x] = doorSymbol;
                 }
                 else
                 {
-                    map[y, x] = EmptySymbol;
+                    map[y, x] = emptySymbol;
                 }
             }
         }
@@ -163,7 +160,7 @@ class Program
         playerY = newY;
     }
 
-    static void VerifyPlayerPosition(int playerX, int playerY, char[,] map)
+    static void TryInterract(int playerX, int playerY, char[,] map)
     {
         char EmptySymbol = '.';
         char TreasureSymbol = '$';
