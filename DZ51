@@ -1,0 +1,86 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        int heightFirstCriminal = 180;
+        int heightSecondCriminal = 175;
+        int heightThirdCriminal = 170;
+        int heightFourthCriminal = 185;
+        int heightFifthCriminal = 165;
+
+        int weightFirstCriminal = 75;
+        int weightSecondCriminal = 80;
+        int weightThirdCriminal = 70;
+        int weightFourthCriminal = 90;
+        int weightFifthCriminal = 65;
+
+        List<Criminal> criminals = new List<Criminal>
+        {
+            new Criminal("Иванов Иван Иванович", false, heightFirstCriminal, weightFirstCriminal, "русский"),
+            new Criminal("Петров Петр Петрович", true, heightSecondCriminal, weightSecondCriminal, "русский"),
+            new Criminal("Сидоров Сидор Сидорович", false, heightThirdCriminal, weightThirdCriminal, "украинец"),
+            new Criminal("Мэддисонов Денис Хамитов", false, heightFourthCriminal, weightFourthCriminal, "американец"),
+            new Criminal("Николаев Игорь Роналдуевич", true, heightFifthCriminal, weightFifthCriminal, "мексиканец")
+        };
+
+        Console.WriteLine("Введите параметры для поиска преступников:");
+
+        Console.Write("Рост: ");
+        int height = int.Parse(Console.ReadLine());
+
+        Console.Write("Вес: ");
+        int weight = int.Parse(Console.ReadLine());
+
+        Console.Write("Национальность: ");
+        string nationality = Console.ReadLine().ToLower();
+
+        var filteredCriminals = criminals
+            .Where(offender => !offender.IsInCustody
+                         && offender.Height == height
+                         && offender.Weight == weight
+                         && offender.Nationality.ToLower() == nationality)
+            .ToList();
+
+        if (filteredCriminals.Any())
+        {
+            Console.WriteLine("\nНайденные преступники:");
+
+            foreach (var criminal in filteredCriminals)
+            {
+                Console.WriteLine($"ФИО: {criminal.FullName}, Рост: {criminal.Height}, Вес: {criminal.Weight}, Национальность: {criminal.Nationality}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("\nПреступников с указанными параметрами не найдено.");
+        }
+    }
+
+    public class Criminal
+    {
+        private string _fullName;
+        private bool _isInCustody;
+        private int _height;
+        private int _weight;
+        private string _nationality;
+
+        public Criminal(string fullName, bool isInCustody, int height, int weight, string nationality)
+        {
+            _fullName = fullName;
+            _isInCustody = isInCustody;
+            _height = height;
+            _weight = weight;
+            _nationality = nationality;
+        }
+
+        public string FullName => _fullName;
+        public bool IsInCustody => _isInCustody;
+        public int Height => _height;
+        public int Weight => _weight;
+        public string Nationality => _nationality;
+    }
+}
