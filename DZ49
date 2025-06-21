@@ -5,34 +5,29 @@ class Program
 {
     static void Main(string[] args)
     {
-        Zoo zoo = ZooFactory.CreateZoo();
+        ZooFactory zooFactory = new ZooFactory();
+        Zoo zoo = zooFactory.CreateZoo();
         zoo.Run();
     }
 }
 
 class ZooFactory
 {
-    public static Zoo CreateZoo()
+    public Zoo CreateZoo()
     {
         var enclosures = new List<Enclosure>
         {
-            CreateEnclosure("Львы", "Рычание", "Саванна", "Лев", "самец", 3),
+            CreateEnclosure("Львы", "Рычание", "Саванна", "Лев", new[] {"самец"}, 3),
             CreateEnclosure("Пингвины", "Крики", "Антарктика", "Пингвин", new[] {"самец", "самка"}, 10),
             CreateEnclosure("Обезьяны", "У-у-у-а-а-а!", "Джунгли", "Обезьяна", new[] {"самец", "самка"}, 5),
-            CreateEnclosure("Зебры", "Фырканье", "Саванна", "Зебра", "самка", 4)
+            CreateEnclosure("Зебры", "Фырканье", "Саванна", "Зебра", new[] {"самка"}, 4)
         };
 
         return new Zoo(enclosures);
     }
 
-    private static Enclosure CreateEnclosure(string animalType, string sound, string habitat,
-                                          string species, string gender, int count)
-    {
-        return CreateEnclosure(animalType, sound, habitat, species, new[] { gender }, count);
-    }
-
-    private static Enclosure CreateEnclosure(string animalType, string sound, string habitat,
-                                          string species, string[] genders, int count)
+    private Enclosure CreateEnclosure(string animalType, string sound, string habitat,
+                                    string species, string[] genders, int count)
     {
         var animals = new List<Animal>();
 
@@ -53,7 +48,7 @@ class Zoo
 
     public Zoo(List<Enclosure> enclosures)
     {
-        _enclosures = enclosures;
+        this._enclosures = enclosures;
     }
 
     public void Run()
@@ -63,7 +58,7 @@ class Zoo
 
         while (isRunning)
         {
-            ShowEnclosuresMenu();
+            ShowMenu();
             string input = Console.ReadLine();
 
             if (input == CommandExit)
@@ -85,7 +80,7 @@ class Zoo
         Console.WriteLine("До свидания");
     }
 
-    private void ShowEnclosuresMenu()
+    private void ShowMenu()
     {
         Console.WriteLine("\nВыберите вольер для просмотра (введите номер):");
 
@@ -105,7 +100,7 @@ class Enclosure
     public Enclosure(Sign sign, List<Animal> animals)
     {
         Sign = sign;
-        _animals = animals;
+        this._animals = animals;
     }
 
     public Sign Sign { get; }
@@ -115,7 +110,7 @@ class Enclosure
     {
         Console.WriteLine("\n=== Информация о вольере ===");
 
-        Sign.DisplayInfo();
+        Sign.Display();
         Console.WriteLine($"Количество животных: {_animals.Count}");
         Console.WriteLine($"Пол животных: {GetGenderDescription()}");
 
@@ -146,23 +141,23 @@ class Enclosure
 
 class Sign
 {
-    private readonly string r_sound;
-    private readonly string r_habitat;
+    private readonly string _sound;
+    private readonly string _habitat;
 
     public Sign(string animalType, string sound, string habitat)
     {
         AnimalType = animalType;
-        r_sound = sound;
-        r_habitat = habitat;
+        this._sound = sound;
+        this._habitat = habitat;
     }
 
     public string AnimalType { get; }
 
-    public void DisplayInfo()
+    public void Display()
     {
         Console.WriteLine($"Тип животных: {AnimalType}");
-        Console.WriteLine($"Среда обитания: {r_habitat}");
-        Console.WriteLine($"Звук: {r_sound}");
+        Console.WriteLine($"Среда обитания: {_habitat}");
+        Console.WriteLine($"Звук: {_sound}");
     }
 }
 
