@@ -5,6 +5,15 @@ class Program
 {
     static void Main(string[] args)
     {
+        Zoo zoo = ZooFactory.CreateZoo();
+        zoo.Run();
+    }
+}
+
+class ZooFactory
+{
+    public static Zoo CreateZoo()
+    {
         var enclosures = new List<Enclosure>
         {
             CreateEnclosure("Львы", "Рычание", "Саванна", "Лев", "самец", 3),
@@ -13,20 +22,13 @@ class Program
             CreateEnclosure("Зебры", "Фырканье", "Саванна", "Зебра", "самка", 4)
         };
 
-        Zoo zoo = new Zoo(enclosures);
-        zoo.Run();
+        return new Zoo(enclosures);
     }
 
     private static Enclosure CreateEnclosure(string animalType, string sound, string habitat,
                                           string species, string gender, int count)
     {
-        var animals = new List<Animal>();
-
-        for (int i = 0; i < count; i++)
-        {
-            animals.Add(new Animal(species, gender));
-        }
-        return new Enclosure(new Sign(animalType, sound, habitat), animals);
+        return CreateEnclosure(animalType, sound, habitat, species, new[] { gender }, count);
     }
 
     private static Enclosure CreateEnclosure(string animalType, string sound, string habitat,
@@ -57,13 +59,27 @@ class Zoo
     public void Run()
     {
         Console.WriteLine("Добро пожаловать в зоопарк");
-
         bool isRunning = true;
 
         while (isRunning)
         {
             ShowEnclosuresMenu();
-            isRunning = ProcessUserInput();
+            string input = Console.ReadLine();
+
+            if (input == CommandExit)
+            {
+                isRunning = false;
+                continue;
+            }
+
+            if (int.TryParse(input, out int choice) && choice > 0 && choice <= _enclosures.Count)
+            {
+                _enclosures[choice - 1].DisplayInfo();
+            }
+            else
+            {
+                Console.WriteLine("Некорректный ввод. Попробуйте еще раз.");
+            }
         }
 
         Console.WriteLine("До свидания");
@@ -80,32 +96,11 @@ class Zoo
 
         Console.WriteLine($"{CommandExit}. Выход из зоопарка");
     }
-
-    private bool ProcessUserInput()
-    {
-        string input = Console.ReadLine();
-
-        if (input == CommandExit)
-        {
-            return false;
-        }
-
-        if (int.TryParse(input, out int choice) && choice > 0 && choice <= _enclosures.Count)
-        {
-            _enclosures[choice - 1].DisplayInfo();
-        }
-        else
-        {
-            Console.WriteLine("Некорректный ввод. Попробуйте еще раз.");
-        }
-
-        return true;
-    }
 }
 
 class Enclosure
 {
-    private List<Animal> _animals;
+    private readonly List<Animal> _animals;
 
     public Enclosure(Sign sign, List<Animal> animals)
     {
@@ -114,16 +109,16 @@ class Enclosure
     }
 
     public Sign Sign { get; }
-    public string AnimalType => Sign.animalType;
+    public string AnimalType => Sign.AnimalType;
 
     public void DisplayInfo()
     {
         Console.WriteLine("\n=== Информация о вольере ===");
 
         Sign.DisplayInfo();
-
         Console.WriteLine($"Количество животных: {_animals.Count}");
         Console.WriteLine($"Пол животных: {GetGenderDescription()}");
+
         Console.WriteLine("============================");
     }
 
@@ -134,7 +129,7 @@ class Enclosure
 
         foreach (var animal in _animals)
         {
-            if (animal.IsMale)
+            if (animal.Gender == Gender.Male)
                 males++;
             else
                 females++;
@@ -151,37 +146,40 @@ class Enclosure
 
 class Sign
 {
-    private string _sound;
-    private string _habitat;
+    private readonly string r_sound;
+    private readonly string r_habitat;
 
     public Sign(string animalType, string sound, string habitat)
     {
-        this.animalType = animalType;
-        _sound = sound;
-        _habitat = habitat;
+        AnimalType = animalType;
+        r_sound = sound;
+        r_habitat = habitat;
     }
 
-    public string animalType { get; }
+    public string AnimalType { get; }
 
     public void DisplayInfo()
     {
-        Console.WriteLine($"Тип животных: {animalType}");
-        Console.WriteLine($"Среда обитания: {_habitat}");
-        Console.WriteLine($"Звук: {_sound}");
+        Console.WriteLine($"Тип животных: {AnimalType}");
+        Console.WriteLine($"Среда обитания: {r_habitat}");
+        Console.WriteLine($"Звук: {r_sound}");
     }
 }
 
 class Animal
 {
-    private const string MaleGender = "самец";
-
     public Animal(string species, string gender)
     {
         Species = species;
-        Gender = gender;
+        Gender = gender == "самец" ? Gender.Male : Gender.Female;
     }
 
     public string Species { get; }
-    public string Gender { get; }
-    public bool IsMale => Gender == MaleGender;
+    public Gender Gender { get; }
+}
+
+enum Gender
+{
+    Male,
+    Female
 }
