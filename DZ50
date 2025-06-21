@@ -19,21 +19,17 @@ class CarServiceApp
     private const string CommandExit = "5";
 
     private readonly CarService _carService;
-    private readonly Queue<Car> _cars;
-    private readonly PartFactory _partFactory;
 
     public CarServiceApp()
     {
-        _partFactory = new PartFactory();
         _carService = InitializeCarService();
-        _cars = InitializeCars();
     }
 
     public void Run()
     {
-        while (_cars.Count > 0)
+        while (_carService.HasCarsInQueue())
         {
-            var currentCar = _cars.Peek();
+            var currentCar = _carService.PeekNextCar();
             DisplayCarInfo(currentCar);
             HandleUserInput(currentCar);
         }
@@ -44,32 +40,35 @@ class CarServiceApp
     private CarService InitializeCarService()
     {
         var warehouse = new Warehouse();
+        var partFactory = new PartFactory();
 
-        warehouse.AddPart(_partFactory.CreateEngine(), 2);
-        warehouse.AddPart(_partFactory.CreateTransmission(), 3);
-        warehouse.AddPart(_partFactory.CreateWheel(), 10);
-        warehouse.AddPart(_partFactory.CreateBattery(), 5);
+        int numberEnginesPlacedWarehouse = 2;
+        int numberTransmissionsPlacedWarehouse = 3;
+        int numberWheelsPlacedWarehouse = 10;
+        int numberBatterysPlacedWarehouse = 5;
 
-        return new CarService(1000, warehouse);
+        var parts = partFactory.CreateAllParts();
+        warehouse.AddPart(parts["Двигатель"], numberEnginesPlacedWarehouse);
+        warehouse.AddPart(parts["Трансмиссия"], numberTransmissionsPlacedWarehouse);
+        warehouse.AddPart(parts["Колесо"], numberWheelsPlacedWarehouse);
+        warehouse.AddPart(parts["Батарея"], numberBatterysPlacedWarehouse);
+
+
+        var cars = new List<Car>
+        {
+            new Car(new List<Part> { CreateBrokenPart(parts["Двигатель"]), CreateBrokenPart(parts["Колесо"]) }),
+            new Car(new List<Part> { CreateBrokenPart(parts["Трансмиссия"]), CreateBrokenPart(parts["Батарея"]) })
+        };
+
+        return new CarService(1000, warehouse, cars);
     }
 
-    private Queue<Car> InitializeCars()
+    private Part CreateBrokenPart(Part original)
     {
-        var cars = new Queue<Car>();
+        var part = new Part(original.Name, original.Price, original.RepairCost);
+        part.Break();
 
-        cars.Enqueue(new Car(new List<Part>
-        {
-            _partFactory.CreateEngine(),
-            _partFactory.CreateWheel()
-        }));
-
-        cars.Enqueue(new Car(new List<Part>
-        {
-            _partFactory.CreateTransmission(),
-            _partFactory.CreateBattery()
-        }));
-
-        return cars;
+        return part;
     }
 
     private void DisplayCarInfo(Car car)
@@ -97,19 +96,19 @@ class CarServiceApp
         switch (choice)
         {
             case CommandShowBalance:
-                DisplayBalance();
+                _carService.DisplayBalance();
                 break;
 
             case CommandShowWarehouse:
-                DisplayWarehouse();
+                _carService.ShowWarehouse();
                 break;
 
             case CommandRepairCar:
-                HandleRepair(currentCar);
+                _carService.TryRepairCar(currentCar);
                 break;
 
             case CommandRefuseRepair:
-                HandleRefusal(currentCar);
+                _carService.RefuseRepair(currentCar);
                 break;
 
             case CommandExit:
@@ -121,56 +120,29 @@ class CarServiceApp
                 break;
         }
     }
-
-    private void DisplayBalance()
-    {
-        Console.WriteLine($"Текущий баланс: {_carService.Balance}");
-    }
-
-    private void DisplayWarehouse()
-    {
-        _carService.ShowWarehouse();
-    }
-
-    private void HandleRepair(Car currentCar)
-    {
-        bool repairSuccessful = _carService.TryRepairCar(currentCar);
-
-        if (repairSuccessful && currentCar.IsRepaired)
-        {
-            _cars.Dequeue();
-
-            Console.WriteLine("Автомобиль успешно отремонтирован");
-        }
-    }
-
-    private void HandleRefusal(Car currentCar)
-    {
-        _carService.RefuseRepair(currentCar);
-        _cars.Dequeue();
-    }
 }
 
 class PartFactory
 {
-    public Part CreateEngine()
+    public Dictionary<string, Part> CreateAllParts()
     {
-        return new Part("Двигатель", 500, 200);
-    }
+        int enginePrice = 500;
+        int transmissionPrice = 300;
+        int wheelPrice = 100;
+        int batteryPrice = 200;
 
-    public Part CreateTransmission()
-    {
-        return new Part("Трансмиссия", 300, 150);
-    }
+        int engineRepairCost = 200;
+        int transmissionRepairCost = 150;
+        int wheelRepairCost = 50;
+        int batteryRepairCost = 100;
 
-    public Part CreateWheel()
-    {
-        return new Part("Колесо", 100, 50);
-    }
-
-    public Part CreateBattery()
-    {
-        return new Part("Батарея", 200, 100);
+        return new Dictionary<string, Part>
+        {
+            ["Двигатель"] = new Part("Двигатель", enginePrice, engineRepairCost),
+            ["Трансмиссия"] = new Part("Трансмиссия", transmissionPrice, transmissionRepairCost),
+            ["Колесо"] = new Part("Колесо", wheelPrice, wheelRepairCost),
+            ["Батарея"] = new Part("Батарея", batteryPrice, batteryRepairCost)
+        };
     }
 }
 
@@ -181,7 +153,7 @@ class Part
         Name = name;
         Price = price;
         RepairCost = repairCost;
-        IsBroken = true;
+        IsBroken = false;
     }
 
     public string Name { get; }
@@ -189,73 +161,68 @@ class Part
     public int RepairCost { get; }
     public bool IsBroken { get; private set; }
 
-    public void ReplaceWithNew()
+    public void Break()
+    {
+        IsBroken = true;
+    }
+
+    public void Repair()
     {
         IsBroken = false;
     }
 
     public override bool Equals(object objects)
     {
-        if (objects == null || GetType() != objects.GetType())
-        {
-            return false;
-        }
-
-        Part other = (Part)objects;
-
-        return Name == other.Name &&
-               Price == other.Price &&
-               RepairCost == other.RepairCost;
+        return objects is Part part &&
+               Name == part.Name &&
+               Price == part.Price &&
+               RepairCost == part.RepairCost;
     }
 
     public override int GetHashCode()
     {
-        int multiplierForCombiningFields = 23;
-
-        unchecked
-        {
-            int initialHashValue = 17;
-            initialHashValue = initialHashValue * multiplierForCombiningFields + (Name?.GetHashCode() ?? 0);
-            initialHashValue = initialHashValue * multiplierForCombiningFields + Price.GetHashCode();
-            initialHashValue = initialHashValue * multiplierForCombiningFields + RepairCost.GetHashCode();
-
-            return initialHashValue;
-        }
+        return (Name?.GetHashCode() ?? 0) ^ Price.GetHashCode() ^ RepairCost.GetHashCode();
     }
 }
 
 class Car
 {
-    private readonly List<Part> _brokenParts;
+    private readonly List<Part> _parts;
 
-    public Car(List<Part> brokenParts)
+    public Car(List<Part> parts)
     {
-        if (brokenParts == null || brokenParts.Count == 0)
+        if (parts == null || parts.Count == 0)
         {
-            throw new ArgumentException("У автомобиля должна быть хотя бы одна сломанная деталь");
+            throw new ArgumentException("У автомобиля должна быть хотя бы одна деталь");
         }
 
-        _brokenParts = new List<Part>(brokenParts);
-        InitialBrokenPartsCount = brokenParts.Count;
+        _parts = new List<Part>(parts);
+        InitialBrokenPartsCount = parts.FindAll(p => p.IsBroken).Count;
     }
 
     public int InitialBrokenPartsCount { get; }
-    public bool IsRepaired => _brokenParts.Count == 0;
-    public int RemainingBrokenPartsCount => _brokenParts.Count;
+    public bool IsRepaired => !_parts.Exists(p => p.IsBroken);
+    public int RemainingBrokenPartsCount => _parts.FindAll(p => p.IsBroken).Count;
 
     public void ShowBrokenParts()
     {
-        foreach (var part in _brokenParts)
+        foreach (var part in _parts)
         {
-            Console.WriteLine($"{part.Name} - Цена: {part.Price}, Цена ремонта: {part.RepairCost}");
+            if (part.IsBroken)
+            {
+                Console.WriteLine($"{part.Name} - Цена: {part.Price}, Цена ремонта: {part.RepairCost}");
+            }
         }
     }
 
     public bool TryReplacePart(Part part)
     {
-        if (_brokenParts.Remove(part))
+        var brokenPart = _parts.Find(p => p.Name == part.Name && p.IsBroken);
+
+        if (brokenPart != null)
         {
-            part.ReplaceWithNew();
+            brokenPart.Repair();
+
             return true;
         }
 
@@ -264,31 +231,58 @@ class Car
 
     public List<Part> GetBrokenParts()
     {
-        return new List<Part>(_brokenParts);
+        return _parts.FindAll(p => p.IsBroken);
+    }
+}
+
+class WarehouseItem
+{
+    public WarehouseItem(Part part, int quantity)
+    {
+        Part = part;
+        Quantity = quantity;
+    }
+
+    public Part Part { get; }
+    public int Quantity { get; private set; }
+
+    public void IncreaseQuantity(int amount)
+    {
+        Quantity += amount;
+    }
+
+    public void DecreaseQuantity()
+    {
+        if (Quantity > 0)
+            Quantity--;
     }
 }
 
 class Warehouse
 {
-    private readonly Dictionary<Part, int> _parts = new Dictionary<Part, int>();
+    private readonly List<WarehouseItem> _items = new List<WarehouseItem>();
 
     public void AddPart(Part part, int quantity)
     {
-        if (_parts.ContainsKey(part))
+        var existingItem = _items.Find(i => i.Part.Name == part.Name);
+        if (existingItem != null)
         {
-            _parts[part] += quantity;
+            existingItem.IncreaseQuantity(quantity);
         }
         else
         {
-            _parts[part] = quantity;
+            _items.Add(new WarehouseItem(part, quantity));
         }
     }
 
     public bool TryTakePart(Part part)
     {
-        if (_parts.ContainsKey(part) && _parts[part] > 0)
+        var item = _items.Find(i => i.Part.Name == part.Name && i.Quantity > 0);
+
+        if (item != null)
         {
-            _parts[part]--;
+            item.DecreaseQuantity();
+
             return true;
         }
 
@@ -297,16 +291,18 @@ class Warehouse
 
     public void DisplayParts()
     {
-        foreach (var partEntry in _parts)
+        foreach (var item in _items)
         {
-            Console.WriteLine($"{partEntry.Key.Name} - Стоимость: {partEntry.Key.Price}, " +
-                             $"Цена ремонта: {partEntry.Key.RepairCost}, Количество: {partEntry.Value}");
+            Console.WriteLine($"{item.Part.Name} - Стоимость: {item.Part.Price}, " +
+                            $"Цена ремонта: {item.Part.RepairCost}, Количество: {item.Quantity}");
         }
     }
 
     public bool HasPart(Part part)
     {
-        return _parts.ContainsKey(part) && _parts[part] > 0;
+        var item = _items.Find(i => i.Part.Name == part.Name);
+
+        return item != null && item.Quantity > 0;
     }
 }
 
@@ -316,19 +312,28 @@ class CarService
     private const int PerPartPenalty = 50;
 
     private readonly Warehouse _warehouse;
+    private readonly Queue<Car> _cars;
 
-    public CarService(int initialBalance, Warehouse warehouse)
+    public CarService(int initialBalance, Warehouse warehouse, List<Car> cars)
     {
         Balance = initialBalance;
         _warehouse = warehouse;
+        _cars = new Queue<Car>(cars);
     }
 
     public int Balance { get; private set; }
 
+    public bool HasCarsInQueue() => _cars.Count > 0;
+    public Car PeekNextCar() => _cars.Peek();
+
+    public void DisplayBalance()
+    {
+        Console.WriteLine($"Текущий баланс: {Balance}");
+    }
+
     public void ShowWarehouse()
     {
         Console.WriteLine("\nСкладские запасные части:");
-
         _warehouse.DisplayParts();
     }
 
@@ -337,6 +342,7 @@ class CarService
         if (car.IsRepaired)
         {
             Console.WriteLine("Машина не нуждается в ремонте");
+            _cars.Dequeue();
 
             return true;
         }
@@ -354,6 +360,12 @@ class CarService
         }
 
         PerformRepair(car, partToRepair);
+
+        if (car.IsRepaired)
+        {
+            _cars.Dequeue();
+            Console.WriteLine("Автомобиль успешно отремонтирован");
+        }
 
         return true;
     }
@@ -401,6 +413,7 @@ class CarService
 
         int penalty = CalculatePenalty(car);
         Balance -= penalty;
+        _cars.Dequeue();
 
         Console.WriteLine($"Ремонт отклонен, применен штраф: {penalty}");
     }
