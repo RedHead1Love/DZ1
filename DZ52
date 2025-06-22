@@ -6,43 +6,52 @@ class Program
 {
     static void Main()
     {
-        var prisoners = GetPrisoners();
+        var prisonerManager = new PrisonerManager();
 
         Console.WriteLine("Список заключенных до амнистии:");
-        PrintPrisoners(prisoners);
+        prisonerManager.PrintPrisoners();
 
-        var filteredPrisoners = ApplyAmnesty(prisoners);
+        prisonerManager.ApplyAmnesty();
 
         Console.WriteLine("\nСписок заключенных после амнистии:");
-        PrintPrisoners(filteredPrisoners);
+        prisonerManager.PrintPrisoners();
     }
+}
 
-    static List<Prisoner> GetPrisoners()
+class PrisonerManager
+{
+    private List<Prisoner> _prisoners;
+
+    public PrisonerManager()
     {
-        return new List<Prisoner>
+        _prisoners = new List<Prisoner>
         {
             new Prisoner("Иванов Иван Иванович", "Кража"),
             new Prisoner("Петров Петр Петрович", "Антиправительственное"),
             new Prisoner("Сидоров Сидор Сидорович", "Мошенничество"),
             new Prisoner("Кузнецова Анна Михайловна", "Антиправительственное"),
-            new Prisoner("Хамитов Денис Гилтикусович", "Угон автомобиля")
+            new Prisoner("Хамитов Денис Гилтикусович", "Смена пола")
         };
     }
 
-    static IEnumerable<Prisoner> ApplyAmnesty(IEnumerable<Prisoner> prisoners)
+    public void ApplyAmnesty()
     {
-        return prisoners.Where(prisoner => prisoner.Crime != "Антиправительственное");
+        string searchCriterion = "Антиправительственное";
+
+        _prisoners = _prisoners
+            .Where(prisoner => prisoner.Crime != searchCriterion)
+            .ToList();
     }
 
-    static void PrintPrisoners(IEnumerable<Prisoner> prisoners)
+    public void PrintPrisoners()
     {
-        if (prisoners.Any() == false)
+        if (_prisoners.Any() == false)
         {
             Console.WriteLine("Список заключенных пуст.");
             return;
         }
 
-        foreach (var prisoner in prisoners)
+        foreach (var prisoner in _prisoners)
         {
             Console.WriteLine($"ФИО: {prisoner.FullName}, Преступление: {prisoner.Crime}");
         }
