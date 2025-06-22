@@ -1,0 +1,80 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+class Program
+{
+    static void Main()
+    {
+        var squad1 = InitializeSquad1();
+        var squad2 = InitializeSquad2();
+
+        Console.WriteLine("=== До перевода ===");
+        PrintSquads(squad1, squad2);
+
+        TransferSoldiers(ref squad1, ref squad2);
+
+        Console.WriteLine("\n=== После перевода ===");
+        PrintSquads(squad1, squad2);
+    }
+
+    private class Soldier
+    {
+        public Soldier(string lastName, string weapon)
+        {
+            LastName = lastName;
+            Weapon = weapon;
+        }
+
+        public string LastName { get; private set; }
+        public string Weapon { get; private set; }
+
+        public override string ToString() => $"{LastName} ({Weapon})";
+    }
+
+    private static List<Soldier> InitializeSquad1()
+    {
+        return new List<Soldier>
+        {
+            new Soldier("Иванов", "АК-47"),
+            new Soldier("Борисов", "ПМ"),
+            new Soldier("Петров", "СВД"),
+            new Soldier("Белов", "АК-74"),
+            new Soldier("Сидоров", "РПК"),
+            new Soldier("Баранов", "ПКМ"),
+            new Soldier("Богданов", "АКС-74У")
+        };
+    }
+
+    private static List<Soldier> InitializeSquad2()
+    {
+        return new List<Soldier>
+        {
+            new Soldier("Кузнецов", "АК-47"),
+            new Soldier("Васильев", "ПМ"),
+            new Soldier("Николаев", "РПГ-7")
+        };
+    }
+
+    private static void TransferSoldiers(ref List<Soldier> fromSquad, ref List<Soldier> toSquad)
+    {
+        string firstLetterSurnameForTransferAnotherSquad = "Б";
+
+        var soldiersToTransfer = fromSquad
+
+       .Where(soldier => soldier.LastName.StartsWith(firstLetterSurnameForTransferAnotherSquad, StringComparison.OrdinalIgnoreCase))
+       .ToList();
+
+        fromSquad = fromSquad.Except(soldiersToTransfer).ToList();
+        toSquad = toSquad.Concat(soldiersToTransfer).ToList();
+    }
+
+    private static void PrintSquads(List<Soldier> squad1, List<Soldier> squad2)
+    {
+        Console.WriteLine("\nОтряд 1 (" + squad1.Count + " человек):");
+        squad1.OrderBy(soldier => soldier.LastName).ToList().ForEach(Console.WriteLine);
+
+        Console.WriteLine("\nОтряд 2 (" + squad2.Count + " человек):");
+        squad2.OrderBy(soldier => soldier.LastName).ToList().ForEach(Console.WriteLine);
+    }
+}
