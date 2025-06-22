@@ -36,7 +36,7 @@ class Program
 
     static void PrintPrisoners(IEnumerable<Prisoner> prisoners)
     {
-        if (!prisoners.Any())
+        if (prisoners.Any() == false)
         {
             Console.WriteLine("Список заключенных пуст.");
             return;
@@ -51,12 +51,12 @@ class Program
 
 class Prisoner
 {
-    public string FullName { get; }
-    public string Crime { get; }
-
     public Prisoner(string fullName, string crime)
     {
         FullName = fullName;
         Crime = crime;
     }
+
+    public string FullName { get; }
+    public string Crime { get; }
 }
