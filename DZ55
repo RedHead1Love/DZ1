@@ -30,43 +30,35 @@ class Program
 
     static List<Stew> InitializeStews()
     {
-        int yearFirstProduction = 2018;
-        int yearSecondProductiont = 2020;
-        int yearThirdProduction = 2022;
-        int yearFourthProduction = 2015;
-        int yearFifthProduction = 2019;
-        int yearSixthProduction = 2021;
-        int yearSeventhProduction = 2023;
-        int yearEighthProduction = 2017;
-        int yearNinthProduction = 2020;
-        int yearTenthProduction = 2022;
+        int minimumRandomExpirationDate = 1;
+        int maximumRandomExpirationYear = 11;
 
-        int expirationDateFirstProduct = 5;
-        int expirationDateSecondProduct = 4;
-        int expirationDateThirdProduct = 3;
-        int expirationDateFourthProduct = 7;
-        int expirationDateFifthProduct = 6;
-        int expirationDateSixthProduct = 5;
-        int expirationDateSeventhProduct = 10;
-        int expirationDateEighthProduct = 3;
-        int expirationDateNinthProduct = 5;
-        int expirationDateTenthProduct = 8;
+        int minimumYearProduction = 10;
 
+        var random = new Random();
         int currentYear = DateTime.Now.Year;
 
-        return new List<Stew>
+        string[] stewNames =
         {
-            new Stew("Говяжья тушенка", yearFirstProduction, expirationDateFirstProduct),
-            new Stew("Свиная тушенка", yearSecondProductiont, expirationDateSecondProduct),
-            new Stew("Куриная тушенка", yearThirdProduction, expirationDateThirdProduct),
-            new Stew("Оленина в собственном соку", yearFourthProduction, expirationDateFourthProduct),
-            new Stew("Тушенка армейская", yearFifthProduction, expirationDateFifthProduct),
-            new Stew("Тушенка домашняя", yearSixthProduction, expirationDateSixthProduct),
-            new Stew("Тушенка охотничья", yearSeventhProduction, expirationDateSeventhProduct),
-            new Stew("Тушенка деликатесная", yearEighthProduction, expirationDateEighthProduct),
-            new Stew("Тушенка по-домашнему", yearNinthProduction, expirationDateNinthProduct),
-            new Stew("Тушенка премиум", yearTenthProduction, expirationDateTenthProduct)
+            "Говяжья тушенка",
+            "Свиная тушенка",
+            "Куриная тушенка",
+            "Оленина в собственном соку",
+            "Тушенка армейская",
+            "Тушенка домашняя",
+            "Тушенка охотничья",
+            "Тушенка деликатесная",
+            "Тушенка по-домашнему",
+            "Тушенка премиум"
         };
+
+        return stewNames.Select(name =>
+            new Stew(
+                name,
+                productionYear: random.Next(currentYear - minimumYearProduction, currentYear + 1), 
+                expirationYears: random.Next(minimumRandomExpirationDate, maximumRandomExpirationYear) 
+            ))
+            .ToList();
     }
 
     static void DisplayExpiredStews(List<Stew> stews)
