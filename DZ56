@@ -1,0 +1,60 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+class Program
+{
+    static void Main()
+    {
+        List<Soldier> soldiers = InitializeSoldiers();
+        DisplaySoldiersNamesAndRanks(soldiers);
+    }
+
+    private class Soldier
+    {
+        public string Name { get; }
+        public string Weapon { get; }
+        public string Rank { get; }
+        public int ServiceMonths { get; }
+
+        public Soldier(string name, string weapon, string rank, int serviceMonths)
+        {
+            Name = name;
+            Weapon = weapon;
+            Rank = rank;
+            ServiceMonths = serviceMonths;
+        }
+    }
+
+    static List<Soldier> InitializeSoldiers()
+    {
+        int serviceLifeFirstFighter = 12;
+        int serviceLifeSecondFighter = 24;
+        int serviceLifeThirdFighter = 18;
+        int serviceLifeFourthFighter = 30;
+        int serviceLifeFifthFighter = 6;
+        int serviceLifeSixthFighter = 42;
+
+        return new List<Soldier>
+        {
+            new Soldier("Иванов", "АК-74", "рядовой", serviceLifeFirstFighter),
+            new Soldier("Петров", "ПМ", "ефрейтор", serviceLifeSecondFighter),
+            new Soldier("Сидоров", "СВД", "мл. сержант", serviceLifeThirdFighter),
+            new Soldier("Кузнецов", "РПК", "сержант", serviceLifeFourthFighter),
+            new Soldier("Васильев", "АК-74", "рядовой", serviceLifeFifthFighter),
+            new Soldier("Смирнов", "ПК", "ст. сержант", serviceLifeSixthFighter)
+        };
+    }
+
+    static void DisplaySoldiersNamesAndRanks(List<Soldier> soldiers)
+    {
+        var namesAndRanks = soldiers
+
+            .Select(soldier => new { soldier.Name, soldier.Rank })
+            .ToList();
+
+        Console.WriteLine("Список солдат (имя и звание):");
+
+        namesAndRanks.ForEach(item => Console.WriteLine($"{item.Name} - {item.Rank}"));
+    }
+}
