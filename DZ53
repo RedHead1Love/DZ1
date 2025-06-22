@@ -4,34 +4,48 @@ using System.Linq;
 
 class Program
 {
+    static void Main(string[] args)
+    {
+        HospitalManager hospitalManager = new HospitalManager();
+        hospitalManager.Run();
+    }
+}
+
+class HospitalManager
+{
     private const string CommandSortByName = "1";
     private const string CommandSortByAge = "2";
     private const string CommandFilterByDisease = "3";
     private const string CommandExit = "4";
 
-    static void Main(string[] args)
+    private readonly List<Patient> _patients;
+
+    public HospitalManager()
     {
-        List<Patient> patients = InitializePatients();
+        _patients = InitializePatients();
+    }
+
+    public void Run()
+    {
         bool shouldContinue = true;
 
         while (shouldContinue)
         {
             DisplayMenu();
-
             string choice = GetMenuChoice();
 
             switch (choice)
             {
                 case CommandSortByName:
-                    SortPatientsByName(patients);
+                    SortPatientsByName();
                     break;
 
                 case CommandSortByAge:
-                    SortPatientsByAge(patients);
+                    SortPatientsByAge();
                     break;
 
                 case CommandFilterByDisease:
-                    FilterPatientsByDisease(patients);
+                    FilterPatientsByDisease();
                     break;
 
                 case CommandExit:
@@ -51,27 +65,7 @@ class Program
         }
     }
 
-    private class Patient
-    {
-        private string _fullName;
-        private int _age;
-        private string _disease;
-
-        public Patient(string fullName, int age, string disease)
-        {
-            this._fullName = fullName;
-            this._age = age;
-            this._disease = disease;
-        }
-
-        public string FullName { get => _fullName; set => _fullName = value; }
-        public int Age { get => _age; set => _age = value; }
-        public string Disease { get => _disease; set => _disease = value; }
-
-        public override string ToString() => $"{FullName}, {Age} лет, заболевание: {Disease}";
-    }
-
-    static List<Patient> InitializePatients()
+    private List<Patient> InitializePatients()
     {
         int ageFirstPatient = 45;
         int ageSecondPatient = 32;
@@ -99,7 +93,7 @@ class Program
         };
     }
 
-    static void DisplayMenu()
+    private void DisplayMenu()
     {
         Console.Clear();
         Console.WriteLine("Меню больницы:");
@@ -111,43 +105,42 @@ class Program
         Console.Write("Выберите пункт меню: ");
     }
 
-    static string GetMenuChoice()
+    private static string GetMenuChoice()
     {
         return Console.ReadLine();
     }
 
-    static void SortPatientsByName(List<Patient> patients)
+    private void SortPatientsByName()
     {
-        var sortedPatients = patients.OrderBy(patient => patient.FullName).ToList();
+        var sortedPatients = _patients.OrderBy(patient => patient.FullName).ToList();
 
         Console.WriteLine("\nСписок больных, отсортированный по ФИО:");
 
         PrintPatients(sortedPatients);
     }
 
-    static void SortPatientsByAge(List<Patient> patients)
+    private void SortPatientsByAge()
     {
-        var sortedPatients = patients.OrderBy(patient => patient.Age).ToList();
+        var sortedPatients = _patients.OrderBy(patient => patient.Age).ToList();
 
         Console.WriteLine("\nСписок больных, отсортированный по возрасту:");
 
         PrintPatients(sortedPatients);
     }
 
-    static void FilterPatientsByDisease(List<Patient> patients)
+    private void FilterPatientsByDisease()
     {
         Console.Write("\nВведите название заболевания: ");
 
         string disease = Console.ReadLine();
 
-        var filteredPatients = patients
+        var filteredPatients = _patients
             .Where(patient => patient.Disease.Equals(disease, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
         if (filteredPatients.Any())
         {
             Console.WriteLine($"\nСписок больных с заболеванием '{disease}':");
-
             PrintPatients(filteredPatients);
         }
         else
@@ -156,11 +149,27 @@ class Program
         }
     }
 
-    static void PrintPatients(List<Patient> patients)
+    private static void PrintPatients(IEnumerable<Patient> patients)
     {
         foreach (var patient in patients)
         {
             Console.WriteLine(patient);
         }
     }
+}
+
+class Patient
+{
+    public Patient(string fullName, int age, string disease)
+    {
+        FullName = fullName;
+        Age = age;
+        Disease = disease;
+    }
+
+    public string FullName { get; private set; }
+    public int Age { get; private set; }
+    public string Disease { get; private set; }
+
+    public override string ToString() => $"{FullName}, {Age} лет, заболевание: {Disease}";
 }
