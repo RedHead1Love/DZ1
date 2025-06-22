@@ -2,25 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-class Program
+namespace MilitarySquads
 {
-    static void Main()
+    class Program
     {
-        var squad1 = InitializeSquad1();
-        var squad2 = InitializeSquad2();
-
-        Console.WriteLine("=== До перевода ===");
-
-        PrintSquads(squad1, squad2);
-
-        TransferSoldiers(ref squad1, ref squad2);
-
-        Console.WriteLine("\n=== После перевода ===");
-
-        PrintSquads(squad1, squad2);
+        static void Main()
+        {
+            var squadManager = new SquadManager();
+            squadManager.RunTransferProcess();
+        }
     }
 
-    private class Soldier
+    public class Soldier
     {
         public Soldier(string lastName, string weapon)
         {
@@ -28,57 +21,95 @@ class Program
             Weapon = weapon;
         }
 
-        public string LastName { get; private set; }
-        public string Weapon { get; private set; }
+        public string LastName { get; }
+        public string Weapon { get; }
 
         public override string ToString() => $"{LastName} ({Weapon})";
     }
 
-    private static List<Soldier> InitializeSquad1()
+    public class Squad
     {
-        return new List<Soldier>
+        private List<Soldier> _soldiers;
+
+        public Squad(IEnumerable<Soldier> soldiers)
         {
-            new Soldier("Иванов", "АК-47"),
-            new Soldier("Борисов", "ПМ"),
-            new Soldier("Петров", "СВД"),
-            new Soldier("Белов", "АК-74"),
-            new Soldier("Сидоров", "РПК"),
-            new Soldier("Баранов", "ПКМ"),
-            new Soldier("Богданов", "АКС-74У")
-        };
-    }
+            _soldiers = soldiers.ToList();
+        }
 
-    private static List<Soldier> InitializeSquad2()
-    {
-        return new List<Soldier>
+        public int Count => _soldiers.Count;
+
+        public IEnumerable<Soldier> GetSoldiersOrdered() =>
+            _soldiers.OrderBy(soldier => soldier.LastName);
+
+        public List<Soldier> ExtractSoldiers(Func<Soldier, bool> predicate)
         {
-            new Soldier("Кузнецов", "АК-47"),
-            new Soldier("Васильев", "ПМ"),
-            new Soldier("Николаев", "РПГ-7")
-        };
+            var extracted = _soldiers.Where(predicate).ToList();
+            _soldiers = _soldiers.Except(extracted).ToList();
+
+            return extracted;
+        }
+
+        public void AddSoldiers(IEnumerable<Soldier> soldiers) =>
+            _soldiers.AddRange(soldiers);
     }
 
-    private static void TransferSoldiers(ref List<Soldier> fromSquad, ref List<Soldier> toSquad)
+    public class SquadManager
     {
-        string firstLetterSurnameForTransferAnotherSquad = "Б";
+        private Squad _squad1;
+        private Squad _squad2;
 
-        var soldiersToTransfer = fromSquad
+        public void RunTransferProcess()
+        {
+            InitializeSquads();
 
-       .Where(soldier => soldier.LastName.StartsWith(firstLetterSurnameForTransferAnotherSquad, StringComparison.OrdinalIgnoreCase))
-       .ToList();
+            Console.WriteLine("=== До перевода ===");
+            PrintSquads();
 
-        fromSquad = fromSquad.Except(soldiersToTransfer).ToList();
-        toSquad = toSquad.Concat(soldiersToTransfer).ToList();
-    }
+            TransferSoldiers();
 
-    private static void PrintSquads(List<Soldier> squad1, List<Soldier> squad2)
-    {
-        Console.WriteLine("\nОтряд 1 (" + squad1.Count + " человек):");
+            Console.WriteLine("\n=== После перевода ===");
+            PrintSquads();
+        }
 
-        squad1.OrderBy(soldier => soldier.LastName).ToList().ForEach(Console.WriteLine);
+        private void InitializeSquads()
+        {
+            _squad1 = new Squad(new List<Soldier>
+            {
+                new Soldier("Иванов", "АК-47"),
+                new Soldier("Борисов", "ПМ"),
+                new Soldier("Петров", "СВД"),
+                new Soldier("Белов", "АК-74"),
+                new Soldier("Сидоров", "РПК"),
+                new Soldier("Баранов", "ПКМ"),
+                new Soldier("Богданов", "АКС-74У")
+            });
 
-        Console.WriteLine("\nОтряд 2 (" + squad2.Count + " человек):");
+            _squad2 = new Squad(new List<Soldier>
+            {
+                new Soldier("Кузнецов", "АК-47"),
+                new Soldier("Васильев", "ПМ"),
+                new Soldier("Николаев", "РПГ-7")
+            });
+        }
 
-        squad2.OrderBy(soldier => soldier.LastName).ToList().ForEach(Console.WriteLine);
+        private void TransferSoldiers()
+        {
+            const string transferLetter = "Б";
+            var soldiersToTransfer = _squad1.ExtractSoldiers(
+                soldier => soldier.LastName.StartsWith(transferLetter, StringComparison.OrdinalIgnoreCase));
+
+            _squad2.AddSoldiers(soldiersToTransfer);
+        }
+
+        private void PrintSquads()
+        {
+            Console.WriteLine("\nОтряд 1 (" + _squad1.Count + " человек):");
+
+            _squad1.GetSoldiersOrdered().ToList().ForEach(Console.WriteLine);
+
+            Console.WriteLine("\nОтряд 2 (" + _squad2.Count + " человек):");
+
+            _squad2.GetSoldiersOrdered().ToList().ForEach(Console.WriteLine);
+        }
     }
 }
