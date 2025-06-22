@@ -10,11 +10,13 @@ class Program
         var squad2 = InitializeSquad2();
 
         Console.WriteLine("=== До перевода ===");
+
         PrintSquads(squad1, squad2);
 
         TransferSoldiers(ref squad1, ref squad2);
 
         Console.WriteLine("\n=== После перевода ===");
+
         PrintSquads(squad1, squad2);
     }
 
@@ -72,9 +74,11 @@ class Program
     private static void PrintSquads(List<Soldier> squad1, List<Soldier> squad2)
     {
         Console.WriteLine("\nОтряд 1 (" + squad1.Count + " человек):");
+
         squad1.OrderBy(soldier => soldier.LastName).ToList().ForEach(Console.WriteLine);
 
         Console.WriteLine("\nОтряд 2 (" + squad2.Count + " человек):");
+
         squad2.OrderBy(soldier => soldier.LastName).ToList().ForEach(Console.WriteLine);
     }
 }
