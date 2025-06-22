@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MilitaryApp
 {
@@ -7,10 +8,11 @@ namespace MilitaryApp
     {
         static void Main()
         {
-            List<Soldier> soldiers = SoldierData.InitializeSoldiers();
-            SoldierDisplay.ShowNamesAndRanks(soldiers);
+            var soldiers = new SoldiersFactory().Create();
+            new SoldiersViewer().ShowNamesAndRanks(soldiers);
         }
     }
+
     public class Soldier
     {
         public Soldier(string name, string weapon, string rank, int serviceMonths)
@@ -27,9 +29,9 @@ namespace MilitaryApp
         public int ServiceMonths { get; }
     }
 
-    public static class SoldierData
+    public class SoldiersFactory
     {
-        public static List<Soldier> InitializeSoldiers()
+        public List<Soldier> Create()
         {
             return new List<Soldier>
             {
@@ -43,12 +45,17 @@ namespace MilitaryApp
         }
     }
 
-    public static class SoldierDisplay
+    public class SoldiersViewer
     {
-        public static void ShowNamesAndRanks(List<Soldier> soldiers)
+        public void ShowNamesAndRanks(List<Soldier> soldiers)
         {
+            var namesAndRanks = soldiers
+                .Select(soldier => new { soldier.Name, soldier.Rank })
+                .ToList();
+
             Console.WriteLine("Список солдат (имя и звание):");
-            soldiers.ForEach(s => Console.WriteLine($"{s.Name} - {s.Rank}"));
+
+            namesAndRanks.ForEach(x => Console.WriteLine($"{x.Name} - {x.Rank}"));
         }
     }
 }
