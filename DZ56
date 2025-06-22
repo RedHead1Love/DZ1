@@ -12,11 +12,6 @@ class Program
 
     private class Soldier
     {
-        public string Name { get; }
-        public string Weapon { get; }
-        public string Rank { get; }
-        public int ServiceMonths { get; }
-
         public Soldier(string name, string weapon, string rank, int serviceMonths)
         {
             Name = name;
@@ -24,6 +19,11 @@ class Program
             Rank = rank;
             ServiceMonths = serviceMonths;
         }
+
+        public string Name { get; }
+        public string Weapon { get; }
+        public string Rank { get; }
+        public int ServiceMonths { get; }
     }
 
     static List<Soldier> InitializeSoldiers()
