@@ -12,16 +12,16 @@ class Program
 
     private class Stew
     {
-        public string Name { get; }
-        public int ProductionYear { get; }
-        public int ExpirationYears { get; }
-
         public Stew(string name, int productionYear, int expirationYears)
         {
             Name = name;
             ProductionYear = productionYear;
             ExpirationYears = expirationYears;
         }
+
+        public string Name { get; }
+        public int ProductionYear { get; }
+        public int ExpirationYears { get; }
 
         public bool IsExpired(int currentYear) => currentYear > ProductionYear + ExpirationYears;
 
@@ -51,7 +51,6 @@ class Program
         int expirationDateEighthProduct = 3;
         int expirationDateNinthProduct = 5;
         int expirationDateTenthProduct = 8;
-
 
         int currentYear = DateTime.Now.Year;
 
