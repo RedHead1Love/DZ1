@@ -1,0 +1,108 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+class Program
+{
+    static void Main()
+    {
+        List<Player> players = InitializePlayers();
+        DisplayTopPlayersByLevel(players);
+        DisplayTopPlayersByPower(players);
+    }
+
+    private class Player
+    {
+        public Player(string name, int level, int power)
+        {
+            Name = name;
+            Level = level;
+            Power = power;
+        }
+
+        public string Name { get; }
+        public int Level { get; }
+        public int Power { get; }
+
+        public override string ToString() => $"{Name} (Ур. {Level}, Сила: {Power})";
+    }
+
+    static List<Player> InitializePlayers()
+    {
+        int levelFirstPatient = 45;
+        int levelSecondPatient = 32;
+        int levelThirdPatient = 28;
+        int levelFourthPatient = 55;
+        int levelFifthPatient = 40;
+        int levelSixthPatient = 35;
+        int levelSeventhPatient = 25;
+        int levelEighthPatient = 60;
+        int levelNinthPatient = 30;
+        int levelTenthPatient = 50;
+
+        int powerFirstPatient = 320;
+        int powerSecondPatient = 280;
+        int powerThirdPatient = 310;
+        int powerFourthPatient = 290;
+        int powerFifthPatient = 350;
+        int powerSixthPatient = 270;
+        int powerSeventhPatient = 240;
+        int powerEighthPatient = 330;
+        int powerNinthPatient = 300;
+        int powerTenthPatient = 360;
+
+        return new List<Player>
+        {
+            new Player("Артур", levelFirstPatient, powerFirstPatient),
+            new Player("Борис", levelSecondPatient, powerSecondPatient),
+            new Player("Виктор", levelThirdPatient, powerThirdPatient),
+            new Player("Геннадий", levelFourthPatient, powerFourthPatient),
+            new Player("Дмитрий", levelFifthPatient, powerFifthPatient),
+            new Player("Евгений", levelSixthPatient, powerSixthPatient),
+            new Player("Жанна", levelSeventhPatient, powerSeventhPatient),
+            new Player("Зоя", levelEighthPatient, powerEighthPatient),
+            new Player("Иван", levelNinthPatient, powerNinthPatient),
+            new Player("Кирилл", levelTenthPatient, powerTenthPatient)
+        };
+    }
+
+    static void DisplayTopPlayersByLevel(List<Player> players)
+    {
+        int countTopPlayersBylevel = 3;
+
+        var topByLevel = players
+
+            .OrderByDescending(player => player.Level)
+            .Take(countTopPlayersBylevel)
+            .ToList();
+
+        Console.WriteLine($"Топ {countTopPlayersBylevel} игроков по уровню:");
+
+        foreach (var player in topByLevel)
+        {
+            Console.WriteLine(player);
+        }
+
+        Console.WriteLine();
+    }
+
+    static void DisplayTopPlayersByPower(List<Player> players)
+    {
+        int countTopPlayersByPower = 3;
+
+        var topByPower = players
+
+            .OrderByDescending(player => player.Power)
+            .Take(countTopPlayersByPower)
+            .ToList();
+
+        Console.WriteLine($"Топ {countTopPlayersByPower} игроков по силе:");
+
+        foreach (var player in topByPower)
+        {
+            Console.WriteLine(player);
+        }
+
+        Console.WriteLine();
+    }
+}
