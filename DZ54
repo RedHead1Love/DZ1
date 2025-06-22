@@ -24,7 +24,7 @@ class Program
         public int Level { get; }
         public int Power { get; }
 
-        public override string ToString() => $"{Name} (Ур. {Level}, Сила: {Power})";
+        public override string ToString() => $"{Name} (Уровень: {Level}, Сила: {Power})";
     }
 
     static List<Player> InitializePlayers()
