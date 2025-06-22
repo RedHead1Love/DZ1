@@ -53,20 +53,20 @@ class Program
 
     private class Patient
     {
-        private string fullName;
-        private int age;
-        private string disease;
+        private string _fullName;
+        private int _age;
+        private string _disease;
 
         public Patient(string fullName, int age, string disease)
         {
-            this.fullName = fullName;
-            this.age = age;
-            this.disease = disease;
+            this._fullName = fullName;
+            this._age = age;
+            this._disease = disease;
         }
 
-        public string FullName { get => fullName; set => fullName = value; }
-        public int Age { get => age; set => age = value; }
-        public string Disease { get => disease; set => disease = value; }
+        public string FullName { get => _fullName; set => _fullName = value; }
+        public int Age { get => _age; set => _age = value; }
+        public string Disease { get => _disease; set => _disease = value; }
 
         public override string ToString() => $"{FullName}, {Age} лет, заболевание: {Disease}";
     }
