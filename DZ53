@@ -1,0 +1,166 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+class Program
+{
+    private const string CommandSortByName = "1";
+    private const string CommandSortByAge = "2";
+    private const string CommandFilterByDisease = "3";
+    private const string CommandExit = "4";
+
+    static void Main(string[] args)
+    {
+        List<Patient> patients = InitializePatients();
+        bool shouldContinue = true;
+
+        while (shouldContinue)
+        {
+            DisplayMenu();
+
+            string choice = GetMenuChoice();
+
+            switch (choice)
+            {
+                case CommandSortByName:
+                    SortPatientsByName(patients);
+                    break;
+
+                case CommandSortByAge:
+                    SortPatientsByAge(patients);
+                    break;
+
+                case CommandFilterByDisease:
+                    FilterPatientsByDisease(patients);
+                    break;
+
+                case CommandExit:
+                    shouldContinue = false;
+                    break;
+
+                default:
+                    Console.WriteLine("Неизвестный пункт меню, выберите снова");
+                    break;
+            }
+
+            if (shouldContinue)
+            {
+                Console.WriteLine("\nНажмите любую клавишу для продолжения");
+                Console.ReadKey();
+            }
+        }
+    }
+
+    private class Patient
+    {
+        private string fullName;
+        private int age;
+        private string disease;
+
+        public Patient(string fullName, int age, string disease)
+        {
+            this.fullName = fullName;
+            this.age = age;
+            this.disease = disease;
+        }
+
+        public string FullName { get => fullName; set => fullName = value; }
+        public int Age { get => age; set => age = value; }
+        public string Disease { get => disease; set => disease = value; }
+
+        public override string ToString() => $"{FullName}, {Age} лет, заболевание: {Disease}";
+    }
+
+    static List<Patient> InitializePatients()
+    {
+        int ageFirstPatient = 45;
+        int ageSecondPatient = 32;
+        int ageThirdPatient = 28;
+        int ageFourthPatient = 55;
+        int ageFifthPatient = 40;
+        int ageSixthPatient = 35;
+        int ageSeventhPatient = 25;
+        int ageEighthPatient = 60;
+        int ageNinthPatient = 30;
+        int ageTenthPatient = 50;
+
+        return new List<Patient>
+        {
+            new Patient("Иванов Иван Иванович", ageFirstPatient, "Грипп"),
+            new Patient("Петров Петр Петрович", ageSecondPatient, "Ангина"),
+            new Patient("Сидорова Анна Михайловна", ageThirdPatient, "Грипп"),
+            new Patient("Кузнецова Елена Владимировна", ageFourthPatient, "Пневмония"),
+            new Patient("Смирнов Алексей Дмитриевич", ageFifthPatient, "Ангина"),
+            new Patient("Федорова Мария Сергеевна", ageSixthPatient, "Бронхит"),
+            new Patient("Николаев Денис Олегович", ageSeventhPatient, "Грипп"),
+            new Patient("Васильева Ольга Игоревна", ageEighthPatient, "Пневмония"),
+            new Patient("Павлов Артем Викторович", ageNinthPatient, "Бронхит"),
+            new Patient("Григорьева Татьяна Николаевна", ageTenthPatient, "Ангина")
+        };
+    }
+
+    static void DisplayMenu()
+    {
+        Console.Clear();
+        Console.WriteLine("Меню больницы:");
+        Console.WriteLine($"{CommandSortByName}) Отсортировать всех больных по ФИО");
+        Console.WriteLine($"{CommandSortByAge}) Отсортировать всех больных по возрасту");
+        Console.WriteLine($"{CommandFilterByDisease}) Вывести больных с определенным заболеванием");
+        Console.WriteLine($"{CommandExit}) Выход");
+
+        Console.Write("Выберите пункт меню: ");
+    }
+
+    static string GetMenuChoice()
+    {
+        return Console.ReadLine();
+    }
+
+    static void SortPatientsByName(List<Patient> patients)
+    {
+        var sortedPatients = patients.OrderBy(patient => patient.FullName).ToList();
+
+        Console.WriteLine("\nСписок больных, отсортированный по ФИО:");
+
+        PrintPatients(sortedPatients);
+    }
+
+    static void SortPatientsByAge(List<Patient> patients)
+    {
+        var sortedPatients = patients.OrderBy(patient => patient.Age).ToList();
+
+        Console.WriteLine("\nСписок больных, отсортированный по возрасту:");
+
+        PrintPatients(sortedPatients);
+    }
+
+    static void FilterPatientsByDisease(List<Patient> patients)
+    {
+        Console.Write("\nВведите название заболевания: ");
+
+        string disease = Console.ReadLine();
+
+        var filteredPatients = patients
+            .Where(patient => patient.Disease.Equals(disease, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        if (filteredPatients.Any())
+        {
+            Console.WriteLine($"\nСписок больных с заболеванием '{disease}':");
+
+            PrintPatients(filteredPatients);
+        }
+        else
+        {
+            Console.WriteLine($"\nБольных с заболеванием '{disease}' не найдено.");
+        }
+    }
+
+    static void PrintPatients(List<Patient> patients)
+    {
+        foreach (var patient in patients)
+        {
+            Console.WriteLine(patient);
+        }
+    }
+}
