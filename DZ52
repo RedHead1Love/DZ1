@@ -1,0 +1,62 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+class Program
+{
+    static void Main()
+    {
+        var prisoners = GetPrisoners();
+
+        Console.WriteLine("Список заключенных до амнистии:");
+        PrintPrisoners(prisoners);
+
+        var filteredPrisoners = ApplyAmnesty(prisoners);
+
+        Console.WriteLine("\nСписок заключенных после амнистии:");
+        PrintPrisoners(filteredPrisoners);
+    }
+
+    static List<Prisoner> GetPrisoners()
+    {
+        return new List<Prisoner>
+        {
+            new Prisoner("Иванов Иван Иванович", "Кража"),
+            new Prisoner("Петров Петр Петрович", "Антиправительственное"),
+            new Prisoner("Сидоров Сидор Сидорович", "Мошенничество"),
+            new Prisoner("Кузнецова Анна Михайловна", "Антиправительственное"),
+            new Prisoner("Хамитов Денис Гилтикусович", "Угон автомобиля")
+        };
+    }
+
+    static IEnumerable<Prisoner> ApplyAmnesty(IEnumerable<Prisoner> prisoners)
+    {
+        return prisoners.Where(prisoner => prisoner.Crime != "Антиправительственное");
+    }
+
+    static void PrintPrisoners(IEnumerable<Prisoner> prisoners)
+    {
+        if (!prisoners.Any())
+        {
+            Console.WriteLine("Список заключенных пуст.");
+            return;
+        }
+
+        foreach (var prisoner in prisoners)
+        {
+            Console.WriteLine($"ФИО: {prisoner.FullName}, Преступление: {prisoner.Crime}");
+        }
+    }
+}
+
+class Prisoner
+{
+    public string FullName { get; }
+    public string Crime { get; }
+
+    public Prisoner(string fullName, string crime)
+    {
+        FullName = fullName;
+        Crime = crime;
+    }
+}
